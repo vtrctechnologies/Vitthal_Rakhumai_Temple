@@ -12,6 +12,7 @@ import {
   IndianRupee,
   Calendar,
 } from "lucide-react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { eventsAPI } from "../../services/api"; // Adjust path
 import { Button, StatCard } from "../customUi/AdminShared";
 import Sidebar from "./Sidebar";
@@ -26,9 +27,32 @@ import HeroFestivalView from "./HeroFestivalView";
 import LiveProgramsView from "./LiveProgramsView";
 
 const DashboardView = ({ user, onLogout }) => {
+  const navigate = useNavigate();
+  const location = useLocation();
+
   const [showNotifications, setShowNotifications] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState("dashboard");
+  
+  // Initialize activeTab from URL sub-path if present
+  const [activeTab, setActiveTab] = useState(() => {
+    const path = location.pathname.split("/").pop();
+    const validTabs = [
+      "dashboard",
+      "hero-festival",
+      "donations",
+      "events",
+      "events-page",
+      "members",
+      "gallery",
+      "banners",
+      "sports",
+      "live-programs",
+      "notifications",
+      "settings",
+    ];
+    return validTabs.includes(path) ? path : "dashboard";
+  });
+  
   const [timeRange, setTimeRange] = useState("12h"); // State for graph time range
   const [events, setEvents] = useState([]);
 
@@ -108,6 +132,40 @@ const DashboardView = ({ user, onLogout }) => {
     }, 5000);
     return () => clearTimeout(timer);
   }, []);
+
+  // Sync state with URL when activeTab changes
+  const handleTabChange = (tab) => {
+    setActiveTab(tab);
+    if (tab === "dashboard") {
+      navigate("/admin");
+    } else {
+      navigate(`/admin/${tab}`);
+    }
+  };
+
+  // Sync state with URL when browser Back/Forward is used
+  useEffect(() => {
+    const path = location.pathname.split("/").pop();
+    const validTabs = [
+      "dashboard",
+      "hero-festival",
+      "donations",
+      "events",
+      "events-page",
+      "members",
+      "gallery",
+      "banners",
+      "sports",
+      "live-programs",
+      "notifications",
+      "settings",
+    ];
+    if (validTabs.includes(path) && path !== activeTab) {
+      setActiveTab(path);
+    } else if (location.pathname === "/admin" && activeTab !== "dashboard") {
+      setActiveTab("dashboard");
+    }
+  }, [location.pathname]);
 
   const unreadCount = notifications.filter((n) => !n.read).length;
 
@@ -264,7 +322,7 @@ const DashboardView = ({ user, onLogout }) => {
           isOpen={sidebarOpen}
           toggleSidebar={() => setSidebarOpen(!sidebarOpen)}
           activeTab={activeTab}
-          setActiveTab={setActiveTab}
+          setActiveTab={handleTabChange}
         />
 
         {/* Main Content Area */}

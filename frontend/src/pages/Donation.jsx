@@ -313,8 +313,8 @@ const Donation = () => {
             <div className="flex flex-col items-center text-center">
               <div
                 className={`rounded-full p-3 mb-4 ${notification.type === "success"
-                    ? "bg-green-100 text-green-600"
-                    : "bg-red-100 text-red-600"
+                  ? "bg-green-100 text-green-600"
+                  : "bg-red-100 text-red-600"
                   }`}
               >
                 {notification.type === "success" ? (
@@ -333,8 +333,8 @@ const Donation = () => {
               <Button
                 onClick={closeNotification}
                 className={`w-full ${notification.type === "success"
-                    ? "bg-green-600 hover:bg-green-700"
-                    : "bg-red-600 hover:bg-red-700"
+                  ? "bg-green-600 hover:bg-green-700"
+                  : "bg-red-600 hover:bg-red-700"
                   }`}
               >
                 {notification.type === "success" ? "Close" : "Try Again"}
@@ -345,41 +345,58 @@ const Donation = () => {
       )}
 
       {/* Hero Section */}
-      <section className="py-20 pt-36 px-4 bg-gradient-to-br from-primary/10 to-secondary/10">
-        <div className="container mx-auto max-w-4xl text-center">
-          <Heart className="w-16 h-16 mx-auto text-primary mb-6 animate-float" />
-          <h1 className="text-5xl md:text-6xl font-display font-bold text-gradient mb-6 animate-fade-in">
-            Support Our Temple
+      <section className="py-20 pt-36 px-4 bg-linear-to-br from-primary/10 to-secondary/10 relative">
+        <div className="absolute top-0 left-0 w-full h-32 bg-linear-to-b from-white to-transparent opacity-40"></div>
+        <div className="container mx-auto max-w-4xl text-center relative z-10">
+          <Heart className="w-16 h-16 mx-auto text-secondary mb-6 animate-float" />
+          <h1 className="text-5xl md:text-7xl font-serif font-bold spiritual-gradient-text mb-6 animate-fade-in">
+            Divine Contribution
           </h1>
-          <div className="w-32 h-1 bg-gradient-to-r from-primary to-accent mx-auto mb-6" />
-          <p className="text-xl text-muted-foreground">
-            Support our dream to build a new temple for Lord Vithal and Goddess
-            Rakhumai. Every rupee counts in this divine mission!
+          <div className="w-48 h-1 bg-linear-to-r from-transparent via-primary to-transparent mx-auto mb-8" />
+          <p className="text-xl text-secondary/70 font-medium max-w-2xl mx-auto leading-relaxed">
+            Support our sacred mission to build a magnificent abode for Lord Vithal and Goddess
+            Rakhumai. Every contribution is a brick in this eternal monument.
           </p>
         </div>
       </section>
 
       {/* Progress Section */}
-      <section className="py-12 px-4 bg-stone-50">
+      <section className="py-12 px-4 bg-[#FFFCF5]">
         <div className="container mx-auto max-w-4xl">
-          <Card className="p-8">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <p className="text-sm text-muted-foreground mb-1">Total Raised</p>
-                <p className="text-3xl font-bold text-primary">
+          <Card className="p-10 border-primary/20 shadow-xl bg-white/80 backdrop-blur-sm rounded-5xl">
+            <div className="flex flex-col md:flex-row items-center justify-between mb-8 gap-6">
+              <div className="text-center md:text-left">
+                <p className="text-xs font-bold text-secondary/50 uppercase tracking-widest mb-1">Total Contributions</p>
+                <p className="text-4xl font-bold text-secondary">
                   {formatRupees(stats.totalRaised)}
                 </p>
               </div>
-              <div className="text-right">
-                <p className="text-sm text-muted-foreground mb-1">Target</p>
-                <p className="text-3xl font-bold text-stone-700">
+              <div className="text-center md:text-right">
+                <p className="text-xs font-bold text-secondary/50 uppercase tracking-widest mb-1">Divine Goal</p>
+                <p className="text-4xl font-bold text-primary">
                   {formatRupees(targetAmount)}
                 </p>
               </div>
             </div>
-            <Progress value={progressPercentage} className="h-3" />
-            <p className="text-sm text-muted-foreground mt-2 text-center">
-              {progressPercentage.toFixed(1)}% of goal reached
+
+            <div className="relative pt-1">
+              <div className="flex mb-2 items-center justify-between">
+                <div>
+                  <span className="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full text-secondary bg-primary/20">
+                    Sacred Progress
+                  </span>
+                </div>
+                <div className="text-right">
+                  <span className="text-xs font-bold inline-block text-secondary">
+                    {progressPercentage.toFixed(1)}%
+                  </span>
+                </div>
+              </div>
+              <Progress value={progressPercentage} className="h-4 bg-orange-100" />
+            </div>
+
+            <p className="text-sm text-secondary/60 mt-4 text-center font-medium italic">
+              Join {stats.totalDonors} devotees who have already contributed.
             </p>
           </Card>
         </div>
@@ -454,7 +471,7 @@ const Donation = () => {
 
                 {/* Right Column: Leaderboard List */}
                 <Card className="lg:col-span-2 bg-white shadow-xl border-orange-100 overflow-hidden relative">
-                  <div className="h-2 w-full bg-gradient-to-r from-orange-400 via-amber-500 to-orange-400"></div>
+                  <div className="h-2 w-full bg-linear-to-r from-orange-400 via-amber-500 to-orange-400"></div>
 
                   <div className="p-6 md:p-8">
                     <div className="relative">
@@ -492,8 +509,8 @@ const Donation = () => {
                                 <div className="flex-shrink-0 mr-3">
                                   {index < 3 ? (
                                     <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${index === 0 ? "bg-yellow-400 text-yellow-900" :
-                                        index === 1 ? "bg-gray-300 text-gray-700" :
-                                          "bg-orange-300 text-orange-900"
+                                      index === 1 ? "bg-gray-300 text-gray-700" :
+                                        "bg-orange-300 text-orange-900"
                                       }`}>
                                       {index + 1}
                                     </div>
@@ -550,7 +567,7 @@ const Donation = () => {
                         )}
                       </div>
 
-                      <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-white to-transparent pointer-events-none"></div>
+                      <div className="absolute bottom-0 left-0 right-0 h-12 bg-linear-to-t from-white to-transparent pointer-events-none"></div>
                     </div>
                   </div>
 
@@ -607,138 +624,234 @@ const Donation = () => {
       `}</style>
       </div>
 
-      {/* Donation Form */}
-      <section ref={ref2} className="py-16 px-4">
-        <div
-          className={`container mx-auto max-w-6xl ${inView2 ? "animate-fade-in" : "opacity-0"
-            }`}
-        >
-          <div className="grid lg:grid-cols-2 gap-8">
-            {/* Donation Form */}
-            <Card className="p-8 bg-white">
-              <h3 className="text-2xl font-display font-bold mb-6">
-                Make a Donation
-              </h3>
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <Input
-                  label="Full Name *"
-                  id="name"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  required
-                />
+      {/* Donation Form Section */}
+      <section ref={ref2} className="py-24 px-4 bg-[#FFFCF5] relative overflow-hidden rounded-2xl">
+        {/* Background Pattern */}
+        <div className="absolute inset-0 z-0 opacity-[0.05] pointer-events-none"
+          style={{
+            backgroundImage: `radial-gradient(var(--color-primary) 1px, transparent 1px)`,
+            backgroundSize: "30px 30px",
+          }}>
+        </div>
 
-                <Input
-                  label="Email Address *"
-                  id="email"
-                  name="email"
-                  type="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  required
-                />
+        {/* Decorative Ornaments */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-px bg-linear-to-r from-transparent via-orange-300 to-transparent rounded-t-5xl"></div>
+        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-full h-px bg-linear-to-r from-transparent via-orange-300 to-transparent rounded-b-5xl"></div>
 
-                <Input
-                  label="Phone Number *"
-                  id="phone"
-                  name="phone"
-                  type="tel"
-                  value={formData.phone}
-                  onChange={handleChange}
-                  required
-                />
+        <div className={`container mx-auto max-w-7xl relative z-10 ${inView2 ? "animate-fade-in" : "opacity-0"}`}>
+          <div className="flex flex-col lg:flex-row gap-12 items-start justify-center">
 
-                <Input
-                  label="Donation Amount (₹) *"
-                  id="amount"
-                  name="amount"
-                  type="number"
-                  value={formData.amount}
-                  onChange={handleChange}
-                  min="1"
-                  step="1"
-                  required
-                />
+            {/* LEFT: PREMIUM GLASS FORM */}
+            <div className="w-full lg:flex-[1.4]">
+              <div className="relative p-[1px] rounded-2xl bg-linear-to-br from-primary via-accent to-secondary shadow-2xl overflow-hidden group">
+                {/* Glossy Overlay */}
+                <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"></div>
 
-                <Textarea
-                  label="Message (Optional)"
-                  id="message"
-                  name="message"
-                  value={formData.message}
-                  onChange={handleChange}
-                  rows={4}
-                  className="resize-none"
-                />
-
-                <label htmlFor="isAnonymous" className="text-sm flex items-center space-x-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    id="isAnonymous"
-                    name="isAnonymous"
-                    checked={formData.isAnonymous}
-                    onChange={handleChange}
-                    className="rounded"
-                  />
-                  <span>Donate anonymously (name won't appear on leaderboard)</span>
-                </label>
-
-                <Button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full bg-gradient-to-r from-primary to-accent text-lg py-6"
-                >
-                  {loading ? (
-                    <>
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      Processing...
-                    </>
-                  ) : (
-                    "Proceed to Payment"
-                  )}
-                </Button>
-                <p className="text-xs text-muted-foreground text-center">
-                  You'll be redirected to a secure payment gateway (UPI, Card, Net Banking, etc.)
-                </p>
-              </form>
-            </Card>
-
-            {/* Payment Info */}
-            <div className="space-y-6">
-              <Card className="p-8 text-center bg-white">
-                <QrCode className="w-12 h-12 mx-auto text-primary mb-4" />
-                <h3 className="text-2xl font-display font-bold mb-4">
-                  Secure Payment
-                </h3>
-                <p className="text-muted-foreground mb-4">
-                  We accept all major payment methods through Razorpay:
-                </p>
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div className="p-3 bg-stone-50 rounded-lg">
-                    <p className="font-semibold">UPI</p>
+                <div className="bg-white/95 backdrop-blur-2xl rounded-2xl p-8 md:p-12">
+                  <div className="mb-10 text-center lg:text-left">
+                    <span className="inline-block px-4 py-1.5 bg-primary/10 text-secondary text-xs font-bold uppercase tracking-[0.2em] rounded-full mb-4">
+                      Divine Contribution
+                    </span>
+                    <h3 className="text-4xl font-serif font-bold text-secondary mb-3 tracking-tight">Support Our Mission</h3>
+                    <p className="text-muted-foreground text-lg italic font-serif">"Your contribution helps build something truly divine and eternal."</p>
                   </div>
-                  <div className="p-3 bg-stone-50 rounded-lg">
-                    <p className="font-semibold">Credit/Debit Card</p>
+
+                  <form onSubmit={handleSubmit} className="space-y-8">
+                    {/* Name + Phone */}
+                    <div className="grid md:grid-cols-2 gap-6">
+                      <div className="space-y-2">
+                        <label className="text-sm font-semibold text-secondary ml-1">Full Name</label>
+                        <Input
+                          name="name"
+                          placeholder="Shri. Your Name"
+                          value={formData.name}
+                          onChange={handleChange}
+                          className="h-14 w-full px-3 rounded-2xl bg-stone-50/50 border-orange-100 focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all text-stone-800"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <label className="text-sm font-semibold text-secondary ml-1">Phone Number</label>
+                        <Input
+                          name="phone"
+                          placeholder="+91-00000-00000"
+                          value={formData.phone}
+                          onChange={handleChange}
+                          className="h-14 w-full px-3 rounded-2xl bg-stone-50/50 border-orange-100 focus:border-orange-100 focus:ring-4 focus:ring-orange-100 transition-all text-stone-800"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Email */}
+                    <div className="space-y-2">
+                      <label className="text-sm font-semibold text-secondary ml-1">Email Address</label>
+                      <Input
+                        name="email"
+                        placeholder="devout@example.com"
+                        value={formData.email}
+                        onChange={handleChange}
+                        className="h-14 px-3 w-full rounded-2xl bg-stone-50/50 border-orange-100 focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all text-stone-800"
+                      />
+                    </div>
+
+                    {/* Amount Area */}
+                    <div className="space-y-4">
+                      <label className="text-sm font-semibold text-secondary ml-1">Donation Amount</label>
+                      <div className="relative">
+                        <Input
+                          name="amount"
+                          type="number"
+                          placeholder="Enter Amount"
+                          value={formData.amount}
+                          onChange={handleChange}
+                          className="h-14 pl-16 pr-6 text-xl font-bold text-secondary bg-orange-50/50 border-2 border-orange-100 rounded-3xl focus:border-primary focus:ring-8 focus:ring-primary/5 transition-all"
+                        />
+                        <span className="absolute left-6 top-1/2 -translate-y-1/2 text-primary text-xl font-bold">₹</span>
+                      </div>
+
+                      <div className="flex gap-3 flex-wrap justify-center lg:justify-start pt-2">
+                        {[501, 1001, 5001, 11001].map((amt) => (
+                          <button
+                            key={amt}
+                            type="button"
+                            onClick={() => setFormData({ ...formData, amount: amt })}
+                            className="px-6 py-2.5 rounded-full bg-orange-50 border border-orange-100 hover:border-primary hover:bg-primary/10 text-secondary text-sm font-bold transition-all hover:scale-105 active:scale-95 shadow-sm"
+                          >
+                            ₹{amt}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Message */}
+                    <div className="space-y-2">
+                      <label className="text-sm font-semibold text-secondary ml-1">Share Your Blessings (Optional)</label>
+                      <Textarea
+                        name="message"
+                        placeholder="Leave a message for the temple community..."
+                        value={formData.message}
+                        onChange={handleChange}
+                        rows={3}
+                        className="px-3 w-full mt-1 py-2 rounded-2xl bg-stone-50/50 border-orange-100 focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all resize-none text-stone-800"
+                      />
+                    </div>
+
+                    {/* Checkbox */}
+                    <label className="flex items-center gap-4 p-4 bg-orange-50/30 rounded-2xl border border-orange-100/50 cursor-pointer hover:bg-orange-50/50 transition-colors group/check">
+                      <div className="relative flex items-center justify-center">
+                        <input
+                          type="checkbox"
+                          name="isAnonymous"
+                          checked={formData.isAnonymous}
+                          onChange={handleChange}
+                          className="w-6 h-6 rounded-md border-orange-200 text-primary focus:ring-primary accent-primary cursor-pointer"
+                        />
+                      </div>
+                      <span className="text-sm text-stone-600 font-medium group-hover/check:text-secondary transition-colors">
+                        Choose to remain anonymous on the leaderboard
+                      </span>
+                    </label>
+
+                    {/* Submit Button */}
+                    <button
+                      type="submit"
+                      disabled={loading}
+                      className="w-full h-18 rounded-3xl bg-linear-to-r from-secondary via-stone-900 to-secondary text-white font-bold text-xl shadow-[0_10px_30px_rgba(93,0,0,0.2)] hover:shadow-[0_15px_40px_rgba(93,0,0,0.3)] hover:scale-[1.02] active:scale-95 transition-all duration-300 flex items-center justify-center gap-3 group"
+                    >
+                      {loading ? (
+                        <>
+                          <Loader2 className="w-6 h-6 animate-spin text-primary" />
+                          <span>Processing...</span>
+                        </>
+                      ) : (
+                        <>
+                          <IndianRupee className="w-5 h-5 text-primary group-hover:rotate-12 transition-transform" />
+                          <span>Devout Contribution</span>
+                          <Star className="w-5 h-5 text-primary group-hover:scale-125 transition-transform" />
+                        </>
+                      )}
+                    </button>
+                  </form>
+                </div>
+              </div>
+            </div>
+
+
+            {/* RIGHT: QR + TRUST + STATS */}
+            <div className="w-full lg:flex-1 flex flex-col gap-8">
+
+              {/* QR CARD - PREMIUM MAROON */}
+              <div className="relative rounded-2xl overflow-hidden bg-secondary text-white p-10 shadow-2xl border border-white/10 group min-h-[400px] flex flex-col justify-center">
+                {/* Decorative background circle */}
+                <div className="absolute top-0 right-0 -mr-20 -mt-20 w-64 h-64 bg-primary/10 rounded-full blur-3xl group-hover:bg-primary/20 transition-all duration-1000"></div>
+
+                <div className="relative z-10 text-center">
+                  <div className="relative inline-block mb-8">
+                    <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full animate-pulse"></div>
+                    <div className="relative bg-white p-5 rounded-3xl shadow-2xl transform group-hover:rotate-3 transition-transform duration-500">
+                      <QrCode className="w-32 h-32 text-secondary" />
+                    </div>
                   </div>
-                  <div className="p-3 bg-stone-50 rounded-lg">
-                    <p className="font-semibold">Net Banking</p>
-                  </div>
-                  <div className="p-3 bg-stone-50 rounded-lg">
-                    <p className="font-semibold">Wallets</p>
+
+                  <h4 className="text-3xl font-serif font-bold mb-3 tracking-wide">Instant Scan & Pay</h4>
+                  <p className="text-orange-100/70 text-sm mb-8 italic">
+                    "Support the divine mission instantly via any UPI app"
+                  </p>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    {["G-Pay", "PhonePe"].map((app) => (
+                      <div
+                        key={app}
+                        className="py-3 bg-white/5 rounded-2xl border border-white/10 text-[10px] font-black uppercase tracking-[0.2em] text-primary/80"
+                      >
+                        {app}
+                      </div>
+                    ))}
                   </div>
                 </div>
-              </Card>
+              </div>
 
-              <Card className="p-6 bg-primary/10 border-primary/20">
-                <p className="text-sm text-center text-muted-foreground">
-                  All donations are tax-exempt under Section 80G. Receipt will
-                  be issued for donations above ₹500.
-                </p>
-              </Card>
+
+              {/* TRUST CARD - MODERN GOLD */}
+              <div className="bg-white rounded-2xl p-8 shadow-xl border border-orange-100 relative overflow-hidden flex-1">
+                <div className="absolute bottom-0 right-0 opacity-10 translate-x-1/4 translate-y-1/4 group transition-transform duration-500 group-hover:scale-110">
+                  <Star className="w-48 h-48 text-primary" />
+                </div>
+
+                <div className="relative z-10 space-y-8">
+                  <div className="flex items-start gap-5">
+                    <div className="bg-primary/10 p-4 rounded-2xl shadow-inner group-hover:bg-primary/20 transition-colors">
+                      <Star className="w-6 h-6 text-primary fill-primary/30" />
+                    </div>
+                    <div>
+                      <h5 className="font-bold text-secondary text-lg">80G Tax Benefits</h5>
+                      <p className="text-sm text-muted-foreground leading-relaxed">All contributions are eligible for income tax exemptions under section 80G.</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-5">
+                    <div className="bg-green-50 p-4 rounded-2xl shadow-inner">
+                      <CheckCircle2 className="w-6 h-6 text-green-600" />
+                    </div>
+                    <div>
+                      <h5 className="font-bold text-secondary text-lg">Instant Receipt</h5>
+                      <p className="text-sm text-muted-foreground leading-relaxed">A digital receipt and certificate will be sent to your email immediately.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Secure Token */}
+              <div className="flex items-center justify-center gap-3 text-stone-400 opacity-50">
+                <div className="h-px w-8 bg-current"></div>
+                <p className="text-[10px] uppercase font-bold tracking-[0.3em]">Securely Processed by Razorpay</p>
+                <div className="h-px w-8 bg-current"></div>
+              </div>
             </div>
           </div>
         </div>
       </section>
+
     </main>
   );
 };

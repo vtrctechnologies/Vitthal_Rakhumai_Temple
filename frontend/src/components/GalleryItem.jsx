@@ -41,23 +41,41 @@ const GalleryItem = memo(({ image, index, onClick }) => {
       <div className="w-full h-full overflow-hidden relative">
         <div className="absolute inset-0 bg-stone-200 animate-pulse -z-10"></div>
         {imageUrl ? (
-          <img
-            src={imageUrl}
-            alt={image.title}
-            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-            style={{ transform: "translateZ(0)" }}
-            loading="lazy"
-            decoding="async"
-            fetchpriority={index < 6 ? "high" : "low"}
-            onError={(e) => {
-              e.target.style.display = "none";
-              const placeholder =
-                e.target.parentElement?.querySelector(".image-placeholder");
-              if (placeholder) {
-                placeholder.style.display = "flex";
-              }
-            }}
-          />
+          image.imageUrl?.match(/\.(mp4|mov|avi|mkv|webm)$/i) || 
+          image.imageUrl?.includes("/video/") ||
+          image.imageUrl?.includes("/upload/v") && !image.imageUrl?.match(/\.(jpg|jpeg|png|webp|gif|svg)$/i) ? (
+            <video
+              src={imageUrl}
+              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+              muted
+              loop
+              autoPlay
+              playsInline
+              onMouseOver={(e) => e.target.play()}
+              onMouseOut={(e) => {
+                e.target.pause();
+                e.target.currentTime = 0;
+              }}
+            />
+          ) : (
+            <img
+              src={imageUrl}
+              alt={image.title}
+              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+              style={{ transform: "translateZ(0)" }}
+              loading="lazy"
+              decoding="async"
+              fetchpriority={index < 6 ? "high" : "low"}
+              onError={(e) => {
+                e.target.style.display = "none";
+                const placeholder =
+                  e.target.parentElement?.querySelector(".image-placeholder");
+                if (placeholder) {
+                  placeholder.style.display = "flex";
+                }
+              }}
+            />
+          )
         ) : null}
         <div
           className="image-placeholder absolute inset-0 w-full h-full flex items-center justify-center bg-stone-200"
@@ -66,7 +84,7 @@ const GalleryItem = memo(({ image, index, onClick }) => {
           <Sparkles className="w-12 h-12 text-stone-400" />
         </div>
         {/* Gradient Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-stone-900/90 via-transparent to-transparent opacity-60 group-hover:opacity-80 transition-opacity duration-500"></div>
+        <div className="absolute inset-0 bg-linear-to-t from-stone-900/90 via-transparent to-transparent opacity-60 group-hover:opacity-80 transition-opacity duration-500"></div>
       </div>
 
       {/* Content - Always visible but moves */}

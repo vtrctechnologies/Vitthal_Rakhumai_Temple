@@ -6,18 +6,36 @@
 export const getImageUrl = (imageUrl) => {
   if (!imageUrl) return null;
   
-  // If already a full URL (http/https), return as is
-  if (imageUrl.startsWith("http://") || imageUrl.startsWith("https://")) {
-    return imageUrl;
+  const trimmedUrl = imageUrl.toString().trim();
+  if (!trimmedUrl) return null;
+
+  // 1. Handle Protocol-Relative URLs (e.g., //res.cloudinary.com/...)
+  if (trimmedUrl.startsWith("//")) {
+    return `https:${trimmedUrl}`;
+  }
+
+  // 2. If already a full URL (http/https), return as is (force https for cloudinary)
+  if (trimmedUrl.startsWith("http://") || trimmedUrl.startsWith("https://")) {
+    if (trimmedUrl.includes("cloudinary.com")) {
+      return trimmedUrl.replace("http://", "https://");
+    }
+    return trimmedUrl;
   }
   
-  // Construct full URL from backend
-  const baseUrl =
-    import.meta.env.VITE_API_URL?.replace("/api", "") ||
+  // 3. Construct full URL from backend (check multiple env patterns)
+  const rawBaseUrl =
+    import.meta.env.VITE_API_BASE_URL || 
+    import.meta.env.VITE_API_URL || 
     "http://localhost:5000";
+    
+  // Clean up API base if it includes /api
+  let baseUrl = rawBaseUrl.endsWith("/") ? rawBaseUrl.slice(0, -1) : rawBaseUrl;
+  if (baseUrl.endsWith("/api")) {
+    baseUrl = baseUrl.replace(/\/api$/, "");
+  }
   
-  // Ensure imageUrl starts with /
-  const path = imageUrl.startsWith("/") ? imageUrl : `/${imageUrl}`;
+  // Ensure path starts with /
+  const path = trimmedUrl.startsWith("/") ? trimmedUrl : `/${trimmedUrl}`;
   
   return `${baseUrl}${path}`;
 };

@@ -120,17 +120,24 @@ const GalleryView = () => {
         setErrors({ ...errors, image: "Image size must be less than 5MB." });
         return;
       }
-      const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/gif", "image/webp"];
+      const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/gif", "image/webp", "video/mp4", "video/quicktime", "video/x-msvideo", "video/x-matroska", "video/webm"];
       if (!allowedTypes.includes(file.type)) {
-        setErrors({ ...errors, image: "Only JPEG, PNG, GIF, and WebP images are allowed." });
+        setErrors({ ...errors, image: "Only common image and video formats are allowed." });
         return;
       }
       setImageFormData({ ...imageFormData, image: file });
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result);
-      };
-      reader.readAsDataURL(file);
+      
+      if (file.type.startsWith("image/")) {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setImagePreview(reader.result);
+        };
+        reader.readAsDataURL(file);
+      } else {
+        // For video, we can't easily preview with FileReader for large files, 
+        // but we can create an object URL for preview.
+        setImagePreview(URL.createObjectURL(file));
+      }
       setErrors({ ...errors, image: "" });
     }
   };
@@ -221,11 +228,7 @@ const GalleryView = () => {
       image: null,
       isActive: image.isActive !== undefined ? image.isActive : true,
     });
-    setImagePreview(
-      image.imageUrl
-        ? `${import.meta.env.VITE_API_URL?.replace("/api", "") || "http://localhost:5000"}${image.imageUrl}`
-        : null
-    );
+    setImagePreview(image.imageUrl ? getImageUrl(image.imageUrl) : null);
     setShowImageForm(true);
     setMessage({ type: "", text: "" });
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -568,17 +571,26 @@ const GalleryView = () => {
                         className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
                       />
                       <p className="text-xs text-gray-500 mt-1">
-                        Supported formats: JPEG, PNG, GIF, WebP (Max 5MB)
+                        Supported formats: JPEG, PNG, GIF, WebP, MP4, MOV (Max 50MB)
                       </p>
                       {errors.image && <p className="text-red-500 text-sm mt-1">{errors.image}</p>}
                     </div>
                     {imagePreview && (
                       <div className="relative">
-                        <img
-                          src={imagePreview}
-                          alt="Preview"
-                          className="w-24 h-24 object-cover rounded-lg border-2 border-gray-200"
-                        />
+                        {imageFormData.image?.type?.startsWith("video/") || (typeof imagePreview === 'string' && (imagePreview.includes("video") || imagePreview.endsWith(".mp4") || imagePreview.endsWith(".mov"))) ? (
+                          <video
+                            src={imagePreview}
+                            className="w-24 h-24 object-cover rounded-lg border-2 border-gray-200"
+                            controls={false}
+                            muted
+                          />
+                        ) : (
+                          <img
+                            src={imagePreview}
+                            alt="Preview"
+                            className="w-24 h-24 object-cover rounded-lg border-2 border-gray-200"
+                          />
+                        )}
                         <button
                           type="button"
                           onClick={() => {
@@ -851,15 +863,38 @@ const GalleryView = () => {
                   >
                     <div className="relative h-48 bg-gray-100">
                       {image.imageUrl ? (
-                        <img
-                          src={getImageUrl(image.imageUrl)}
-                          alt={image.title}
-                          className="w-full h-full object-cover"
-                          onError={(e) => {
-                            e.target.style.display = "none";
-                            e.target.nextSibling.style.display = "flex";
-                          }}
-                        />
+                        image.imageUrl.match(/\.(mp4|mov|avi|mkv|webm)$/i) || 
+                        image.imageUrl.includes("/video/") ||
+                        (image.imageUrl.includes("/upload/v") && !image.imageUrl.match(/\.(jpg|jpeg|png|webp|gif|svg)$/i)) ? (
+                          <div className="w-full h-full relative">
+                            <video
+                              src={getImageUrl(image.imageUrl)}
+                              className="w-full h-full object-cover"
+                              muted
+                              loop
+                              autoPlay
+                              playsInline
+                              onMouseOver={(e) => e.target.play()}
+                              onMouseOut={(e) => {
+                                e.target.pause();
+                                e.target.currentTime = 0;
+                              }}
+                            />
+                            <div className="absolute top-2 right-2 bg-black/50 p-1 rounded-full">
+                               <Loader2 className="w-4 h-4 text-white" />
+                            </div>
+                          </div>
+                        ) : (
+                          <img
+                            src={getImageUrl(image.imageUrl)}
+                            alt={image.title}
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              e.target.style.display = "none";
+                              e.target.nextSibling.style.display = "flex";
+                            }}
+                          />
+                        )
                       ) : null}
                       <div
                         className={`w-full h-full flex items-center justify-center ${

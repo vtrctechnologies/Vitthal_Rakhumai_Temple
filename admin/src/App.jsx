@@ -37,7 +37,7 @@ const App = () => {
               - Showing AuthPage (Login/Register)
               - Showing DashboardView (Sidebar + Content)
             */}
-            <Route path="/admin" element={<AdminPage />} />
+            <Route path="/admin/*" element={<AdminPage />} />
 
             {/* 3. 404 Route */}
             <Route path="*" element={<NotFound />} />

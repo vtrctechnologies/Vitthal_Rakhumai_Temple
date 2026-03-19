@@ -22,7 +22,9 @@ export default function AdminPage() {
             const userData = {
               id: response.data.admin.id,
               username: response.data.admin.username,
+              name: response.data.admin.username, // Map username to name
               email: response.data.admin.email,
+              phone: response.data.admin.phone,
               role: response.data.admin.role || "admin",
             };
             setUser(userData);
@@ -46,8 +48,13 @@ export default function AdminPage() {
   }, []);
 
   const handleLogin = (userData) => {
-    localStorage.setItem("temple_admin_user", JSON.stringify(userData));
-    setUser(userData);
+    // Ensure 'name' is present for components that use it (like DashboardView)
+    const processedUser = {
+      ...userData,
+      name: userData.name || userData.username
+    };
+    localStorage.setItem("temple_admin_user", JSON.stringify(processedUser));
+    setUser(processedUser);
     setIsAuthenticated(true);
   };
 

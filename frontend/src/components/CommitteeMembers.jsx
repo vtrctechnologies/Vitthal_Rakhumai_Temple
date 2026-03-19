@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import useEmblaCarousel from "embla-carousel-react";
 import { ChevronLeft, ChevronRight, User, Loader2 } from "lucide-react";
+import { getImageUrl } from "../utils/imageUrl";
 
 /* --- 1. FONTS & GLOBAL STYLES --- */
 const GlobalStyles = () => (
@@ -24,24 +25,15 @@ const GlobalStyles = () => (
 );
 
 /* --- 2. HELPERS --- */
-const getImageUrl = (imageUrl) => {
-  if (!imageUrl) return null;
-  if (imageUrl.startsWith("http")) return imageUrl;
-  // Fallback to localhost:5000 if env var is missing
-  const baseUrl =
-    import.meta.env.VITE_API_BASE_URL?.replace("/api", "") ||
-    "http://localhost:5000";
-  return `${baseUrl}${imageUrl}`;
-};
 
 /* --- 3. SUB-COMPONENTS --- */
 
 const DecorativeHeading = ({ title, subtitle }) => (
   <div className="text-center mb-12 relative z-10">
     <div className="flex items-center justify-center gap-3 mb-3 opacity-60">
-      <div className="h-px w-8 sm:w-16 bg-gradient-to-r from-transparent to-orange-400"></div>
+      <div className="h-px w-8 sm:w-16 bg-linear-to-r from-transparent to-orange-400"></div>
       <div className="w-2 h-2 rotate-45 border border-orange-500 bg-orange-100"></div>
-      <div className="h-px w-8 sm:w-16 bg-gradient-to-l from-transparent to-orange-400"></div>
+      <div className="h-px w-8 sm:w-16 bg-linear-to-l from-transparent to-orange-400"></div>
     </div>
     <h3 className="text-3xl md:text-4xl font-serif font-bold text-gray-800 tracking-wide mb-3">
       {title}
@@ -59,11 +51,11 @@ const MemberCard = ({ name, role, image }) => {
   const [imgError, setImgError] = useState(false);
 
   return (
-    <div className="group relative w-56 sm:w-64 flex-shrink-0 cursor-default perspective-1000">
+    <div className="group relative w-56 sm:w-64 shrink-0 cursor-default perspective-1000">
       {/* Card Border/Frame Effect */}
-      <div className="absolute -inset-1.5 bg-gradient-to-b from-orange-200 to-transparent rounded-[2rem] opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-sm" />
+      <div className="absolute -inset-1.5 bg-linear-to-b from-orange-200 to-transparent rounded-4xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-sm" />
 
-      <div className="relative h-[22rem] overflow-hidden rounded-[1.5rem] bg-white shadow-md border border-stone-100 transition-all duration-500 group-hover:-translate-y-2 group-hover:shadow-xl">
+      <div className="relative h-88 overflow-hidden rounded-3xl bg-white shadow-md border border-stone-100 transition-all duration-500 group-hover:-translate-y-2 group-hover:shadow-xl">
         {/* Image Container */}
         <div className="h-[75%] w-full relative overflow-hidden bg-orange-50">
           {image && !imgError ? (
@@ -84,7 +76,7 @@ const MemberCard = ({ name, role, image }) => {
           )}
 
           {/* Gradient Overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60 transition-opacity duration-300 group-hover:opacity-40" />
+          <div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent opacity-60 transition-opacity duration-300 group-hover:opacity-40" />
         </div>
 
         {/* Text Content */}
@@ -172,7 +164,7 @@ const CarouselSection = ({ title, description, members, loading, error }) => {
                 .map((_, i) => (
                   <div
                     key={i}
-                    className="flex-shrink-0 w-56 sm:w-64 h-[22rem] rounded-[1.5rem] bg-stone-100 animate-pulse flex items-center justify-center border border-stone-200"
+                    className="shrink-0 w-56 sm:w-64 h-88 rounded-3xl bg-stone-100 animate-pulse flex items-center justify-center border border-stone-200"
                   >
                     <Loader2 className="animate-spin text-stone-300" />
                   </div>
@@ -276,7 +268,7 @@ const CommitteeMembers = () => {
       ></div>
 
       {/* Decorative Top Banner */}
-      <div className="w-full h-2 bg-gradient-to-r from-orange-400 via-red-500 to-orange-400 relative z-20" />
+      <div className="w-full h-2 bg-linear-to-r from-orange-400 via-red-500 to-orange-400 relative z-20" />
 
       {/* Main Header */}
       <div className="relative pt-20 pb-12 text-center z-10 px-4">
@@ -307,7 +299,7 @@ const CommitteeMembers = () => {
       </div>
 
       {/* Content Container */}
-      <div className="max-w-[90rem] mx-auto relative z-10 px-4">
+      <div className="max-w-360 mx-auto relative z-10 px-4">
         <CarouselSection
           title="Register Committee"
           description="The pillars of our governance, ensuring transparency and operational excellence."
@@ -354,7 +346,7 @@ const CommitteeMembers = () => {
       </div>
 
       {/* Footer Decoration */}
-      <div className="w-full h-24 bg-gradient-to-t from-orange-100/50 to-transparent absolute bottom-0 z-0" />
+      <div className="w-full h-24 bg-linear-to-t from-orange-100/50 to-transparent absolute bottom-0 z-0" />
     </section>
   );
 };
