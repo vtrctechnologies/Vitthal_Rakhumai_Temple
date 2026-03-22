@@ -13,6 +13,7 @@ import { motion } from "framer-motion";
 const BentoGridGallery = lazy(() => import("@/components/BentoGridGallery"));
 const EventsSection = lazy(() => import("@/components/EventsSection"));
 const DonationTicker = lazy(() => import("@/components/DonationTicker"));
+const GuestSection = lazy(() => import("@/components/GuestSection"));
 const BannerSection = lazy(() => import("@/components/BannerSection"));
 const StaticCommitteeMembers = lazy(
   () => import("@/components/StaticCommitteeMembers"),
@@ -314,6 +315,11 @@ const Home = memo(() => {
         </Suspense>
       </motion.section>
 
+      {/* Guest Section */}
+      <Suspense fallback={<div className="h-64 bg-stone-50" />}>
+        <GuestSection />
+      </Suspense>
+
       {/* Committee Members */}
       <motion.section
         className="px-4"
@@ -334,11 +340,6 @@ const Home = memo(() => {
           <StaticCommitteeMembers />
         </Suspense>
       </motion.section>
-
-      {/* Banner Section */}
-      <Suspense fallback={<div className="h-64 bg-stone-50" />}>
-        <BannerSection />
-      </Suspense>
 
       {/* Gallery Section */}
       <motion.section

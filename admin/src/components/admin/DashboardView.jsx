@@ -27,6 +27,7 @@ import HeroSectionView from "./HeroSectionView";
 import LiveProgramsView from "./LiveProgramsView";
 import SubscribersView from "./SubscribersView";
 import MessagesView from "./MessagesView";
+import GuestView from "./GuestView";
 
 const DashboardView = ({ user, onLogout }) => {
   const navigate = useNavigate();
@@ -51,6 +52,7 @@ const DashboardView = ({ user, onLogout }) => {
       "live-programs",
       "subscribers",
       "messages",
+      "guests",
       "notifications",
       "settings",
     ];
@@ -150,6 +152,7 @@ const DashboardView = ({ user, onLogout }) => {
       "live-programs",
       "subscribers",
       "messages",
+      "guests",
       "notifications",
       "settings",
     ];
@@ -471,6 +474,8 @@ const DashboardView = ({ user, onLogout }) => {
             <SubscribersView />
           ) : activeTab === "messages" ? (
             <MessagesView />
+          ) : activeTab === "guests" ? (
+            <GuestView />
           ) : activeTab === "settings" ? (
             <SettingsView user={user} />
           ) : (

@@ -1,134 +1,83 @@
-import React, { memo, useState, useEffect } from "react";
+import React, { memo, useState } from "react";
 import { ZoomIn, MapPin, Calendar, Music, Camera } from "lucide-react";
-import { galleryAPI } from "@/services/api";
-import { getImageUrl } from "@/utils/imageUrl";
-import { Loader2 } from "lucide-react";
+import HeroBg12 from "../assets/HeroBg12.jpg";
+import templeMain from "../assets/temple-main.png";
+import HeroBg from "../assets/HeroBg.jpeg";
+import templeHero from "../assets/temple-hero.jpg";
 
 const BentoGridGallery = memo(() => {
-  const [images, setImages] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [activeYear, setActiveYear] = useState(new Date().getFullYear());
-  const [availableYears, setAvailableYears] = useState([]);
   const [hoveredId, setHoveredId] = useState(null);
 
-  // Fetch unique years and latest images
-  useEffect(() => {
-    const initGallery = async () => {
-      try {
-        setLoading(true);
-        const [imagesResponse] = await Promise.all([
-          galleryAPI.getImages({ limit: 100 })
-        ]);
+  // Static images for the gallery
+  const galleryItems = [
+    // --- COLUMN 1 (Left Stack) ---
+    {
+      id: 1,
+      type: "tall",
+      className: "lg:col-span-2 lg:row-span-1 lg:col-start-1 lg:row-start-1 h-48 lg:h-auto",
+      image: HeroBg12,
+      title: "Temple Morning",
+      subtitle: "Divine Atmosphere",
+    },
+    {
+      id: 2,
+      type: "tall",
+      className: "lg:col-span-2 lg:row-span-1 lg:col-start-1 lg:row-start-2 h-48 lg:h-auto",
+      image: templeMain,
+      title: "Shree Vitthal",
+      subtitle: "Main Sanctum",
+    },
 
-        if (imagesResponse?.status === "success") {
-          const data = imagesResponse.data || [];
-          setImages(data);
+    // --- COLUMN 2 (Left Tall) ---
+    {
+      id: 3,
+      type: "tall",
+      className: "lg:col-span-2 lg:row-span-2 lg:col-start-3 lg:row-start-1 h-64 lg:h-auto",
+      image: templeHero,
+      title: "Festival Celebration",
+      subtitle: "Annual Gathering",
+    },
 
-          const years = [...new Set(data.map(img => img.year))].filter(Boolean).sort((a, b) => b - a);
-          setAvailableYears(years);
-          if (years.length > 0 && !years.includes(activeYear)) {
-            setActiveYear(years[0]);
-          }
-        }
-      } catch (err) {
-        console.error("Error initializing gallery:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    initGallery();
-  }, []);
+    // --- COLUMN 3 (Center Featured) ---
+    {
+      id: 4,
+      type: "featured",
+      className: "lg:col-span-4 lg:row-span-2 lg:col-start-5 lg:row-start-1 h-80 lg:h-auto",
+      image: HeroBg,
+      title: "Shree Vitthal Rakhumai",
+      description: "Witnessing the vibrant colors, thundering drums, and shared devotion of the annual gathering at Amberkarwadi.",
+      location: "Amberkarwadi",
+      event: "Kartiki Ekadashi",
+    },
 
-  const filteredImages = images.filter(img => img.year === activeYear).slice(0, 7);
+    // --- COLUMN 4 (Right Tall) ---
+    {
+      id: 5,
+      type: "tall",
+      className: "lg:col-span-2 lg:row-span-2 lg:col-start-9 lg:row-start-1 h-64 lg:h-auto",
+      image: HeroBg12,
+      title: "Evening Aarti",
+      subtitle: "Peaceful Moments",
+    },
 
-  const getThumbnailUrl = (url) => {
-    if (!url) return null;
-    if (url.includes('cloudinary.com') && (url.includes('/video/upload/') || url.match(/\.(mp4|mov|avi|mkv|webm)$/i))) {
-      return url.replace(/\/video\/upload\/(v\d+\/)?/, '/video/upload/so_auto,f_auto,q_auto/').replace(/\.[^.]+$/, '.jpg');
-    }
-    return url;
-  };
-
-  // Create gallery items from fetched images or use fallback
-  const galleryItems =
-    filteredImages.length > 0
-      ? [
-        // --- COLUMN 1 (Left Stack) ---
-        {
-          id: filteredImages[0]?._id || 1,
-          type: "tall",
-          className: "lg:col-span-2 lg:row-span-1 lg:col-start-1 lg:row-start-1 h-48 lg:h-auto",
-          image: filteredImages[0]?.imageUrl,
-          resourceType: filteredImages[0]?.resourceType,
-          title: filteredImages[0]?.title || "Temple Image",
-          subtitle: filteredImages[0]?.category?.name || "Gallery",
-        },
-        {
-          id: filteredImages[1]?._id || 2,
-          type: "tall",
-          className: "lg:col-span-2 lg:row-span-1 lg:col-start-1 lg:row-start-2 h-48 lg:h-auto",
-          image: filteredImages[1]?.imageUrl,
-          resourceType: filteredImages[1]?.resourceType,
-          title: filteredImages[1]?.title || "Temple Image",
-          subtitle: filteredImages[1]?.category?.name || "Gallery",
-        },
-
-        // --- COLUMN 2 (Left Tall) ---
-        {
-          id: filteredImages[2]?._id || 3,
-          type: "tall",
-          className: "lg:col-span-2 lg:row-span-2 lg:col-start-3 lg:row-start-1 h-64 lg:h-auto",
-          image: filteredImages[2]?.imageUrl,
-          resourceType: filteredImages[2]?.resourceType,
-          title: filteredImages[2]?.title || "Temple Image",
-          subtitle: filteredImages[2]?.category?.name || "Gallery",
-        },
-
-        // --- COLUMN 3 (Center Featured) ---
-        {
-          id: filteredImages[3]?._id || 4,
-          type: "featured",
-          className: "lg:col-span-4 lg:row-span-2 lg:col-start-5 lg:row-start-1 h-80 lg:h-auto",
-          image: filteredImages[3]?.imageUrl,
-          resourceType: filteredImages[3]?.resourceType,
-          title: filteredImages[3]?.title || "Shree Vitthal Rakhumai",
-          description: filteredImages[3]?.description || "Witnessing the vibrant colors, thundering drums, and shared devotion of the annual gathering.",
-          location: "Amberkarwadi",
-          event: `${filteredImages[3]?.category?.name || 'Festival'} ${activeYear}`,
-        },
-
-        // --- COLUMN 4 (Right Tall) ---
-        {
-          id: filteredImages[4]?._id || 5,
-          type: "tall",
-          className: "lg:col-span-2 lg:row-span-2 lg:col-start-9 lg:row-start-1 h-64 lg:h-auto",
-          image: filteredImages[4]?.imageUrl,
-          resourceType: filteredImages[4]?.resourceType,
-          title: filteredImages[4]?.title || "Temple Image",
-          subtitle: filteredImages[4]?.category?.name || "Gallery",
-        },
-
-        // --- COLUMN 5 (Right Stack) ---
-        {
-          id: filteredImages[5]?._id || 6,
-          type: "tall",
-          className: "lg:col-span-2 lg:row-span-1 lg:col-start-11 lg:row-start-1 h-48 lg:h-auto",
-          image: filteredImages[5]?.imageUrl,
-          resourceType: filteredImages[5]?.resourceType,
-          title: filteredImages[5]?.title || "Temple Image",
-          subtitle: filteredImages[5]?.category?.name || "Gallery",
-        },
-        {
-          id: filteredImages[6]?._id || 7,
-          type: "tall",
-          className: "lg:col-span-2 lg:row-span-1 lg:col-start-11 lg:row-start-2 h-48 lg:h-auto",
-          image: filteredImages[6]?.imageUrl,
-          resourceType: filteredImages[6]?.resourceType,
-          title: filteredImages[6]?.title || "Temple Image",
-          subtitle: filteredImages[6]?.category?.name || "Gallery",
-        },
-      ]
-      : [];
+    // --- COLUMN 5 (Right Stack) ---
+    {
+      id: 6,
+      type: "tall",
+      className: "lg:col-span-2 lg:row-span-1 lg:col-start-11 lg:row-start-1 h-48 lg:h-auto",
+      image: templeMain,
+      title: "Temple Entrance",
+      subtitle: "Welcoming Devotees",
+    },
+    {
+      id: 7,
+      type: "tall",
+      className: "lg:col-span-2 lg:row-span-1 lg:col-start-11 lg:row-start-2 h-48 lg:h-auto",
+      image: templeHero,
+      title: "Cultural Program",
+      subtitle: "Community Unity",
+    },
+  ];
 
   const renderItemContent = (item) => {
     switch (item.type) {
@@ -187,84 +136,30 @@ const BentoGridGallery = memo(() => {
                 Captured Moments
               </h2>
             </div>
-
-            {/* Year Selector */}
-            {availableYears.length > 0 && (
-              <div className="flex gap-2 p-1 bg-white rounded-xl shadow-sm border border-orange-100">
-                {availableYears.map(year => (
-                  <button
-                    key={year}
-                    onClick={() => setActiveYear(year)}
-                    className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${activeYear === year
-                      ? 'bg-orange-600 text-white shadow-md'
-                      : 'text-gray-500 hover:text-orange-600 hover:bg-orange-50'
-                      }`}
-                  >
-                    {year}
-                  </button>
-                ))}
-              </div>
-            )}
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-12 lg:grid-rows-2 gap-4 h-auto lg:h-[600px]">
-            {loading ? (
-              <div className="col-span-12 flex items-center justify-center py-20">
-                <Loader2 className="w-8 h-8 animate-spin text-orange-600" />
-              </div>
-            ) : galleryItems.length > 0 ? (
-              galleryItems.map((item) => (
-                <div
-                  key={item.id}
-                  className={`relative group overflow-hidden rounded-2xl shadow-lg cursor-pointer bg-gray-800 ${item.className}`}
-                  onMouseEnter={() => setHoveredId(item.id)}
-                  onMouseLeave={() => setHoveredId(null)}
-                >
-                  {/* Media Layer */}
-                  {item.image ? (
-                    <div className="absolute inset-0 w-full h-full">
-                      {(item.resourceType === 'video' || item.image.includes('/video/upload/')) ? (
-                        <div className="w-full h-full">
-                          <img
-                            src={getThumbnailUrl(getImageUrl(item.image))}
-                            className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${hoveredId === item.id ? 'opacity-0' : 'opacity-100'}`}
-                            alt={item.title}
-                          />
-                          {hoveredId === item.id && (
-                            <video
-                              src={getImageUrl(item.image)}
-                              className="absolute inset-0 w-full h-full object-cover scale-110"
-                              muted
-                              loop
-                              autoPlay
-                              playsInline
-                            />
-                          )}
-                        </div>
-                      ) : (
-                        <div
-                          className="absolute inset-0 w-full h-full bg-cover bg-center transition-transform duration-500 group-hover:scale-110"
-                          style={{ backgroundImage: `url(${getImageUrl(item.image)})` }}
-                        />
-                      )}
-                    </div>
-                  ) : (
-                    <div className="absolute inset-0 w-full h-full bg-gray-300 flex items-center justify-center">
-                      <Camera className="text-gray-400" size={48} />
-                    </div>
-                  )}
-
-                  {/* Content Layer */}
-                  <div className="relative h-full w-full">
-                    {renderItemContent(item)}
-                  </div>
+            {galleryItems.map((item) => (
+              <div
+                key={item.id}
+                className={`relative group overflow-hidden rounded-2xl shadow-lg cursor-pointer bg-gray-800 ${item.className}`}
+                onMouseEnter={() => setHoveredId(item.id)}
+                onMouseLeave={() => setHoveredId(null)}
+              >
+                {/* Media Layer */}
+                <div className="absolute inset-0 w-full h-full">
+                  <div
+                    className="absolute inset-0 w-full h-full bg-cover bg-center transition-transform duration-500 group-hover:scale-110"
+                    style={{ backgroundImage: `url(${item.image})` }}
+                  />
                 </div>
-              ))
-            ) : (
-              <div className="col-span-12 flex items-center justify-center py-20">
-                <div className="text-gray-500">No gallery images available</div>
+
+                {/* Content Layer */}
+                <div className="relative h-full w-full">
+                  {renderItemContent(item)}
+                </div>
               </div>
-            )}
+            ))}
           </div>
         </div>
       </section>

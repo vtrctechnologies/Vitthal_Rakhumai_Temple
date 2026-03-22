@@ -173,5 +173,13 @@ export const contactAPI = {
   },
 };
 
+// Guest API functions
+export const guestAPI = {
+  // Get all guests (public)
+  getGuests: async (params = {}) => {
+    return apiClient.get("/guests", { params });
+  },
+};
+
 export default galleryAPI;
 
