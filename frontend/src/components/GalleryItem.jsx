@@ -1,4 +1,5 @@
 import { memo } from "react";
+import React from "react";
 import { Sparkles } from "lucide-react";
 import { getImageUrl } from "@/utils/imageUrl";
 
@@ -15,11 +16,27 @@ const GalleryItem = memo(({ image, index, onClick }) => {
   const spanClass = isTall
     ? "row-span-2"
     : isWide
-    ? "col-span-1 sm:col-span-2"
-    : "col-span-1";
+      ? "col-span-1 sm:col-span-2"
+      : "col-span-1";
+
+  const [isHovered, setIsHovered] = React.useState(false);
 
   // Use utility function for image URL
   const imageUrl = getImageUrl(image.imageUrl);
+
+  // Construct video thumbnail URL (Cloudinary specific optimization)
+  const getThumbnailUrl = (url) => {
+    if (!url) return null;
+    if (url.includes('cloudinary.com') && (url.includes('/video/upload/') || url.match(/\.(mp4|mov|avi|mkv|webm)$/i))) {
+      // Replace extension with .jpg and add transformation for auto-thumbnail
+      return url.replace(/\/video\/upload\/(v\d+\/)?/, '/video/upload/so_auto,f_auto,q_auto/').replace(/\.[^.]+$/, '.jpg');
+    }
+    return url;
+  };
+
+  const isVideo = image.resourceType === 'video' ||
+    image.imageUrl?.match(/\.(mp4|mov|avi|mkv|webm)$/i) ||
+    image.imageUrl?.includes("/video/");
 
   return (
     <div
@@ -28,6 +45,8 @@ const GalleryItem = memo(({ image, index, onClick }) => {
         image.size
       )} overflow-hidden bg-black shadow-xl cursor-pointer transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl hover:shadow-amber-900/20`}
       onClick={onClick}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
       {/* Inner Border Frame (The "Gold" Reveal) */}
       <div
@@ -37,26 +56,31 @@ const GalleryItem = memo(({ image, index, onClick }) => {
         )} pointer-events-none scale-95 group-hover:scale-100`}
       ></div>
 
-      {/* Image */}
+      {/* Media Content */}
       <div className="w-full h-full overflow-hidden relative">
         <div className="absolute inset-0 bg-stone-200 animate-pulse -z-10"></div>
         {imageUrl ? (
-          image.imageUrl?.match(/\.(mp4|mov|avi|mkv|webm)$/i) || 
-          image.imageUrl?.includes("/video/") ||
-          image.imageUrl?.includes("/upload/v") && !image.imageUrl?.match(/\.(jpg|jpeg|png|webp|gif|svg)$/i) ? (
-            <video
-              src={imageUrl}
-              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-              muted
-              loop
-              autoPlay
-              playsInline
-              onMouseOver={(e) => e.target.play()}
-              onMouseOut={(e) => {
-                e.target.pause();
-                e.target.currentTime = 0;
-              }}
-            />
+          isVideo ? (
+            <div className="w-full h-full relative">
+              {/* Thumbnail - Always present or replaced by video on hover */}
+              <img
+                src={getThumbnailUrl(imageUrl)}
+                alt={image.title}
+                className={`w-full h-full object-cover transition-opacity duration-500 ${isHovered ? 'opacity-0' : 'opacity-100'}`}
+                loading="lazy"
+              />
+              {/* Video - Rendered/Played only on hover for performance */}
+              {isHovered && (
+                <video
+                  src={imageUrl}
+                  className="absolute inset-0 w-full h-full object-cover"
+                  muted
+                  loop
+                  autoPlay
+                  playsInline
+                />
+              )}
+            </div>
           ) : (
             <img
               src={imageUrl}
@@ -66,14 +90,6 @@ const GalleryItem = memo(({ image, index, onClick }) => {
               loading="lazy"
               decoding="async"
               fetchpriority={index < 6 ? "high" : "low"}
-              onError={(e) => {
-                e.target.style.display = "none";
-                const placeholder =
-                  e.target.parentElement?.querySelector(".image-placeholder");
-                if (placeholder) {
-                  placeholder.style.display = "flex";
-                }
-              }}
             />
           )
         ) : null}

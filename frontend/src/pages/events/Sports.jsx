@@ -309,21 +309,20 @@ const Sports = () => {
             <div className="relative">
               {/* Section Title */}
               <motion.div
-                className="flex items-center justify-center mb-10"
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
+                className="text-center mb-16 space-y-4"
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6 }}
               >
-                <div className="bg-white px-6 py-2 rounded-full shadow-sm border border-amber-100 flex items-center gap-3">
-                  <Medal className="text-amber-500 fill-amber-100" size={24} />
-                  <span className="font-serif font-bold text-xl text-red-950">
+                <div className="inline-block p-1 px-4 rounded-full bg-linear-to-br from-red-600/20 to-amber-600/20 border border-red-200/50 backdrop-blur-md mb-4 group hover:scale-105 transition-transform duration-300">
+                  <Medal className="text-[#FFB700] animate-pulse" size={24} />
+                  <span className="font-serif font-bold text-xl text-white">
                     Victory Podium
                   </span>
                 </div>
               </motion.div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-end max-w-5xl mx-auto">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-end max-w-5xl mx-auto px-4">
                 {/* 2nd Place */}
                 <WinnerCard
                   winner={winners.second}
@@ -474,7 +473,7 @@ const WinnerCard = ({
 
   return (
     <motion.div
-      className={`${config.order} flex flex-col group`}
+      className={`${config.order} flex flex-col group h-full`}
       initial={config.initial}
       whileInView={config.whileInView}
       viewport={{ once: true }}
@@ -483,7 +482,7 @@ const WinnerCard = ({
       <div
         className={`
         relative rounded-xl shadow-lg border ${config.containerClass} 
-        p-6 flex flex-col items-center justify-between transition-transform duration-300 hover:-translate-y-1
+        p-6 flex flex-col items-center justify-between transition-transform duration-300 hover:-translate-y-1 h-full
         ${position === "first" ? "shadow-amber-900/10" : "shadow-stone-900/5"}
       `}
       >
@@ -498,7 +497,7 @@ const WinnerCard = ({
         <div className="w-full flex flex-col items-center pt-6">
           {/* Image */}
           <div
-            className={`relative mb-4 rounded-full overflow-hidden bg-stone-100 flex-shrink-0 cursor-pointer ${config.imageSize}`}
+            className={`relative mb-4 rounded-full overflow-hidden bg-stone-100 shrink-0 cursor-pointer ${config.imageSize}`}
             onClick={onViewImage}
           >
             {winner.imageUrl ? (
@@ -576,29 +575,55 @@ const TeamMembersModal = ({ winner, onClose }) => {
       onClose={onClose}
       title={winner.teamName}
     >
-      <div className="flex-1 overflow-y-auto p-6 bg-stone-50">
-        <div className="space-y-2">
+      <div className="flex-1 overflow-y-auto p-6 bg-stone-50/50">
+        {/* Captain Highlight */}
+        {winner.captain && (
+          <div className="mb-6 p-4 bg-linear-to-r from-[#5D0000] to-[#8B0000] rounded-xl shadow-md border border-[#FFB700]/30 text-white relative overflow-hidden group">
+            <div className="absolute top-0 right-0 w-16 h-16 bg-[#FFB700] opacity-10 rounded-bl-full group-hover:scale-110 transition-transform" />
+            <div className="relative z-10 flex items-center gap-4">
+              <div className="w-12 h-12 bg-[#FFB700] rounded-full flex items-center justify-center text-[#5D0000] shadow-lg">
+                <Trophy size={20} />
+              </div>
+              <div>
+                <p className="text-[#FFB700] text-xs font-bold uppercase tracking-widest mb-0.5">Team Captain</p>
+                <h4 className="text-xl font-display font-bold">{winner.captain}</h4>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Members List */}
+        <div className="space-y-3">
+          <p className="text-stone-400 text-xs font-bold uppercase tracking-widest pl-1 mb-2">Squad Members</p>
           {members.length === 0 ? (
-            <div className="text-center py-10 text-stone-400">
-              <Users size={48} className="mx-auto mb-2 opacity-20" />
-              <p>No team members listed</p>
+            <div className="text-center py-8 text-stone-400 bg-white rounded-lg border border-dashed border-stone-200">
+              <Users size={32} className="mx-auto mb-2 opacity-20" />
+              <p className="text-sm italic">No other members listed</p>
             </div>
           ) : (
             members.map((member, index) => (
               <div
                 key={index}
-                className="flex items-center gap-4 p-3 bg-white border border-stone-200 rounded-lg hover:border-amber-300 hover:shadow-sm transition-all group"
+                className={`flex items-center gap-4 p-3 bg-white border rounded-lg transition-all group ${
+                  member === winner.captain 
+                    ? "border-amber-200 bg-amber-50/30" 
+                    : "border-stone-200 hover:border-red-200 hover:shadow-sm"
+                }`}
               >
-                <div className="w-8 h-8 rounded-full bg-red-50 text-red-900 flex items-center justify-center text-sm font-bold border border-red-100 group-hover:bg-red-900 group-hover:text-white transition-colors">
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold border transition-colors ${
+                  member === winner.captain
+                    ? "bg-amber-100 text-amber-900 border-amber-200"
+                    : "bg-stone-50 text-stone-500 border-stone-100 group-hover:bg-red-50 group-hover:text-red-900 group-hover:border-red-100"
+                }`}>
                   {index + 1}
                 </div>
-                <div className="flex-1 font-medium text-stone-700">
+                <div className={`flex-1 font-medium transition-colors ${
+                  member === winner.captain ? "text-amber-950" : "text-stone-700"
+                }`}>
                   {member}
-                  {(member === winner.captain ||
-                    (typeof member === "string" &&
-                      member.includes(winner.captain))) && (
-                    <span className="ml-2 text-xs font-bold text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-100">
-                      CPT
+                  {member === winner.captain && (
+                    <span className="ml-2 text-[10px] font-bold text-amber-600 bg-amber-100 px-1.5 py-0.5 rounded uppercase tracking-tighter">
+                      Captain
                     </span>
                   )}
                 </div>

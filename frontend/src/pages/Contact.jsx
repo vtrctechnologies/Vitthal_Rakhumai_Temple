@@ -5,6 +5,7 @@ import Button from "@/components/base/Button";
 import { Input, Textarea } from "@/components/base/Input";
 import { MapPin, Phone, Mail, Clock } from "lucide-react";
 import Swal from "sweetalert2";
+import { contactAPI } from "@/services/api";
 
 const Contact = () => {
   const [ref, inView] = useInView({ triggerOnce: true, threshold: 0.1 });
@@ -13,6 +14,7 @@ const Contact = () => {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
+    phone: "",
     subject: "",
     message: "",
   });
@@ -33,27 +35,29 @@ const Contact = () => {
     }
 
     try {
-      // Simulate form submission
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const response = await contactAPI.sendMessage(formData);
 
-      Swal.fire({
-        icon: "success",
-        title: "Message Sent!",
-        text: "Thank you for contacting us. We'll get back to you soon.",
-        confirmButtonColor: "#d97706",
-      });
+      if (response.status === "success") {
+        Swal.fire({
+          icon: "success",
+          title: "Message Sent!",
+          text: "Thank you for contacting us. We'll get back to you soon.",
+          confirmButtonColor: "#d97706",
+        });
 
-      setFormData({
-        name: "",
-        email: "",
-        subject: "",
-        message: "",
-      });
+        setFormData({
+          name: "",
+          email: "",
+          phone: "",
+          subject: "",
+          message: "",
+        });
+      }
     } catch (error) {
       Swal.fire({
         icon: "error",
         title: "Submission Failed",
-        text: "There was an error sending your message. Please try again.",
+        text: error.response?.data?.message || "There was an error sending your message.",
         confirmButtonColor: "#d97706",
       });
     } finally {
@@ -163,6 +167,26 @@ const Contact = () => {
                   value={formData.email}
                   onChange={handleChange}
                   placeholder="your@email.com"
+                  required
+                />
+
+                <Input
+                  label="Phone Number"
+                  id="phone"
+                  name="phone"
+                  type="tel"
+                  value={formData.phone}
+                  onChange={handleChange}
+                  placeholder="Enter your phone number"
+                />
+
+                <Input
+                  label="Subject *"
+                  id="subject"
+                  name="subject"
+                  value={formData.subject}
+                  onChange={handleChange}
+                  placeholder="What is this about?"
                   required
                 />
 

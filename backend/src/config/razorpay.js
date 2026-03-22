@@ -1,4 +1,4 @@
 // Razorpay config placeholder
-module.exports = {
+export default {
   client: null
 };

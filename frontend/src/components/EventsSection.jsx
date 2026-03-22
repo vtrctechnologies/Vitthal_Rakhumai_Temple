@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import {
   Calendar,
   Clock,
@@ -25,8 +25,8 @@ const EventsSection = () => {
         setLoading(true);
         setError(null);
 
-        // Use the API service to fetch events
-        const response = await eventsPageAPI.getAllEvents({ upcoming: "true" });
+        // Use the API service to fetch events with a limit of 4
+        const response = await eventsPageAPI.getAllEvents({ upcoming: "true", limit: 4 });
 
         // Handle API response structure: { status: "success", data: [...] }
         let eventsData = [];
@@ -42,20 +42,13 @@ const EventsSection = () => {
           eventsData = response.data;
         }
 
-        // Filter for active events only and sort by date (earliest first)
+        // Sort by date (earliest first) - should already be sorted by backend but double check
         const activeEvents = eventsData
-          .filter((event) => {
-            // Only filter out if explicitly inactive
-            return event.isActive !== false;
-          })
+          .filter((event) => event.isActive !== false)
           .sort((a, b) => {
-            // Sort by date ascending (earliest first)
             if (!a.date || !b.date) return 0;
-            const dateA = new Date(a.date);
-            const dateB = new Date(b.date);
-            return dateA - dateB;
-          })
-          .slice(0, 4); // Take only 4 events
+            return new Date(a.date) - new Date(b.date);
+          });
 
         setEvents(activeEvents);
       } catch (err) {
@@ -241,8 +234,9 @@ const EventsSection = () => {
                 const imageUrl = getImageUrl(event.imageUrl);
 
                 return (
-                  <div
+                  <Link
                     key={event._id || event.id}
+                    to={`/events/${event._id}`}
                     className="snap-center flex-shrink-0 w-[300px] md:w-[360px] bg-white rounded-2xl shadow-sm border border-stone-100 overflow-hidden hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 flex flex-col group"
                   >
                     {/* Image Area */}
@@ -323,7 +317,7 @@ const EventsSection = () => {
                         )}
                       </div>
                     </div>
-                  </div>
+                  </Link>
                 );
               });
             }

@@ -1364,7 +1364,7 @@ const TeamMembersModal = ({ winner, onClose }) => {
                     <div className="flex-1 min-w-0">
                       <p className="font-medium text-gray-900 truncate">
                         {member}
-                        {(member === winner.captain || (typeof member === "string" && member.includes(winner.captain))) && (
+                        {winner.captain && (member === winner.captain) && (
                           <span className="ml-2 text-xs text-primary font-semibold">
                             (Captain)
                           </span>

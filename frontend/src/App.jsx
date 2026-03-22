@@ -3,6 +3,8 @@ import { useEffect, Suspense, lazy, memo } from "react";
 // Lazy load Lenis to reduce initial bundle size
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Outlet } from "react-router-dom";
+import Events from "./pages/Events.jsx";
+
 
 // Lazy load all non-critical components for better initial performance
 const Navbar = lazy(() => import("./components/Navbar"));
@@ -11,20 +13,20 @@ const ScrollToTop = lazy(() => import("./components/ScrollToTop"));
 
 // Context - Keep this non-lazy as it's needed immediately
 import { LanguageProvider } from "./context/LanguageContext";
+import Donation from "./pages/Donation.jsx";
+import Contact from "./pages/Contact.jsx";
+import PrivacyPolicy from "./pages/PrivacyPolicy.jsx";
+import NotFound from "./pages/NotFound.jsx";
 
 // Lazy load pages for code splitting
 const Home = lazy(() => import("./pages/Home.jsx"));
 const About = lazy(() => import("./pages/About.jsx"));
 const Gallery = lazy(() => import("./pages/Gallery.jsx"));
-const Events = lazy(() => import("./pages/Events.jsx"));
-const Donation = lazy(() => import("./pages/Donation.jsx"));
-const Contact = lazy(() => import("./pages/Contact.jsx"));
-const NotFound = lazy(() => import("./pages/NotFound.jsx"));
-const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
 const TermsAndConditions = lazy(() => import("./pages/TermsAndConditions"));
 const Sports = lazy(() => import("./pages/events/Sports"));
 const Banners = lazy(() => import("./pages/events/Banners"));
 const LivePrograms = lazy(() => import("./pages/events/LivePrograms"));
+const EventDetail = lazy(() => import("./pages/EventDetail.jsx"));
 const Committee = lazy(() => import("./pages/Committee"));
 
 // Loading fallback component
@@ -143,123 +145,131 @@ const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <LanguageProvider>
-          <BrowserRouter
-            future={{
-              v7_startTransition: true,
-              v7_relativeSplatPath: true,
-            }}
-          >
-            <Routes>
-              <Route element={<PublicLayout />}>
-                <Route
-                  path="/"
-                  element={
-                    <Suspense fallback={<PageLoader />}>
-                      <Home />
-                    </Suspense>
-                  }
-                />
-                <Route
-                  path="/about"
-                  element={
-                    <Suspense fallback={<PageLoader />}>
-                      <About />
-                    </Suspense>
-                  }
-                />
-                <Route
-                  path="/gallery"
-                  element={
-                    <Suspense fallback={<PageLoader />}>
-                      <Gallery />
-                    </Suspense>
-                  }
-                />
-                <Route
-                  path="/events"
-                  element={
-                    <Suspense fallback={<PageLoader />}>
-                      <Events />
-                    </Suspense>
-                  }
-                />
-                <Route
-                  path="/donation"
-                  element={
-                    <Suspense fallback={<PageLoader />}>
-                      <Donation />
-                    </Suspense>
-                  }
-                />
-                <Route
-                  path="/contact"
-                  element={
-                    <Suspense fallback={<PageLoader />}>
-                      <Contact />
-                    </Suspense>
-                  }
-                />
-                <Route
-                  path="/privacy"
-                  element={
-                    <Suspense fallback={<PageLoader />}>
-                      <PrivacyPolicy />
-                    </Suspense>
-                  }
-                />
-                <Route
-                  path="/terms"
-                  element={
-                    <Suspense fallback={<PageLoader />}>
-                      <TermsAndConditions />
-                    </Suspense>
-                  }
-                />
-                <Route
-                  path="/events/sports"
-                  element={
-                    <Suspense fallback={<PageLoader />}>
-                      <Sports />
-                    </Suspense>
-                  }
-                />
-                <Route
-                  path="/events/banners"
-                  element={
-                    <Suspense fallback={<PageLoader />}>
-                      <Banners />
-                    </Suspense>
-                  }
-                />
-                <Route
-                  path="/events/live-programs"
-                  element={
-                    <Suspense fallback={<PageLoader />}>
-                      <LivePrograms />
-                    </Suspense>
-                  }
-                />
-                <Route
-                  path="/about/committee"
-                  element={
-                    <Suspense fallback={<PageLoader />}>
-                      <Committee />
-                    </Suspense>
-                  }
-                />
+        <BrowserRouter
+          future={{
+            v7_startTransition: true,
+            v7_relativeSplatPath: true,
+          }}
+        >
+          <Routes>
+            <Route element={<PublicLayout />}>
+              <Route
+                path="/"
+                element={
+                  <Suspense fallback={<PageLoader />}>
+                    <Home />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="/about"
+                element={
+                  <Suspense fallback={<PageLoader />}>
+                    <About />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="/gallery"
+                element={
+                  <Suspense fallback={<PageLoader />}>
+                    <Gallery />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="/events"
+                element={
+                  <Suspense fallback={<PageLoader />}>
+                    <Events />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="/events/:id"
+                element={
+                  <Suspense fallback={<PageLoader />}>
+                    <EventDetail />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="/donation"
+                element={
+                  <Suspense fallback={<PageLoader />}>
+                    <Donation />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="/contact"
+                element={
+                  <Suspense fallback={<PageLoader />}>
+                    <Contact />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="/privacy"
+                element={
+                  <Suspense fallback={<PageLoader />}>
+                    <PrivacyPolicy />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="/terms"
+                element={
+                  <Suspense fallback={<PageLoader />}>
+                    <TermsAndConditions />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="/events/sports"
+                element={
+                  <Suspense fallback={<PageLoader />}>
+                    <Sports />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="/events/banners"
+                element={
+                  <Suspense fallback={<PageLoader />}>
+                    <Banners />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="/events/live-programs"
+                element={
+                  <Suspense fallback={<PageLoader />}>
+                    <LivePrograms />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="/about/committee"
+                element={
+                  <Suspense fallback={<PageLoader />}>
+                    <Committee />
+                  </Suspense>
+                }
+              />
 
-                {/* 404 handling for public site */}
-                <Route
-                  path="*"
-                  element={
-                    <Suspense fallback={<PageLoader />}>
-                      <NotFound />
-                    </Suspense>
-                  }
-                />
-              </Route>
-            </Routes>
-          </BrowserRouter>
+              {/* 404 handling for public site */}
+              <Route
+                path="*"
+                element={
+                  <Suspense fallback={<PageLoader />}>
+                    <NotFound />
+                  </Suspense>
+                }
+              />
+            </Route>
+          </Routes>
+        </BrowserRouter>
       </LanguageProvider>
     </QueryClientProvider>
   );

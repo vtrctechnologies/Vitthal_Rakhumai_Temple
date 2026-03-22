@@ -119,24 +119,26 @@ const BannerView = () => {
     }
   };
 
-  const handleImageChange = (e) => {
+  const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      // Validate file type
-      const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/gif", "image/webp"];
-      if (!allowedTypes.includes(file.type)) {
+      const isVideo = file.type.startsWith('video/');
+      const isImage = file.type.startsWith('image/');
+      
+      if (!isImage && !isVideo) {
         setErrors((prev) => ({
           ...prev,
-          image: "Please select a valid image file (JPEG, PNG, GIF, or WebP)",
+          image: "Please select a valid image or video file",
         }));
         return;
       }
 
-      // Validate file size (5MB)
-      if (file.size > 5 * 1024 * 1024) {
+      // Validate file size (5MB for image, 50MB for video)
+      const maxSize = isVideo ? 50 * 1024 * 1024 : 5 * 1024 * 1024;
+      if (file.size > maxSize) {
         setErrors((prev) => ({
           ...prev,
-          image: "Image size must be less than 5MB",
+          image: `File size must be less than ${isVideo ? '50MB' : '5MB'}`,
         }));
         return;
       }
@@ -546,25 +548,33 @@ const BannerView = () => {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Image {!editingBanner && "*"}
+                  Image/Video {!editingBanner && "*"}
                 </label>
                 <div className="space-y-2">
                   <input
                     type="file"
-                    accept="image/*"
-                    onChange={handleImageChange}
+                    accept="image/*,video/*"
+                    onChange={handleFileChange}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                   />
                   {errors.image && (
                     <p className="text-red-500 text-xs">{errors.image}</p>
                   )}
                   {(imagePreview || (editingBanner && editingBanner.imageUrl)) && (
-                    <div className="mt-2">
-                      <img
-                        src={imagePreview || getImageUrl(editingBanner.imageUrl)}
-                        alt="Preview"
-                        className="w-full h-48 object-cover rounded-md border border-gray-300"
-                      />
+                    <div className="mt-2 relative">
+                      { (imagePreview?.startsWith('data:video') || editingBanner?.resourceType === 'video') ? (
+                        <video 
+                          src={imagePreview || getImageUrl(editingBanner.imageUrl)} 
+                          className="w-full h-48 object-cover rounded-md border border-gray-300"
+                          controls
+                        />
+                      ) : (
+                        <img
+                          src={imagePreview || getImageUrl(editingBanner.imageUrl)}
+                          alt="Preview"
+                          className="w-full h-48 object-cover rounded-md border border-gray-300"
+                        />
+                      )}
                     </div>
                   )}
                 </div>

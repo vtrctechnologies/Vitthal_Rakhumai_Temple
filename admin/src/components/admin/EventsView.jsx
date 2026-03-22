@@ -28,6 +28,8 @@ const EventsView = () => {
   const [editingEvent, setEditingEvent] = useState(null);
   const [message, setMessage] = useState({ type: "", text: "" });
   const [imagePreview, setImagePreview] = useState(null);
+  const [availableYears, setAvailableYears] = useState([]);
+  const [filterYear, setFilterYear] = useState("");
 
   // State for delete confirmation modal
   const [deleteId, setDeleteId] = useState(null);
@@ -41,20 +43,36 @@ const EventsView = () => {
     attendees: "",
     status: "upcoming",
     image: null,
+    isFeatured: false,
+    year: new Date().getFullYear(),
   });
 
   const [errors, setErrors] = useState({});
 
   // Fetch events on component mount
   useEffect(() => {
+    fetchYears();
     fetchEvents();
-  }, []);
+  }, [filterYear]);
+
+  const fetchYears = async () => {
+    try {
+      const response = await eventsAPI.getEventYears();
+      if (response && response.status === "success") {
+        setAvailableYears(response.data || []);
+      }
+    } catch (error) {
+      console.error("Error fetching event years:", error);
+    }
+  };
 
   const fetchEvents = async () => {
     setFetching(true);
     try {
-      // Fetch all events (not just upcoming) for admin panel
-      const response = await eventsAPI.getEvents();
+      // Fetch all events for admin panel with year filter if selected
+      const params = {};
+      if (filterYear) params.year = filterYear;
+      const response = await eventsAPI.getEventsAdmin(params);
       console.log("Events API Response:", response);
       if (response && response.status === "success") {
         const eventsData = Array.isArray(response.data) ? response.data : [];
@@ -138,6 +156,8 @@ const EventsView = () => {
       formDataToSend.append("location", formData.location);
       formDataToSend.append("attendees", formData.attendees || "");
       formDataToSend.append("status", formData.status);
+      formDataToSend.append("isFeatured", formData.isFeatured);
+      formDataToSend.append("year", formData.year);
       if (formData.image) {
         formDataToSend.append("image", formData.image);
       }
@@ -183,6 +203,8 @@ const EventsView = () => {
       attendees: event.attendees || "",
       status: event.status || "upcoming",
       image: null,
+      isFeatured: event.isFeatured || false,
+      year: event.year || new Date().getFullYear(),
     });
     setImagePreview(getImageUrl(event.imageUrl));
     setShowForm(true);
@@ -227,6 +249,8 @@ const EventsView = () => {
       attendees: "",
       status: "upcoming",
       image: null,
+      isFeatured: false,
+      year: new Date().getFullYear(),
     });
     setErrors({});
     setImagePreview(null);
@@ -272,6 +296,34 @@ const EventsView = () => {
           >
             <Plus size={20} className="mr-2" /> Create New Event
           </Button>
+        </div>
+
+        {/* Filters Section */}
+        <div className="flex flex-wrap items-center gap-4 bg-white p-4 rounded-xl border border-gray-100 shadow-sm">
+          <div className="flex items-center gap-2">
+            <Calendar size={18} className="text-gray-400" />
+            <span className="text-sm font-medium text-gray-700">Filter by Year:</span>
+          </div>
+          <select
+            value={filterYear}
+            onChange={(e) => setFilterYear(e.target.value)}
+            className="bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block p-2 transition-all outline-none"
+          >
+            <option value="">All Years</option>
+            {availableYears.map((year) => (
+              <option key={year} value={year}>
+                {year}
+              </option>
+            ))}
+          </select>
+          {filterYear && (
+            <button
+              onClick={() => setFilterYear("")}
+              className="text-xs text-orange-600 hover:text-orange-700 font-medium"
+            >
+              Clear Filter
+            </button>
+          )}
         </div>
 
         {/* Message Alert */}
@@ -484,6 +536,32 @@ const EventsView = () => {
                       </div>
                     )}
                   </div>
+                </div>
+              </div>
+
+              {/* Is Featured and Year Row */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 bg-orange-50/50 rounded-xl border border-orange-100">
+                <div className="flex items-center gap-3">
+                  <input
+                    type="checkbox"
+                    id="isFeatured"
+                    checked={formData.isFeatured}
+                    onChange={(e) => setFormData({ ...formData, isFeatured: e.target.checked })}
+                    className="w-5 h-5 text-orange-600 bg-white border-gray-300 rounded focus:ring-orange-500"
+                  />
+                  <label htmlFor="isFeatured" className="text-sm font-semibold text-gray-700 cursor-pointer">
+                    Feature on Home Page (Countdown Timer)
+                  </label>
+                </div>
+                <div>
+                   <InputField
+                    label="Year"
+                    placeholder="e.g. 2026"
+                    type="number"
+                    icon={Calendar}
+                    value={formData.year}
+                    onChange={(e) => setFormData({ ...formData, year: e.target.value })}
+                  />
                 </div>
               </div>
 
