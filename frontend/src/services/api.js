@@ -34,6 +34,11 @@ export const eventsPageAPI = {
   getAllEvents: async (params = {}) => {
     return apiClient.get("/events", { params });
   },
+
+  // Get available event years
+  getEventYears: async () => {
+    return apiClient.get("/events/years");
+  },
 };
 
 // Banner API functions
@@ -68,7 +73,7 @@ export const sportsAPI = {
 
   // Get sport with winners (public)
   getSportWithWinners: async (id) => {
-    return apiClient.get(`/sports/${id}/winners`);
+    return apiClient.get(`/sports/${id}`);
   },
 
   // Get available sport years (public)
@@ -77,11 +82,11 @@ export const sportsAPI = {
   },
 };
 
-// Hero Festival API functions
-export const heroFestivalAPI = {
-  // Get active hero festival (public)
-  getHeroFestival: async () => {
-    return apiClient.get("/hero-festival");
+// Hero Section API functions
+export const heroSectionAPI = {
+  // Get active hero section (public)
+  getHeroSection: async () => {
+    return apiClient.get("/hero/active");
   },
 };
 
@@ -114,6 +119,11 @@ export const committeeAPI = {
   getMember: async (id) => {
     return apiClient.get(`/committee/${id}`);
   },
+
+  // Get available years for committee (public)
+  getCommitteeYears: async () => {
+    return apiClient.get("/committee/years");
+  },
 };
 
 // Live Program Categories API functions
@@ -139,6 +149,27 @@ export const donationAPI = {
   // Get leaderboard
   getLeaderboard: async (params = {}) => {
     return apiClient.get("/donations/leaderboard", { params });
+  },
+};
+
+// Subscriber API functions
+export const subscriberAPI = {
+  // Request OTP for subscription
+  subscribe: async (data) => {
+    return apiClient.post("/subscribers/subscribe", data);
+  },
+
+  // Verify OTP and finalize subscription
+  verifyOTP: async (data) => {
+    return apiClient.post("/subscribers/verify", data);
+  },
+};
+
+// Contact API functions
+export const contactAPI = {
+  // Send a new message (Public)
+  sendMessage: async (data) => {
+    return apiClient.post("/contact/send", data);
   },
 };
 

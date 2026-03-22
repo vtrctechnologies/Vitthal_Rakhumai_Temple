@@ -4,7 +4,8 @@ import { Calendar, Heart, MapPin, Info } from "lucide-react";
 import HeroBg12 from "../assets/HeroBg12.jpg";
 import templeMain from "../assets/temple-main.png";
 import { useLanguage } from "../context/LanguageContext";
-import { heroFestivalAPI } from "@/services/api";
+import { heroSectionAPI } from "@/services/api";
+import { getImageUrl } from "@/utils/imageUrl";
 
 import { motion } from "framer-motion";
 
@@ -12,6 +13,7 @@ import { motion } from "framer-motion";
 const BentoGridGallery = lazy(() => import("@/components/BentoGridGallery"));
 const EventsSection = lazy(() => import("@/components/EventsSection"));
 const DonationTicker = lazy(() => import("@/components/DonationTicker"));
+const BannerSection = lazy(() => import("@/components/BannerSection"));
 const StaticCommitteeMembers = lazy(
   () => import("@/components/StaticCommitteeMembers"),
 );
@@ -19,9 +21,17 @@ const StaticCommitteeMembers = lazy(
 const Home = memo(() => {
   const navigate = useNavigate();
   const { isMarathi } = useLanguage();
-  const [festivalTitle, setFestivalTitle] = useState({
-    title: "Next Festival: Kartiki Ekadashi",
-    titleMarathi: "पुढील उत्सव: कार्तिकी एकादशी",
+  const [heroData, setHeroData] = useState({
+    mainTitle: "Shree Vitthal",
+    mainTitleMarathi: "श्री विठ्ठल",
+    accentTitle: "Rakhumai Temple",
+    accentTitleMarathi: "रखुमाई मंदिर",
+    subTitle: "Experience divine grace in the heart of Amberkarwadi. A sacred sanctuary of devotion, peace, and unity for all devotees.",
+    subTitleMarathi: "आंबेकरवाडीच्या हृदयात दैवी कृपेचा अनुभव घ्या. सर्व भक्तांसाठी भक्ती, शांती आणि एकतेचे पवित्र स्थान.",
+    festivalTitle: "Next Festival: Kartiki Ekadashi",
+    festivalTitleMarathi: "पुढील उत्सव: कार्तिकी एकादशी",
+    backgroundUrl: HeroBg12,
+    resourceType: "image"
   });
 
   const handleDonateClick = useCallback(() => {
@@ -32,24 +42,41 @@ const Home = memo(() => {
     navigate("/events");
   }, [navigate]);
 
-  // Fetch hero festival title
+  // Fetch hero section data
   useEffect(() => {
-    const fetchFestivalTitle = async () => {
+    const fetchHeroData = async () => {
       try {
-        const response = await heroFestivalAPI.getHeroFestival();
+        const response = await heroSectionAPI.getHeroSection();
         if (response && response.status === "success" && response.data) {
-          setFestivalTitle({
-            title: response.data.title || "Next Festival: Kartiki Ekadashi",
-            titleMarathi:
-              response.data.titleMarathi || "पुढील उत्सव: कार्तिकी एकादशी",
+          setHeroData({
+            mainTitle: response.data.mainTitle || "Shree Vitthal",
+            mainTitleMarathi: response.data.mainTitleMarathi || "श्री विठ्ठल",
+            accentTitle: response.data.accentTitle || "Rakhumai Temple",
+            accentTitleMarathi: response.data.accentTitleMarathi || "रखुमाई मंदिर",
+            subTitle: response.data.subTitle || "Experience divine grace in the heart of Amberkarwadi. A sacred sanctuary of devotion, peace, and unity for all devotees.",
+            subTitleMarathi: response.data.subTitleMarathi || "आंबेकरवाडीच्या हृदयात दैवी कृपेचा अनुभव घ्या. सर्व भक्तांसाठी भक्ती, शांती आणि एकतेचे पवित्र स्थान.",
+            festivalTitle: response.data.festivalTitle || "Next Festival: Kartiki Ekadashi",
+            festivalTitleMarathi: response.data.festivalTitleMarathi || "पुढील उत्सव: कार्तिकी एकादशी",
+            backgroundUrl: response.data.backgroundUrl || HeroBg12,
+            resourceType: response.data.resourceType || "image"
           });
         }
       } catch (error) {
-        console.error("Error fetching festival title:", error);
+        console.error("Error fetching hero data:", error);
       }
     };
-    fetchFestivalTitle();
+    fetchHeroData();
   }, []);
+
+  // Helper to get background source
+  const getBackgroundSrc = (url) => {
+    if (!url) return HeroBg12;
+    // If it's the static import or a relative frontend path, return as is
+    if (url === HeroBg12 || url.startsWith('/src/') || url.startsWith('data:')) {
+      return url;
+    }
+    return getImageUrl(url);
+  };
 
   return (
     <div className="min-h-screen w-full overflow-x-hidden bg-slate-50">
@@ -57,14 +84,24 @@ const Home = memo(() => {
       <header className="relative flex min-h-[90vh] w-full items-center justify-center overflow-hidden py-32 lg:py-44">
         {/* Optimized Background Image Layer */}
         <div className="absolute inset-0 z-0">
-          <img
-            src={HeroBg12}
-            alt="Temple Background"
-            className="h-full w-full object-cover object-center"
-            fetchpriority="high"
-            decoding="async"
-            loading="eager"
-          />
+          {heroData.resourceType === 'video' ? (
+            <video
+              src={getBackgroundSrc(heroData.backgroundUrl)}
+              autoPlay
+              muted
+              loop
+              className="h-full w-full object-cover object-center"
+            />
+          ) : (
+            <img
+              src={getImageUrl(heroData.backgroundUrl)}
+              alt="Temple Background"
+              className="h-full w-full object-cover object-center"
+              fetchpriority="high"
+              decoding="async"
+              loading="eager"
+            />
+          )}
           {/* Gradient Overlay - Reduced opacity for performance */}
           <div className="absolute inset-0 bg-gradient-to-b from-slate-900/60 via-slate-900/40 to-slate-900/90" />
 
@@ -85,7 +122,7 @@ const Home = memo(() => {
             transition={{ duration: 0.6 }}
           >
             <span className="flex h-2 w-2 rounded-full bg-orange-500 animate-pulse" />
-            {isMarathi ? festivalTitle.titleMarathi : festivalTitle.title}
+            {isMarathi ? heroData.festivalTitleMarathi : heroData.festivalTitle}
           </motion.div>
 
           <motion.div
@@ -94,21 +131,12 @@ const Home = memo(() => {
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.1 }}
           >
-            {isMarathi ? (
-              <h1 className="font-marathiTitle text-5xl font-bold leading-tight text-white drop-shadow-2xl md:text-7xl lg:py-6 lg:text-9xl">
-                {isMarathi ? "श्री विठ्ठल" : "Shree Vitthal"}
-                <span className="ml-4 bg-gradient-to-r from-orange-200 to-amber-500 bg-clip-text py-6 text-transparent">
-                  {isMarathi ? "रखुमाई मंदिर" : "Rakhumai Temple"}
-                </span>
-              </h1>
-            ) : (
-              <h1 className="text-5xl font-bold leading-tight text-white drop-shadow-2xl md:text-7xl lg:text-8xl">
-                {isMarathi ? "श्री विठ्ठल" : "Shree Vitthal"} <br />
-                <span className="bg-gradient-to-r from-orange-200 to-amber-500 bg-clip-text text-transparent">
-                  {isMarathi ? "रखुमाई मंदिर" : "Rakhumai Temple"}
-                </span>
-              </h1>
-            )}
+            <h1 className="text-5xl font-bold leading-tight text-white drop-shadow-2xl md:text-7xl lg:text-8xl">
+              {isMarathi ? heroData.mainTitleMarathi : heroData.mainTitle} <br />
+              <span className="bg-gradient-to-r from-orange-200 to-amber-500 bg-clip-text text-transparent">
+                {isMarathi ? heroData.accentTitleMarathi : heroData.accentTitle}
+              </span>
+            </h1>
           </motion.div>
 
           <motion.p
@@ -118,9 +146,7 @@ const Home = memo(() => {
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.2 }}
           >
-            {isMarathi
-              ? "आंबेकरवाडीच्या हृदयात दैवी कृपेचा अनुभव घ्या. सर्व भक्तांसाठी भक्ती, शांती आणि एकतेचे पवित्र स्थान."
-              : "Experience divine grace in the heart of Amberkarwadi. A sacred sanctuary of devotion, peace, and unity for all devotees."}
+            {isMarathi ? heroData.subTitleMarathi : heroData.subTitle}
           </motion.p>
 
           <motion.div
@@ -308,6 +334,11 @@ const Home = memo(() => {
           <StaticCommitteeMembers />
         </Suspense>
       </motion.section>
+
+      {/* Banner Section */}
+      <Suspense fallback={<div className="h-64 bg-stone-50" />}>
+        <BannerSection />
+      </Suspense>
 
       {/* Gallery Section */}
       <motion.section

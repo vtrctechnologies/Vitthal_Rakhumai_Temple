@@ -9,18 +9,39 @@ const Committee = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState("register");
+  const [activeYear, setActiveYear] = useState(new Date().getFullYear());
+  const [availableYears, setAvailableYears] = useState([]);
 
+  // Fetch available years on mount
+  useEffect(() => {
+    const fetchYears = async () => {
+      try {
+        const response = await committeeAPI.getCommitteeYears();
+        if (response?.status === "success" && Array.isArray(response.data)) {
+          setAvailableYears(response.data);
+          if (response.data.length > 0 && !response.data.includes(activeYear)) {
+            setActiveYear(response.data[0]);
+          }
+        }
+      } catch (err) {
+        console.error("Error fetching committee years:", err);
+      }
+    };
+    fetchYears();
+  }, []);
+
+  // Fetch members when year changes
   useEffect(() => {
     const fetchMembers = async () => {
       try {
         setLoading(true);
         setError(null);
 
-        // Fetch all three committees in parallel
+        // Fetch all three committees for the selected year in parallel
         const [registerRes, utsavRes, mahilaRes] = await Promise.all([
-          committeeAPI.getMembers({ committeeType: "register" }),
-          committeeAPI.getMembers({ committeeType: "utsav" }),
-          committeeAPI.getMembers({ committeeType: "mahila" }),
+          committeeAPI.getMembers({ committeeType: "register", year: activeYear }),
+          committeeAPI.getMembers({ committeeType: "utsav", year: activeYear }),
+          committeeAPI.getMembers({ committeeType: "mahila", year: activeYear }),
         ]);
 
         // Helper to extract members array from response
@@ -51,7 +72,7 @@ const Committee = () => {
     };
 
     fetchMembers();
-  }, []);
+  }, [activeYear]);
 
   const getImageUrl = (imageUrl) => {
     if (!imageUrl) return null;
@@ -157,6 +178,32 @@ const Committee = () => {
               `}
             >
               {committee.title}
+            </button>
+          ))}
+        </motion.div>
+
+        {/* Year Filter */}
+        <motion.div
+          className="flex flex-wrap justify-center gap-2 mb-12"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6, delay: 0.1 }}
+        >
+          {availableYears.map((year) => (
+            <button
+              key={year}
+              onClick={() => setActiveYear(year)}
+              className={`
+                px-4 py-1.5 rounded-lg text-xs font-bold tracking-widest transition-all duration-300
+                ${
+                  activeYear === year
+                    ? "bg-orange-500 text-white shadow-md shadow-orange-200"
+                    : "bg-white text-gray-500 hover:text-orange-600 border border-gray-100"
+                }
+              `}
+            >
+              YEAR {year}
             </button>
           ))}
         </motion.div>

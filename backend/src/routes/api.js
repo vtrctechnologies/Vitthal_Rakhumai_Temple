@@ -1,41 +1,31 @@
 import express from 'express';
-import { Gallery } from '../models/galleryModel.js';
-import { Event } from '../models/eventModel.js';
-import { Committee } from '../models/committeeModel.js';
 
-import apiRouter from '../modules/auth/auth.routes.js';
+import authRoutes from '../modules/auth/auth.routes.js';
+import bannerRoutes from '../modules/banner/banner.routes.js';
+import galleryRoutes from '../modules/gallery/gallery.routes.js';
+import committeeRoutes from '../modules/committee/committee.routes.js';
+import eventsRoutes from '../modules/events/events.routes.js';
+import sportsRoutes from '../modules/sports/sports.routes.js';
+import liveProgramsRoutes from '../modules/livePrograms/live.routes.js';
+import heroRoutes from '../modules/hero/hero.routes.js';
+import subscriberRoutes from '../modules/subscriber/subscriber.routes.js';
+import contactRoutes from '../modules/contact/contact.routes.js';
+import notificationRoutes from '../modules/notification/notification.routes.js';
 
 const router = express.Router();
 
-router.use('/auth', apiRouter);
+router.use('/auth', authRoutes);
+router.use('/banners', bannerRoutes);
+router.use('/gallery', galleryRoutes);
+router.use('/committee', committeeRoutes);
+router.use('/events', eventsRoutes);
+router.use('/sports', sportsRoutes);
+router.use('/live-programs', liveProgramsRoutes);
+router.use('/hero', heroRoutes);
+router.use('/subscribers', subscriberRoutes);
+router.use('/contact', contactRoutes);
+router.use('/notifications', notificationRoutes);
 
 router.get('/health', (req, res) => res.json({ status: 'ok' }));
-
-router.get('/gallery', async (req, res) => {
-  try {
-    const items = await Gallery.find().limit(100);
-    res.json(items);
-  } catch (err) {
-    res.status(500).json({ error: 'Failed to fetch gallery' });
-  }
-});
-
-router.get('/events', async (req, res) => {
-  try {
-    const items = await Event.find().sort({ date: -1 }).limit(100);
-    res.json(items);
-  } catch (err) {
-    res.status(500).json({ error: 'Failed to fetch events' });
-  }
-});
-
-router.get('/committee', async (req, res) => {
-  try {
-    const items = await Committee.find().limit(100);
-    res.json(items);
-  } catch (err) {
-    res.status(500).json({ error: 'Failed to fetch committee' });
-  }
-});
 
 export default router;

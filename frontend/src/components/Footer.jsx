@@ -12,9 +12,13 @@ import {
 } from "lucide-react";
 import { useLanguage } from "../context/LanguageContext";
 
+import { useState } from "react";
+import SubscriptionModal from "./SubscriptionModal";
+
 const Footer = () => {
   const { isMarathi } = useLanguage();
   const currentYear = new Date().getFullYear();
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const quickLinks = [
     { name: "Home", marathiName: "मुख्यपान", path: "/" },
@@ -146,24 +150,29 @@ const Footer = () => {
                 : "Subscribe to our newsletter for daily darshan updates and upcoming events."}
             </p>
 
-            {/* Newsletter Form */}
-            <form
-              className="flex gap-2 mb-8"
-              onSubmit={(e) => e.preventDefault()}
-            >
-              <input
-                type="email"
-                placeholder={isMarathi ? "ईमेल पत्ता" : "Email address"}
-                className="flex-1 bg-background/50 border border-primary/20 rounded-lg px-3 py-2 text-white placeholder:text-white/80 text-sm focus:outline-none focus:border-primary transition-colors"
-              />
+            {/* Newsletter Button */}
+            <div className="mb-8">
               <button
                 type="button"
-                className="bg-primary text-primary-foreground p-2 rounded-lg hover:bg-primary/90 transition-colors"
-                aria-label="Subscribe"
+                onClick={() => setIsModalOpen(true)}
+                className="w-full flex items-center justify-between gap-3 bg-primary/10 border border-primary/20 rounded-xl px-4 py-3 text-white hover:bg-primary/20 transition-all group"
               >
-                <Send className="w-4 h-4" />
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-primary/20 rounded-lg group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
+                    <Send className="w-4 h-4" />
+                  </div>
+                  <span className="text-sm font-medium">
+                    {isMarathi ? "आता सबस्क्राईब करा" : "Subscribe Now"}
+                  </span>
+                </div>
+                <ArrowRight className="w-4 h-4 text-primary group-hover:translate-x-1 transition-transform" />
               </button>
-            </form>
+            </div>
+
+            <SubscriptionModal 
+              isOpen={isModalOpen} 
+              onClose={() => setIsModalOpen(false)} 
+            />
 
             {/* Social Icons */}
             <div className="flex space-x-4">

@@ -1,16 +1,17 @@
-import React from "react";
-import { Layout, IndianRupee, Calendar, User, Lock, Bell, Image, Timer, FileImage, Trophy, Sparkles, Video } from "lucide-react";
+import { Layout, IndianRupee, Calendar, User, Lock, Bell, Image, Timer, FileImage, Trophy, Sparkles, Video, Users, MessageSquare } from "lucide-react";
 
 const Sidebar = ({ isOpen, toggleSidebar, activeTab, setActiveTab }) => {
   const menuItems = [
     { id: "dashboard", label: "Dashboard", icon: Layout },
-    { id: "hero-festival", label: "Hero Festival", icon: Sparkles },
+    { id: "hero-section", label: "Hero Section", icon: Sparkles },
     { id: "donations", label: "Donations", icon: IndianRupee },
     { id: "events", label: "Events", icon: Calendar },
     { id: "events-page", label: "Events Page", icon: Timer },
     { id: "banners", label: "Banners", icon: FileImage },
     { id: "sports", label: "Sports", icon: Trophy },
     { id: "live-programs", label: "Live Programs", icon: Video },
+    { id: "subscribers", label: "Subscribers", icon: Users },
+    { id: "messages", label: "Messages", icon: MessageSquare },
     { id: "members", label: "Members", icon: User },
     { id: "gallery", label: "Gallery", icon: Image },
     { id: "notifications", label: "Notifications", icon: Bell },
@@ -45,11 +46,10 @@ const Sidebar = ({ isOpen, toggleSidebar, activeTab, setActiveTab }) => {
                 setActiveTab(item.id);
                 if (window.innerWidth < 768) toggleSidebar();
               }}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
-                activeTab === item.id
-                  ? "bg-orange-50 text-orange-700 border-r-4 border-orange-600"
-                  : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-              }`}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${activeTab === item.id
+                ? "bg-orange-50 text-orange-700 border-r-4 border-orange-600"
+                : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                }`}
             >
               <item.icon size={20} />
               {item.label}

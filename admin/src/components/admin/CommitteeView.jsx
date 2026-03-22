@@ -25,13 +25,16 @@ const CommitteeView = () => {
   const [message, setMessage] = useState({ type: "", text: "" });
   const [imagePreview, setImagePreview] = useState(null);
   const [deleteId, setDeleteId] = useState(null);
-  const [filterType, setFilterType] = useState("all"); // "all", "register", "utsav", "mahila"
   const [showInactive, setShowInactive] = useState(false);
+  const [availableYears, setAvailableYears] = useState([new Date().getFullYear()]);
+  const [filterYear, setFilterYear] = useState(new Date().getFullYear());
 
   const [formData, setFormData] = useState({
     name: "",
     role: "",
     committeeType: "register",
+    year: new Date().getFullYear(),
+    position: "",
     order: 0,
     image: null,
     isActive: true,
@@ -40,14 +43,40 @@ const CommitteeView = () => {
   const [errors, setErrors] = useState({});
 
   useEffect(() => {
-    fetchMembers();
+    fetchInitialData();
   }, []);
+
+  useEffect(() => {
+    fetchMembers();
+  }, [filterYear]);
+
+  const fetchInitialData = async () => {
+    await fetchYears();
+    await fetchMembers();
+  };
+
+  const fetchYears = async () => {
+    try {
+      const response = await committeeAPI.getCommitteeYears();
+      if (response && response.status === "success" && Array.isArray(response.data)) {
+        if (response.data.length > 0) {
+          setAvailableYears(response.data);
+          // Set filter year to latest available if current year not in list
+          if (!response.data.includes(filterYear)) {
+            setFilterYear(response.data[0]);
+          }
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching committee years:", error);
+    }
+  };
 
   const fetchMembers = async () => {
     setFetching(true);
     try {
       // Fetch all members (including inactive) for admin panel
-      const response = await committeeAPI.getMembers();
+      const response = await committeeAPI.getMembersAdmin({ year: filterYear });
       if (response && response.status === "success") {
         const membersData = Array.isArray(response.data) ? response.data : [];
         setMembers(membersData);
@@ -111,6 +140,8 @@ const CommitteeView = () => {
       formDataToSend.append("name", formData.name);
       formDataToSend.append("role", formData.role);
       formDataToSend.append("committeeType", formData.committeeType);
+      formDataToSend.append("year", formData.year.toString());
+      formDataToSend.append("position", formData.position || "");
       formDataToSend.append("order", formData.order.toString());
       formDataToSend.append("isActive", formData.isActive.toString());
       if (formData.image) {
@@ -150,6 +181,8 @@ const CommitteeView = () => {
       name: member.name || "",
       role: member.role || "",
       committeeType: member.committeeType || "register",
+      year: member.year || new Date().getFullYear(),
+      position: member.position || "",
       order: member.order || 0,
       image: null,
       isActive: member.isActive !== undefined ? member.isActive : true,
@@ -190,6 +223,8 @@ const CommitteeView = () => {
       name: "",
       role: "",
       committeeType: "register",
+      year: new Date().getFullYear(),
+      position: "",
       order: 0,
       image: null,
       isActive: true,
@@ -208,11 +243,6 @@ const CommitteeView = () => {
       // Filter by active status
       if (!showInactive && !m.isActive) return false;
       return true;
-    })
-    .sort((a, b) => {
-      // Sort by order first, then by name
-      if (a.order !== b.order) return a.order - b.order;
-      return a.name.localeCompare(b.name);
     });
 
   return (
@@ -283,6 +313,28 @@ const CommitteeView = () => {
           <label htmlFor="showInactive" className="text-sm text-gray-700 cursor-pointer">
             Show inactive members
           </label>
+        </div>
+        <div className="flex items-center gap-4">
+          <label className="text-sm font-medium text-gray-700">Filter by Year:</label>
+          <select
+            value={filterYear}
+            onChange={(e) => {
+              setFilterYear(parseInt(e.target.value));
+              // fetchMembers will be triggered by useEffect or manual call
+            }}
+            className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:ring-blue-500 focus:border-blue-500 outline-none"
+          >
+            {availableYears.map(year => (
+              <option key={year} value={year}>{year}</option>
+            ))}
+          </select>
+          <Button 
+            onClick={fetchMembers} 
+            variant="outline" 
+            className="!w-auto py-1 px-3 text-xs"
+          >
+            Refresh
+          </Button>
         </div>
       </div>
 
@@ -375,6 +427,37 @@ const CommitteeView = () => {
                   {errors.committeeType && (
                     <p className="text-red-500 text-sm mt-1 ml-1">{errors.committeeType}</p>
                   )}
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1 ml-1">
+                      Position (Optional)
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.position}
+                      onChange={(e) =>
+                        setFormData({ ...formData, position: e.target.value })
+                      }
+                      className="w-full px-3 py-2 border-2 border-gray-200 rounded-lg bg-gray-50 focus:bg-white focus:border-orange-500 outline-none text-gray-800"
+                      placeholder="e.g. President"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1 ml-1">
+                      Year *
+                    </label>
+                    <input
+                      type="number"
+                      value={formData.year}
+                      onChange={(e) =>
+                        setFormData({ ...formData, year: parseInt(e.target.value) || new Date().getFullYear() })
+                      }
+                      className="w-full px-3 py-2 border-2 border-gray-200 rounded-lg bg-gray-50 focus:bg-white focus:border-orange-500 outline-none text-gray-800"
+                      required
+                    />
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">

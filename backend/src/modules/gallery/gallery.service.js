@@ -1,4 +1,4 @@
 // Gallery service placeholder
-module.exports = {
+export default {
   findAll: async () => []
 };

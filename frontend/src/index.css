@@ -172,6 +172,71 @@
   border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
+/* Modal Classes */
+.base-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 1rem;
+}
+
+.base-modal-content {
+  background-color: white;
+  border-radius: var(--radius-lg);
+  width: 100%;
+  max-width: 32rem;
+  max-height: 90vh;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  border: 2px solid var(--color-primary);
+  overflow: hidden;
+  animation: modalScaleIn 0.3s ease-out forwards;
+}
+
+@keyframes modalScaleIn {
+  0% { transform: scale(0.95); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.base-modal-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  color: #9ca3af;
+  cursor: pointer;
+  transition: color 0.2s;
+  z-index: 10;
+}
+
+.base-modal-close:hover {
+  color: var(--color-secondary);
+}
+
+.base-modal-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1.5rem;
+}
+
+/* Custom Scrollbar for Modal Body */
+.base-modal-body::-webkit-scrollbar {
+  width: 6px;
+}
+.base-modal-body::-webkit-scrollbar-track {
+  background: transparent;
+}
+.base-modal-body::-webkit-scrollbar-thumb {
+  background: var(--color-primary);
+  border-radius: 10px;
+}
+
 /* Fonts */
 @font-face {
   font-family: "CustomFont";

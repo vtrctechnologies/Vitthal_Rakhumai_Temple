@@ -29,12 +29,15 @@ const GalleryView = () => {
   const [deleteImageId, setDeleteImageId] = useState(null);
   const [deleteCategoryId, setDeleteCategoryId] = useState(null);
   const [filterCategory, setFilterCategory] = useState("all");
+  const [filterYear, setFilterYear] = useState("all");
   const [showInactive, setShowInactive] = useState(false);
+  const [availableYears, setAvailableYears] = useState([]);
   const [activeTab, setActiveTab] = useState("images"); // "images" or "categories"
 
   const [imageFormData, setImageFormData] = useState({
     title: "",
     category: "",
+    year: new Date().getFullYear(),
     order: 0,
     image: null,
     isActive: true,
@@ -61,6 +64,10 @@ const GalleryView = () => {
       if (response && response.status === "success") {
         const imagesData = Array.isArray(response.data) ? response.data : [];
         setImages(imagesData);
+        
+        // Extract available years
+        const years = [...new Set(imagesData.map(img => img.year))].filter(Boolean).sort((a, b) => b - a);
+        setAvailableYears(years);
       } else {
         setImages([]);
       }
@@ -116,15 +123,20 @@ const GalleryView = () => {
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      if (file.size > 5 * 1024 * 1024) {
-        setErrors({ ...errors, image: "Image size must be less than 5MB." });
+      const isVideo = file.type.startsWith('video/');
+      const maxSize = isVideo ? 50 * 1024 * 1024 : 5 * 1024 * 1024;
+      
+      if (file.size > maxSize) {
+        setErrors({ ...errors, image: `File size must be less than ${isVideo ? '50MB' : '5MB'}.` });
         return;
       }
+      
       const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/gif", "image/webp", "video/mp4", "video/quicktime", "video/x-msvideo", "video/x-matroska", "video/webm"];
       if (!allowedTypes.includes(file.type)) {
         setErrors({ ...errors, image: "Only common image and video formats are allowed." });
         return;
       }
+      
       setImageFormData({ ...imageFormData, image: file });
       
       if (file.type.startsWith("image/")) {
@@ -134,8 +146,10 @@ const GalleryView = () => {
         };
         reader.readAsDataURL(file);
       } else {
-        // For video, we can't easily preview with FileReader for large files, 
-        // but we can create an object URL for preview.
+        // Create an object URL for video preview
+        if (imagePreview && imagePreview.startsWith('blob:')) {
+          URL.revokeObjectURL(imagePreview);
+        }
         setImagePreview(URL.createObjectURL(file));
       }
       setErrors({ ...errors, image: "" });
@@ -153,6 +167,7 @@ const GalleryView = () => {
       const formDataToSend = new FormData();
       formDataToSend.append("title", imageFormData.title);
       formDataToSend.append("category", imageFormData.category);
+      formDataToSend.append("year", imageFormData.year.toString());
       formDataToSend.append("order", imageFormData.order.toString());
       formDataToSend.append("isActive", imageFormData.isActive.toString());
       if (imageFormData.image) {
@@ -224,6 +239,7 @@ const GalleryView = () => {
     setImageFormData({
       title: image.title || "",
       category: image.category?._id || image.category || "",
+      year: image.year || new Date().getFullYear(),
       order: image.order || 0,
       image: null,
       isActive: image.isActive !== undefined ? image.isActive : true,
@@ -326,7 +342,8 @@ const GalleryView = () => {
 
   const filteredImages = images
     .filter((img) => {
-      if (filterCategory !== "all" && img.category?._id !== filterCategory) return false;
+      if (filterCategory !== "all" && img.category?._id !== filterCategory && img.category !== filterCategory) return false;
+      if (filterYear !== "all" && img.year?.toString() !== filterYear) return false;
       if (!showInactive && !img.isActive) return false;
       return true;
     })
@@ -415,6 +432,21 @@ const GalleryView = () => {
                   </option>
                 ))}
             </select>
+
+            <label className="text-sm font-medium text-gray-700 ml-4">Year:</label>
+            <select
+              value={filterYear}
+              onChange={(e) => setFilterYear(e.target.value)}
+              className="px-3 py-2 border-2 border-gray-200 rounded-lg bg-white focus:border-blue-500 outline-none text-sm"
+            >
+              <option value="all">All Years</option>
+              {availableYears.map((year) => (
+                <option key={year} value={year.toString()}>
+                  {year}
+                </option>
+              ))}
+            </select>
+
             <div className="flex items-center gap-2 ml-4">
               <input
                 type="checkbox"
@@ -512,10 +544,29 @@ const GalleryView = () => {
                   )}
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-3 gap-4">
                   <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-1 ml-1">
-                      Order (for sorting)
+                      Year *
+                    </label>
+                    <input
+                      type="number"
+                      min="2000"
+                      max="2100"
+                      value={imageFormData.year}
+                      onChange={(e) =>
+                        setImageFormData({
+                          ...imageFormData,
+                          year: parseInt(e.target.value) || new Date().getFullYear(),
+                        })
+                      }
+                      className="w-full px-3 py-2 border-2 border-gray-200 rounded-lg bg-gray-50 focus:bg-white focus:border-orange-500 outline-none text-gray-800"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1 ml-1">
+                      Order
                     </label>
                     <input
                       type="number"
@@ -530,30 +581,24 @@ const GalleryView = () => {
                       className="w-full px-3 py-2 border-2 border-gray-200 rounded-lg bg-gray-50 focus:bg-white focus:border-orange-500 outline-none text-gray-800"
                       placeholder="0"
                     />
-                    <p className="text-xs text-gray-500 mt-1 ml-1">Lower numbers appear first</p>
                   </div>
                   <div className="flex items-end">
-                    <div className="w-full">
-                      <label className="block text-sm font-semibold text-gray-700 mb-1 ml-1">
-                        Status
+                    <div className="flex items-center gap-2 mb-3">
+                      <input
+                        type="checkbox"
+                        id="isActiveImage"
+                        checked={imageFormData.isActive}
+                        onChange={(e) =>
+                          setImageFormData({ ...imageFormData, isActive: e.target.checked })
+                        }
+                        className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                      />
+                      <label
+                        htmlFor="isActiveImage"
+                        className="text-sm text-gray-700 cursor-pointer"
+                      >
+                        Active
                       </label>
-                      <div className="flex items-center gap-2 mt-2">
-                        <input
-                          type="checkbox"
-                          id="isActiveImage"
-                          checked={imageFormData.isActive}
-                          onChange={(e) =>
-                            setImageFormData({ ...imageFormData, isActive: e.target.checked })
-                          }
-                          className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                        />
-                        <label
-                          htmlFor="isActiveImage"
-                          className="text-sm text-gray-700 cursor-pointer"
-                        >
-                          Active Image
-                        </label>
-                      </div>
                     </div>
                   </div>
                 </div>

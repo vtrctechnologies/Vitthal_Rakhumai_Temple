@@ -8,6 +8,8 @@ const Gallery = () => {
   const [images, setImages] = useState([]);
   const [categories, setCategories] = useState([]);
   const [activeCategory, setActiveCategory] = useState("all");
+  const [activeYear, setActiveYear] = useState(new Date().getFullYear());
+  const [availableYears, setAvailableYears] = useState([]);
   const [selectedImageIndex, setSelectedImageIndex] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -38,7 +40,15 @@ const Gallery = () => {
         }
 
         if (imagesResponse?.status === "success") {
-          setImages(imagesResponse.data || []);
+          const imagesData = imagesResponse.data || [];
+          setImages(imagesData);
+          
+          // Extract available years
+          const years = [...new Set(imagesData.map(img => img.year))].filter(Boolean).sort((a, b) => b - a);
+          setAvailableYears(years);
+          if (years.length > 0 && !years.includes(activeYear)) {
+            setActiveYear(years[0]);
+          }
         }
       } catch (err) {
         console.error("Error fetching gallery data:", err);
@@ -52,15 +62,14 @@ const Gallery = () => {
   }, []);
 
   // Filter images by category
-  const filteredImages =
-    activeCategory === "all"
-      ? images
-      : images.filter(
-          (img) =>
-            img.category?._id === activeCategory ||
-            img.category?.slug === activeCategory ||
-            img.category?.name?.toLowerCase() === activeCategory.toLowerCase()
-        );
+  const filteredImages = images.filter((img) => {
+    const categoryMatch = activeCategory === "all" || 
+                         img.category?._id === activeCategory ||
+                         img.category?.slug === activeCategory ||
+                         img.category?.name?.toLowerCase() === activeCategory.toLowerCase();
+    const yearMatch = img.year === activeYear;
+    return categoryMatch && yearMatch;
+  });
 
   // Navigation handlers
   const handleNext = (e) => {
@@ -172,6 +181,23 @@ const Gallery = () => {
                   }`}
                 >
                   {cat.name}
+                </button>
+              ))}
+            </div>
+
+            {/* Year Filters */}
+            <div className="flex flex-wrap justify-center gap-2 mt-6 animate-fade-in-up delay-100">
+              {availableYears.map((year) => (
+                <button
+                  key={year}
+                  onClick={() => setActiveYear(year)}
+                  className={`px-4 py-1.5 rounded-lg text-xs font-bold tracking-widest uppercase transition-all duration-300 border ${
+                    activeYear === year
+                      ? "bg-white text-stone-900 border-white shadow-lg"
+                      : "bg-transparent border-white/10 text-white/60 hover:text-white hover:border-white/30"
+                  }`}
+                >
+                  {year}
                 </button>
               ))}
             </div>

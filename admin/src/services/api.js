@@ -91,6 +91,16 @@ export const eventsAPI = {
     return apiClient.delete(`/events/${id}`);
   },
 
+  // Get all events for admin (includes inactive)
+  getEventsAdmin: async (params = {}) => {
+    return apiClient.get("/events/admin/all", { params });
+  },
+
+  // Get available years for events
+  getEventYears: async () => {
+    return apiClient.get("/events/years");
+  },
+
   // Featured Event (Countdown Timer) APIs
   getFeaturedEvent: async () => {
     return apiClient.get("/events/featured");
@@ -166,6 +176,16 @@ export const committeeAPI = {
         "Content-Type": "multipart/form-data",
       },
     });
+  },
+
+  // Get all committee members (admin - includes inactive)
+  getMembersAdmin: async (params = {}) => {
+    return apiClient.get("/committee/admin/all", { params });
+  },
+
+  // Get available years for committee
+  getCommitteeYears: async () => {
+    return apiClient.get("/committee/years");
   },
 
   // Delete committee member
@@ -300,7 +320,7 @@ export const sportsAPI = {
 
   // Get sport with winners
   getSportWithWinners: async (id) => {
-    return apiClient.get(`/sports/${id}/winners`);
+    return apiClient.get(`/sports/${id}`);
   },
 
   // Get available sport years
@@ -365,31 +385,39 @@ export const sportsAPI = {
   },
 };
 
-// Hero Festival API functions
-export const heroFestivalAPI = {
-  // Get active hero festival (public)
-  getHeroFestival: async () => {
-    return apiClient.get("/hero-festival");
+// Hero Section API functions
+export const heroSectionAPI = {
+  // Get active hero section
+  getActiveHero: async () => {
+    return apiClient.get("/hero/active");
   },
 
-  // Get all hero festivals (admin)
-  getAllHeroFestivals: async () => {
-    return apiClient.get("/hero-festival/all");
+  // Get all hero sections (admin)
+  getAllHeroes: async () => {
+    return apiClient.get("/hero");
   },
 
-  // Create hero festival
-  createHeroFestival: async (data) => {
-    return apiClient.post("/hero-festival", data);
+  // Create hero section
+  createHero: async (formData) => {
+    return apiClient.post("/hero", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
   },
 
-  // Update hero festival
-  updateHeroFestival: async (id, data) => {
-    return apiClient.put(`/hero-festival/${id}`, data);
+  // Update hero section
+  updateHero: async (id, formData) => {
+    return apiClient.put(`/hero/${id}`, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
   },
 
-  // Delete hero festival
-  deleteHeroFestival: async (id) => {
-    return apiClient.delete(`/hero-festival/${id}`);
+  // Delete hero section
+  deleteHero: async (id) => {
+    return apiClient.delete(`/hero/${id}`);
   },
 };
 
@@ -457,6 +485,45 @@ export const liveProgramsAPI = {
   // Delete category
   deleteCategory: async (id) => {
     return apiClient.delete(`/live-programs/categories/${id}`);
+  },
+};
+
+// Subscriber API functions
+export const subscriberAPI = {
+  // Get all verified subscribers (Admin)
+  getSubscribers: async () => {
+    return apiClient.get("/subscribers");
+  },
+};
+
+// Contact API functions
+export const contactAPI = {
+  // Get all messages (Admin)
+  getMessages: async () => {
+    return apiClient.get("/contact/messages");
+  },
+
+  // Delete a message (Admin)
+  deleteMessage: async (id) => {
+    return apiClient.delete(`/contact/messages/${id}`);
+  },
+};
+
+// Notification API functions
+export const notificationAPI = {
+  // Get all notifications (Admin)
+  getNotifications: async () => {
+    return apiClient.get("/notifications");
+  },
+
+  // Mark notification as read (Admin)
+  markAsRead: async (id) => {
+    return apiClient.patch(`/notifications/${id}/read`);
+  },
+
+  // Clear all notifications (Admin)
+  clearNotifications: async () => {
+    return apiClient.delete("/notifications/clear");
   },
 };
 

@@ -13,7 +13,7 @@ import {
   Calendar,
 } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { eventsAPI } from "../../services/api"; // Adjust path
+import { eventsAPI, notificationAPI } from "../../services/api"; // Adjust path
 import { Button, StatCard } from "../customUi/AdminShared";
 import Sidebar from "./Sidebar";
 import EventsView from "./EventsView";
@@ -23,8 +23,10 @@ import MembersView from "./MembersView";
 import GalleryView from "./GalleryView";
 import BannerView from "./BannerView";
 import SportsView from "./SportsView";
-import HeroFestivalView from "./HeroFestivalView";
+import HeroSectionView from "./HeroSectionView";
 import LiveProgramsView from "./LiveProgramsView";
+import SubscribersView from "./SubscribersView";
+import MessagesView from "./MessagesView";
 
 const DashboardView = ({ user, onLogout }) => {
   const navigate = useNavigate();
@@ -47,6 +49,8 @@ const DashboardView = ({ user, onLogout }) => {
       "banners",
       "sports",
       "live-programs",
+      "subscribers",
+      "messages",
       "notifications",
       "settings",
     ];
@@ -55,22 +59,7 @@ const DashboardView = ({ user, onLogout }) => {
   
   const [timeRange, setTimeRange] = useState("12h"); // State for graph time range
   const [events, setEvents] = useState([]);
-
-  const [notifications, setNotifications] = useState([
-    {
-      id: 1,
-      text: "New donation received: ₹501",
-      time: "2 mins ago",
-      read: false,
-    },
-    {
-      id: 2,
-      text: "Evening Aarti scheduled for 7 PM",
-      time: "1 hour ago",
-      read: false,
-    },
-    { id: 3, text: "Staff meeting at 4 PM", time: "3 hours ago", read: true },
-  ]);
+  const [notifications, setNotifications] = useState([]);
 
   // Graph Data Configuration
   const graphData = {
@@ -117,20 +106,22 @@ const DashboardView = ({ user, onLogout }) => {
     fetchEvents();
   }, []);
 
-  // Simulate receiving a notification
+  // Fetch notifications
+  const fetchNotifications = async () => {
+    try {
+      const response = await notificationAPI.getNotifications();
+      if (response && response.status === "success") {
+        setNotifications(Array.isArray(response.data) ? response.data : []);
+      }
+    } catch (error) {
+      console.error("Error fetching notifications:", error);
+    }
+  };
+
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setNotifications((prev) => [
-        {
-          id: Date.now(),
-          text: "VIP Darshan request pending",
-          time: "Just now",
-          read: false,
-        },
-        ...prev,
-      ]);
-    }, 5000);
-    return () => clearTimeout(timer);
+    fetchNotifications();
+    const interval = setInterval(fetchNotifications, 30000); // Pulse every 30s
+    return () => clearInterval(interval);
   }, []);
 
   // Sync state with URL when activeTab changes
@@ -157,6 +148,8 @@ const DashboardView = ({ user, onLogout }) => {
       "banners",
       "sports",
       "live-programs",
+      "subscribers",
+      "messages",
       "notifications",
       "settings",
     ];
@@ -167,15 +160,37 @@ const DashboardView = ({ user, onLogout }) => {
     }
   }, [location.pathname]);
 
-  const unreadCount = notifications.filter((n) => !n.read).length;
+  const unreadCount = notifications.filter((n) => !n.isRead).length;
 
-  const markAllAsRead = () => {
-    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+  const markAsRead = async (id, e) => {
+    if (e) e.stopPropagation();
+    try {
+      await notificationAPI.markAsRead(id);
+      setNotifications((prev) =>
+        prev.map((n) => (n._id === id ? { ...n, isRead: true } : n))
+      );
+    } catch (error) {
+      console.error("Error marking as read:", error);
+    }
   };
 
-  const removeNotification = (id, e) => {
-    e.stopPropagation();
-    setNotifications((prev) => prev.filter((n) => n.id !== id));
+  const markAllAsRead = async () => {
+    try {
+      // For now, we'll mark them locally as read and we could call an API to mark all as read if it exists
+      setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
+    } catch (error) {
+      console.error("Error marking all read:", error);
+    }
+  };
+
+  const clearAllNotifications = async () => {
+    try {
+      await notificationAPI.clearNotifications();
+      setNotifications([]);
+      setShowNotifications(false);
+    } catch (error) {
+      console.error("Error clearing notifications:", error);
+    }
   };
 
   return (
@@ -220,12 +235,20 @@ const DashboardView = ({ user, onLogout }) => {
                           {unreadCount} unread messages
                         </p>
                       </div>
-                      {unreadCount > 0 && (
+                          {unreadCount > 0 && (
                         <button
                           onClick={markAllAsRead}
                           className="text-xs text-orange-600 hover:text-orange-700 font-semibold flex items-center gap-1"
                         >
                           <Check size={12} /> Mark all read
+                        </button>
+                      )}
+                      {notifications.length > 0 && (
+                        <button
+                          onClick={clearAllNotifications}
+                          className="text-xs text-gray-400 hover:text-red-500 font-semibold"
+                        >
+                          Clear all
                         </button>
                       )}
                     </div>
@@ -239,18 +262,14 @@ const DashboardView = ({ user, onLogout }) => {
                       ) : (
                         notifications.map((n) => (
                           <div
-                            key={n.id}
+                            key={n._id}
                             onClick={() => {
-                              setNotifications((prev) =>
-                                prev.map((item) =>
-                                  item.id === n.id
-                                    ? { ...item, read: true }
-                                    : item
-                                )
-                              );
+                              if (!n.isRead) markAsRead(n._id);
+                              if (n.link) handleTabChange(n.link.split("/").pop());
+                              setShowNotifications(false);
                             }}
                             className={`px-4 py-3 border-b border-gray-50 last:border-0 cursor-pointer transition-colors relative group ${
-                              n.read
+                              n.isRead
                                 ? "bg-white hover:bg-gray-50"
                                 : "bg-orange-50/30 hover:bg-orange-50/60"
                             }`}
@@ -258,13 +277,13 @@ const DashboardView = ({ user, onLogout }) => {
                             <div className="flex gap-3">
                               <div
                                 className={`mt-1.5 w-2 h-2 rounded-full flex-shrink-0 ${
-                                  n.read ? "bg-gray-200" : "bg-orange-500"
+                                  n.isRead ? "bg-gray-200" : "bg-orange-500"
                                 }`}
                               />
                               <div className="flex-1 pr-4">
                                 <p
                                   className={`text-sm ${
-                                    n.read
+                                    n.isRead
                                       ? "text-gray-600"
                                       : "text-gray-800 font-semibold"
                                   }`}
@@ -272,15 +291,9 @@ const DashboardView = ({ user, onLogout }) => {
                                   {n.text}
                                 </p>
                                 <p className="text-xs text-gray-400 mt-1 font-medium">
-                                  {n.time}
+                                  {new Date(n.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                 </p>
                               </div>
-                              <button
-                                onClick={(e) => removeNotification(n.id, e)}
-                                className="absolute right-2 top-2 p-1 text-gray-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all rounded-full hover:bg-gray-100"
-                              >
-                                <X size={14} />
-                              </button>
                             </div>
                           </div>
                         ))
@@ -438,8 +451,8 @@ const DashboardView = ({ user, onLogout }) => {
                 </div>
               </div>
             </div>
-          ) : activeTab === "hero-festival" ? (
-            <HeroFestivalView />
+          ) : activeTab === "hero-section" ? (
+            <HeroSectionView />
           ) : activeTab === "events" ? (
             <EventsView />
           ) : activeTab === "events-page" ? (
@@ -454,6 +467,10 @@ const DashboardView = ({ user, onLogout }) => {
             <SportsView />
           ) : activeTab === "live-programs" ? (
             <LiveProgramsView />
+          ) : activeTab === "subscribers" ? (
+            <SubscribersView />
+          ) : activeTab === "messages" ? (
+            <MessagesView />
           ) : activeTab === "settings" ? (
             <SettingsView user={user} />
           ) : (
