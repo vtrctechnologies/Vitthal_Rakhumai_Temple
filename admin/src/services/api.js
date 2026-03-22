@@ -527,4 +527,40 @@ export const notificationAPI = {
   },
 };
 
+// Guest API functions
+export const guestAPI = {
+  // Get all guests (public)
+  getGuests: async (params = {}) => {
+    return apiClient.get("/guests", { params });
+  },
+
+  // Get all guests (admin)
+  getGuestsAdmin: async (params = {}) => {
+    return apiClient.get("/guests/admin/all", { params });
+  },
+
+  // Create guest
+  createGuest: async (formData) => {
+    return apiClient.post("/guests", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+  },
+
+  // Update guest
+  updateGuest: async (id, formData) => {
+    return apiClient.put(`/guests/${id}`, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+  },
+
+  // Delete guest
+  deleteGuest: async (id) => {
+    return apiClient.delete(`/guests/${id}`);
+  },
+};
+
 export default authAPI;

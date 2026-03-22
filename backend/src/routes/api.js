@@ -11,6 +11,7 @@ import heroRoutes from '../modules/hero/hero.routes.js';
 import subscriberRoutes from '../modules/subscriber/subscriber.routes.js';
 import contactRoutes from '../modules/contact/contact.routes.js';
 import notificationRoutes from '../modules/notification/notification.routes.js';
+import guestRoutes from '../modules/guest/guest.routes.js';
 
 const router = express.Router();
 
@@ -25,6 +26,7 @@ router.use('/hero', heroRoutes);
 router.use('/subscribers', subscriberRoutes);
 router.use('/contact', contactRoutes);
 router.use('/notifications', notificationRoutes);
+router.use('/guests', guestRoutes);
 
 router.get('/health', (req, res) => res.json({ status: 'ok' }));
 

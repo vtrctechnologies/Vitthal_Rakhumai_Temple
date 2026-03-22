@@ -12,6 +12,7 @@ const Sidebar = ({ isOpen, toggleSidebar, activeTab, setActiveTab }) => {
     { id: "live-programs", label: "Live Programs", icon: Video },
     { id: "subscribers", label: "Subscribers", icon: Users },
     { id: "messages", label: "Messages", icon: MessageSquare },
+    { id: "guests", label: "Guests", icon: User },
     { id: "members", label: "Members", icon: User },
     { id: "gallery", label: "Gallery", icon: Image },
     { id: "notifications", label: "Notifications", icon: Bell },
