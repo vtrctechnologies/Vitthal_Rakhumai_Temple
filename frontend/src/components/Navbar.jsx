@@ -16,244 +16,288 @@ import { useLanguage } from "../context/LanguageContext";
 
 const Navbar = memo(() => {
   const [isOpen, setIsOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
   const { isMarathi } = useLanguage();
 
-  // Disable body scroll when menu is open
   useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "unset";
-    }
+    document.body.style.overflow = isOpen ? "hidden" : "";
+    return () => {
+      document.body.style.overflow = "";
+    };
   }, [isOpen]);
 
-  // Memoize nav links to prevent recreation on every render
-  const navLinks = useMemo(() => [
-    { name: "Home", marathiName: "मुख्यपान", path: "/", icon: Home },
-    {
-      name: "About",
-      marathiName: "आमच्याबद्दल",
-      path: "/about",
-      icon: Info,
-      dropdown: [
-        { name: "Committee", marathiName: "समिती", path: "/about/committee" },
-      ],
-    },
-    { name: "Gallery", marathiName: "गॅलरी", path: "/gallery", icon: Image },
-    {
-      name: "Events",
-      marathiName: "कार्यक्रम",
-      path: "/events",
-      icon: Calendar,
-      dropdown: [
-        { name: "Banners", marathiName: "आगामी", path: "/events/banners" },
-        { name: "Sports", marathiName: "संपन्न", path: "/events/sports" },
-        { name: "Live Programs", marathiName: "थेट कार्यक्रम", path: "/events/live-programs" },
-      ],
-    },
-    { name: "Donation", marathiName: "देणगी", path: "/donation", icon: Heart },
-    { name: "Contact", marathiName: "संपर्क", path: "/contact", icon: Phone },
-  ], []);
-
-  // Memoize helper functions
-  const isActive = useCallback((path) => location.pathname === path, [location.pathname]);
-  const isParentActive = useCallback((path) => location.pathname.startsWith(path), [location.pathname]);
-
-  const toggleMenu = useCallback(() => {
-    setIsOpen((prev) => !prev);
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 10);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  const closeMenu = useCallback(() => {
+  // Close on route change
+  useEffect(() => {
     setIsOpen(false);
-  }, []);
+  }, [location.pathname]);
+
+  const navLinks = useMemo(
+    () => [
+      { name: "Home", mr: "मुख्यपान", path: "/", icon: Home },
+      {
+        name: "About",
+        mr: "आमच्याबद्दल",
+        path: "/about",
+        icon: Info,
+        dropdown: [
+          { name: "Committee", mr: "समिती", path: "/about/committee" },
+        ],
+      },
+      { name: "Gallery", mr: "गॅलरी", path: "/gallery", icon: Image },
+      {
+        name: "Events",
+        mr: "कार्यक्रम",
+        path: "/events",
+        icon: Calendar,
+        dropdown: [
+          { name: "Banners", mr: "आगामी", path: "/events/banners" },
+          { name: "Sports", mr: "संपन्न", path: "/events/sports" },
+          {
+            name: "Live Programs",
+            mr: "थेट कार्यक्रम",
+            path: "/events/live-programs",
+          },
+        ],
+      },
+      { name: "Donation", mr: "देणगी", path: "/donation", icon: Heart },
+      { name: "Contact", mr: "संपर्क", path: "/contact", icon: Phone },
+    ],
+    [],
+  );
+
+  const isActive = useCallback(
+    (path) => location.pathname === path,
+    [location.pathname],
+  );
+  const isParActive = useCallback(
+    (path) => path !== "/" && location.pathname.startsWith(path),
+    [location.pathname],
+  );
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-red-900 border-b-4 border-yellow-500 shadow-xl h-20 transition-all duration-300">
-      <div className="container mx-auto px-4 h-full">
-        <div className="flex items-center justify-between h-full">
-          {/* 1. Left Section: Logo */}
+    <>
+      <nav
+        className={`fixed top-0 left-0 right-0 z-50 h-[72px] bg-maroon-dk border-b border-gold-dim font-heading transition-shadow duration-300 ${
+          scrolled ? "shadow-[0_4px_32px_rgba(44,10,10,0.55)]" : ""
+        }`}
+      >
+        {/* Multi-stripe top bar (temple arch color band) */}
+        <div className="h-1 w-full bg-gradient-to-r from-maroon via-saffron to-maroon via-40% via-gold-lt via-60%" />
+
+        {/* Max-width container */}
+        <div className="max-w-7xl mx-auto px-6 h-full flex items-center justify-between gap-4">
+          {/* Logo */}
           <Link
             to="/"
-            className="flex items-center space-x-3 z-[60] group"
-            onClick={closeMenu}
+            className="group flex items-center gap-3 shrink-0"
+            onClick={() => setIsOpen(false)}
           >
-            <div className="relative">
-              <div className="absolute inset-0 bg-yellow-400 rounded-full blur opacity-20 group-hover:opacity-40 transition-opacity duration-500"></div>
+            <div className="relative w-11 h-11 shrink-0">
+              <div className="absolute -inset-[3px] rounded-full bg-[conic-gradient(from_0deg,var(--color-gold),var(--color-saffron),var(--color-gold),var(--color-maroon-lt),var(--color-gold))] animate-spin-slow z-0" />
+              <div className="absolute inset-[2px] rounded-full bg-maroon-dk z-10" />
               <img
                 src="/temple-logo.png"
-                alt="Logo"
+                alt="Temple logo"
                 loading="lazy"
-                className="relative w-11 h-11 rounded-full object-cover border-2 border-yellow-500 shadow-md"
+                className="absolute inset-[3px] rounded-full object-cover z-20 w-[calc(100%-6px)] h-[calc(100%-6px)]"
               />
             </div>
-            <div
-              className={`flex flex-col justify-center ${
-                isOpen ? "opacity-0 lg:opacity-100" : "opacity-100"
-              } transition-opacity duration-300`}
-            >
-              <h1 className="text-sm font-bold font-display leading-none mb-2 tracking-tight text-white group-hover:text-yellow-200 transition-colors">
+            <div className="flex flex-col gap-[2px]">
+              <span className="font-marathi text-[0.78rem] font-semibold text-gold-lt tracking-wide leading-tight whitespace-nowrap">
+                {isMarathi ? "श्री विठ्ठल रखुमाई" : "Shree Vitthal Rakhumai"}
+              </span>
+              <span className="font-heading text-[0.82rem] font-bold text-cream tracking-wide leading-tight transition-colors group-hover:text-gold-lt whitespace-nowrap">
+                {isMarathi ? "मंदिर ट्रस्ट" : "Mandir Trust"}
+              </span>
+              <span className="font-body italic text-[0.72rem] text-gold-dim tracking-widest uppercase whitespace-nowrap">
                 {isMarathi
-                  ? "श्री विठ्ठल रखुमाई मंदिर"
-                  : "Shree Vitthal Rakhumai Mandir"}
-              </h1>
-              <span className="text-[10px] text-yellow-400/80 uppercase tracking-widest font-medium">
-                {isMarathi
-                  ? "आंबेकरवाडी, रत्नागिरी"
-                  : "Amberkarwadi, Ratnagiri"}
+                  ? "आंबेकरवाडी · रत्नागिरी"
+                  : "Amberkarwadi · Ratnagiri"}
               </span>
             </div>
           </Link>
 
-          {/* 2. Center Section: Navigation Pills (Desktop) */}
-          <div className="hidden lg:flex flex-1 items-center justify-center px-4">
-            <div className="flex items-center p-1 space-x-2">
-              {navLinks.map((link) => (
-                <div key={link.path} className="relative group">
+          {/* Desktop Links */}
+          <div className="hidden lg:flex items-center justify-center flex-1 gap-1">
+            {navLinks.map((link) => {
+              const active = isActive(link.path) || isParActive(link.path);
+              return (
+                <div key={link.path} className="relative group/nav-item">
                   <Link
                     to={link.path}
-                    className={`flex items-center space-x-2 px-4 py-2 rounded-full text-sm font-bold tracking-wide transition-all duration-300 ${
-                      isActive(link.path) ||
-                      (link.dropdown &&
-                        isParentActive(link.path) &&
-                        link.path !== "/")
-                        ? "bg-yellow-500 text-red-900 shadow-lg scale-105"
-                        : "text-red-100 hover:text-white hover:bg-red-800"
+                    className={`flex items-center gap-[7px] py-2 px-3.5 rounded-sm font-heading text-[0.72rem] font-semibold tracking-widest uppercase border border-transparent transition-all duration-200 whitespace-nowrap relative after:content-[''] after:absolute after:bottom-0 after:left-1/2 after:w-0 hover:after:w-[80%] after:h-[1px] after:bg-gold after:-translate-x-1/2 after:transition-all after:duration-250 ${
+                      active
+                        ? "text-gold bg-gold/10 border-gold-dim after:w-[80%]"
+                        : "text-cream/75 hover:text-gold-lt"
                     }`}
                   >
                     <link.icon
-                      className={`w-4 h-4 transition-transform duration-300 ${
-                        isActive(link.path)
-                          ? "scale-110"
-                          : "group-hover:scale-110"
+                      size={13}
+                      className={`transition-opacity duration-200 ${
+                        active ? "opacity-100" : "opacity-70 group-hover/nav-item:opacity-100"
                       }`}
                     />
-                    <span>{isMarathi ? link.marathiName : link.name}</span>
+                    {isMarathi ? link.mr : link.name}
                     {link.dropdown && (
-                      <ChevronDown className="w-3 h-3 ml-1 transition-transform duration-300 group-hover:rotate-180" />
+                      <ChevronDown
+                        size={11}
+                        className="opacity-60 transition-transform duration-300 group-hover/nav-item:rotate-180 group-hover/nav-item:opacity-100"
+                      />
                     )}
                   </Link>
 
-                  {/* Desktop Dropdown Menu */}
+                  {/* Dropdown menu */}
                   {link.dropdown && (
-                    <div className="absolute top-full left-1/2 transform -translate-x-1/2 pt-4 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50">
-                      <div className="bg-red-900 border border-yellow-500/50 rounded-xl shadow-2xl overflow-hidden w-48 flex flex-col">
-                        {link.dropdown.map((subLink) => (
-                          <Link
-                            key={subLink.path}
-                            to={subLink.path}
-                            className={`px-4 py-3 text-sm font-medium border-b border-white/10 last:border-0 hover:bg-yellow-500 hover:text-red-900 transition-colors ${
-                              isActive(subLink.path)
-                                ? "bg-yellow-500/10 text-yellow-400"
-                                : "text-red-100"
-                            }`}
-                          >
-                            {isMarathi ? subLink.marathiName : subLink.name}
-                          </Link>
-                        ))}
+                    <div className="absolute top-[calc(100%+12px)] left-1/2 -translate-x-1/2 min-w-[200px] opacity-0 invisible pointer-events-none scale-y-90 origin-top transition-all duration-200 group-hover/nav-item:opacity-100 group-hover/nav-item:visible group-hover/nav-item:pointer-events-auto group-hover/nav-item:scale-y-100">
+                      <div className="bg-maroon-dk border border-gold-dim border-t-[2px] border-t-gold relative">
+                        {/* Top diamond accent */}
+                        <div className="absolute -top-[6px] left-1/2 -translate-x-1/2 rotate-45 w-[11px] h-[11px] bg-gold border-l border-t border-gold-dim z-[1]" />
+                        <div className="flex flex-col relative z-10">
+                          {link.dropdown.map((sub, idx) => (
+                            <Link
+                              key={sub.path}
+                              to={sub.path}
+                              className={`block px-[18px] py-[11px] font-heading text-[0.7rem] font-semibold tracking-widest uppercase text-cream/75 border-b border-gold/15 last:border-b-0 transition-all duration-200 hover:bg-gold/10 hover:text-gold-lt hover:pl-6 ${
+                                isActive(sub.path)
+                                  ? "text-gold bg-gold/5"
+                                  : ""
+                              }`}
+                            >
+                              {isMarathi ? sub.mr : sub.name}
+                            </Link>
+                          ))}
+                        </div>
                       </div>
                     </div>
                   )}
                 </div>
-              ))}
-            </div>
+              );
+            })}
           </div>
 
-          {/* 3. Right Section: Switch & Mobile Toggle */}
-          <div className="flex items-center gap-4">
-            {/* Desktop Switch */}
+          {/* Right Controls */}
+          <div className="flex items-center gap-3.5 shrink-0 z-[1010]">
             <div className="hidden lg:block">
               <Switch />
             </div>
 
-            {/* Mobile Menu Toggle */}
+            {/* Mobile menu toggle */}
             <button
-              className="lg:hidden p-2 rounded-full hover:bg-red-800 transition-colors z-[60] relative group border border-transparent hover:border-yellow-500/50"
-              onClick={toggleMenu}
-              aria-label="Toggle menu"
+              className="flex lg:hidden items-center justify-center w-10 h-10 border border-gold-dim rounded-sm bg-transparent cursor-pointer transition-colors duration-200 hover:bg-gold/10 hover:border-gold"
+              onClick={() => setIsOpen((p) => !p)}
+              aria-label={isOpen ? "Close menu" : "Open menu"}
             >
               {isOpen ? (
-                <X className="w-7 h-7 text-yellow-400" />
+                <X size={20} className="text-gold-lt" />
               ) : (
-                <Menu className="w-7 h-7 text-yellow-400" />
+                <Menu size={20} className="text-gold-lt" />
               )}
             </button>
           </div>
         </div>
-      </div>
+      </nav>
 
-      {/* Mobile Full Screen Overlay Menu */}
+      {/* Mobile Overlay Navigation */}
       <div
-        className={`fixed inset-0 bg-red-900 z-50 flex flex-col justify-center items-center transition-transform duration-500 cubic-bezier(0.4, 0, 0.2, 1) lg:hidden ${
+        className={`fixed inset-0 z-[999] bg-maroon-dk flex flex-col transition-transform duration-500 overflow-y-auto ${
           isOpen ? "translate-x-0" : "translate-x-full"
         }`}
+        style={{
+          backgroundImage:
+            "repeating-linear-gradient(45deg, rgba(212,175,55,0.04) 0, rgba(212,175,55,0.04) 1px, transparent 0, transparent 50%)",
+          backgroundSize: "18px 18px",
+        }}
+        aria-hidden={!isOpen}
       >
-        {/* Decorative Background Element */}
-        <div className="absolute inset-0 opacity-10 pointer-events-none bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-yellow-500 via-transparent to-transparent"></div>
-
-        <div className="flex flex-col items-start space-y-6 w-auto px-8 relative z-10 max-h-[80vh] overflow-y-auto">
-          {navLinks.map((link, idx) => (
-            <div
-              key={link.path}
-              className={`flex flex-col items-start transition-all duration-1000 ${
-                isOpen ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0"
-              }`}
-              style={{ transitionDelay: `${idx * 50}ms` }}
-            >
-              <Link
-                to={link.path}
-                onClick={closeMenu}
-                className={`group flex items-center space-x-4 text-3xl font-display font-bold tracking-tight transition-all duration-300 ${
-                  isActive(link.path)
-                    ? "text-yellow-400 scale-105 drop-shadow-[0_0_10px_rgba(234,179,8,0.5)]"
-                    : "text-red-100 hover:text-yellow-200"
-                }`}
-              >
-                <link.icon
-                  className={`w-8 h-8 ${
-                    isActive(link.path)
-                      ? "text-yellow-400"
-                      : "text-red-300 group-hover:text-yellow-200"
-                  }`}
-                />
-                <span>{isMarathi ? link.marathiName : link.name}</span>
-              </Link>
-
-              {/* Mobile Sub-menu */}
-              {link.dropdown && (
-                <div className="flex flex-col ml-12 mt-2 space-y-3 border-l-2 border-yellow-500/30 pl-4">
-                  {link.dropdown.map((subLink) => (
-                    <Link
-                      key={subLink.path}
-                      to={subLink.path}
-                      onClick={closeMenu}
-                      className={`text-xl font-medium tracking-wide transition-colors ${
-                        isActive(subLink.path)
-                          ? "text-yellow-400"
-                          : "text-red-300 hover:text-yellow-200"
-                      }`}
-                    >
-                      {isMarathi ? subLink.marathiName : subLink.name}
-                    </Link>
-                  ))}
-                </div>
-              )}
+        <div className="flex items-center justify-between p-5 pb-4 border-b border-gold-dim">
+          <Link
+            to="/"
+            className="flex items-center gap-3"
+            onClick={() => setIsOpen(false)}
+          >
+            <div className="relative w-9 h-9 shrink-0">
+              <div className="absolute inset-[2px] rounded-full bg-maroon-dk z-10" />
+              <img
+                src="/temple-logo.png"
+                alt=""
+                loading="lazy"
+                className="absolute inset-[3px] rounded-full object-cover z-20 w-[calc(100%-6px)] h-[calc(100%-6px)]"
+              />
             </div>
-          ))}
+            <span className="font-marathi text-[0.9rem] font-semibold text-gold-lt tracking-wide">
+              {isMarathi
+                ? "श्री विठ्ठल रखुमाई मंदिर"
+                : "Shree Vitthal Rakhumai Mandir"}
+            </span>
+          </Link>
         </div>
 
-        {/* Divider */}
-        <div className="w-16 h-1 bg-yellow-500/30 rounded-full mt-6"></div>
+        <div className="flex-1 px-6 pt-6 flex flex-col">
+          {navLinks.map((link, i) => {
+            const active = isActive(link.path) || isParActive(link.path);
+            return (
+              <div
+                key={link.path}
+                className="border-b border-gold/15 first:border-t"
+                style={{
+                  transitionDelay: isOpen ? `${i * 55}ms` : "0ms",
+                  opacity: isOpen ? 1 : 0,
+                  transform: isOpen ? "translateX(0)" : "translateX(20px)",
+                  transition: "opacity 0.4s ease, transform 0.4s ease",
+                }}
+              >
+                <Link
+                  to={link.path}
+                  className={`flex items-center gap-4 py-4 px-1 font-heading text-xl font-semibold tracking-wide uppercase transition-all duration-200 w-full hover:text-gold-lt hover:pl-2 ${
+                    active ? "text-gold" : "text-cream/80"
+                  }`}
+                  onClick={() => !link.dropdown && setIsOpen(false)}
+                >
+                  <link.icon
+                    size={20}
+                    className={`shrink-0 ${active ? "opacity-100" : "opacity-60"}`}
+                  />
+                  {isMarathi ? link.mr : link.name}
+                </Link>
 
-        {/* Switch inside Mobile Menu */}
-        <div className="transform scale-125 pt-6 relative z-10">
+                {link.dropdown && (
+                  <div className="pl-13 pb-3.5 flex flex-col gap-1 border-l border-gold-dim ml-[18px]">
+                    {link.dropdown.map((sub) => (
+                      <Link
+                        key={sub.path}
+                        to={sub.path}
+                        className={`block py-[7px] px-3 font-heading text-[0.8rem] font-semibold tracking-widest uppercase transition-all duration-200 hover:text-gold-lt hover:pl-4 ${
+                          isActive(sub.path) ? "text-gold" : "text-cream/55"
+                        }`}
+                        onClick={() => setIsOpen(false)}
+                      >
+                        — {isMarathi ? sub.mr : sub.name}
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+
+        <div className="p-7 border-t border-gold-dim flex items-center justify-between">
+          <span className="font-marathi text-[0.9rem] text-gold-lt/50 italic tracking-wide">
+            || राम कृष्ण हरी ||
+          </span>
           <Switch />
         </div>
       </div>
-    </nav>
+    </>
   );
 });
 
 Navbar.displayName = "Navbar";
-
 export default Navbar;

@@ -30,18 +30,28 @@ const Footer = () => {
   ];
 
   return (
-    <footer className="bg-secondary text-secondary-foreground pt-16 pb-8 border-t border-primary/10">
-      <div className="container mx-auto px-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-12 mb-12">
+    <footer className="bg-maroon-dk text-cream relative overflow-hidden border-t-4 border-gold pt-16 pb-8">
+      {/* Subtle Pattern Background */}
+      <div
+        className="absolute inset-0 z-0 opacity-10 pointer-events-none"
+        style={{
+          backgroundImage:
+            "repeating-linear-gradient(45deg, var(--color-gold) 0, var(--color-gold) 1px, transparent 0, transparent 50%)",
+          backgroundSize: "20px 20px",
+        }}
+      />
+      
+      <div className="max-w-7xl mx-auto px-6 relative z-10">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-14 mb-14">
           {/* Column 1: About & Donation CTA */}
           <div className="space-y-6">
             <div>
-              <h3 className="text-2xl font-display font-bold text-primary mb-2">
+              <h3 className="text-2xl font-display font-bold text-gold-lt mb-3 leading-tight drop-shadow-md">
                 {isMarathi
                   ? "श्री विठ्ठल-रखुमाई मंदिर"
                   : "Shree Vitthal-Rakhumai Mandir"}
               </h3>
-              <p className="text-sm opacity-90 leading-relaxed">
+              <p className="text-sm text-cream-dk/80 leading-relaxed font-body">
                 {isMarathi
                   ? "अंबेरे गावाच्या हृदयात वसलेले भक्ती, शांती आणि आध्यात्मिक साक्षात्काराचे पवित्र स्थान."
                   : "A sacred place of devotion, peace, and spiritual enlightenment in the heart of Ambere Village."}
@@ -51,26 +61,26 @@ const Footer = () => {
             {/* Donate CTA */}
             <Link
               to="/donation"
-              className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-6 py-3 rounded-full text-sm font-medium hover:bg-primary/90 transition-all shadow-lg hover:shadow-primary/25 group"
+              className="inline-flex items-center gap-2.5 bg-gradient-to-br from-vermillion to-saffron-dk text-white px-7 py-3 rounded-md text-[0.95rem] font-heading font-semibold tracking-widest uppercase transition-all duration-300 shadow-[0_4px_20px_rgba(192,57,43,0.35)] hover:-translate-y-1 hover:shadow-[0_6px_28px_rgba(192,57,43,0.5)] group"
             >
-              <Heart className="w-4 h-4 fill-current group-hover:scale-110 transition-transform" />
+              <Heart className="w-4 h-4 fill-current group-hover:scale-110 transition-transform duration-300" />
               <span>{isMarathi ? "देणगी" : "Donate Now"}</span>
             </Link>
           </div>
 
           {/* Column 2: Quick Links */}
           <div>
-            <h4 className="text-lg font-display font-semibold mb-6 text-primary">
+            <h4 className="text-lg font-display font-semibold mb-6 text-saffron-lt uppercase tracking-widest">
               {isMarathi ? "महत्वाचे दुवे" : "Quick Links"}
             </h4>
-            <ul className="space-y-3">
+            <ul className="space-y-3.5">
               {quickLinks.map((link) => (
                 <li key={link.path}>
                   <Link
                     to={link.path}
-                    className="group flex items-center text-sm hover:text-primary transition-colors duration-300"
+                    className="group flex items-center text-[0.95rem] font-heading text-cream/70 hover:text-gold-lt hover:pl-2 transition-all duration-300"
                   >
-                    <ArrowRight className="w-3 h-3 mr-2 opacity-0 -ml-5 group-hover:opacity-100 group-hover:ml-0 transition-all" />
+                    <ArrowRight className="w-3.5 h-3.5 mr-2 opacity-0 -ml-5 group-hover:opacity-100 group-hover:ml-0 transition-all duration-300 text-gold-lt" />
                     {isMarathi ? link.marathiName : link.name}
                   </Link>
                 </li>
@@ -80,15 +90,15 @@ const Footer = () => {
 
           {/* Column 3: Contact & Hours */}
           <div>
-            <h4 className="text-lg font-display font-semibold mb-6 text-primary">
+            <h4 className="text-lg font-display font-semibold mb-6 text-saffron-lt uppercase tracking-widest">
               {isMarathi ? "संपर्क करा" : "Visit Us"}
             </h4>
-            <div className="space-y-4">
+            <div className="space-y-5">
               {/* Address */}
-              <div className="flex items-start space-x-3 group">
-                <MapPin className="w-5 h-5 text-primary shrink-0 mt-1" />
-                <div className="text-sm">
-                  <p className="leading-relaxed mb-1">
+              <div className="flex items-start space-x-3.5 group">
+                <MapPin className="w-5 h-5 text-gold-lt shrink-0 mt-0.5" />
+                <div className="text-sm text-cream-dk/80 font-body">
+                  <p className="leading-relaxed mb-1.5">
                     {isMarathi ? (
                       <>
                         आंबेकरवाडी, गावडे अंबेरे, तालुका रत्नागिरी,
@@ -107,7 +117,7 @@ const Footer = () => {
                     href="https://www.google.com/maps/search/?api=1&query=Shree+Vitthal+Rakhumai+Temple+Amberkarwadi"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-xs text-primary font-medium hover:underline inline-flex items-center gap-1"
+                    className="text-xs text-saffron-lt font-heading font-semibold hover:text-gold transition-colors inline-flex items-center gap-1 uppercase tracking-wider"
                   >
                     {isMarathi ? "नकाशा पहा" : "Get Directions"}{" "}
                     <ExternalLink className="w-3 h-3" />
@@ -116,22 +126,22 @@ const Footer = () => {
               </div>
 
               {/* Phone */}
-              <div className="flex items-center space-x-3">
-                <Phone className="w-5 h-5 text-primary shrink-0" />
+              <div className="flex items-center space-x-3.5">
+                <Phone className="w-5 h-5 text-gold-lt shrink-0" />
                 <a
                   href="tel:+919876543210"
-                  className="text-sm hover:text-primary transition-colors"
+                  className="text-sm font-body text-cream-dk/80 hover:text-gold transition-colors"
                 >
                   +91 9876543210
                 </a>
               </div>
 
               {/* Email */}
-              <div className="flex items-center space-x-3">
-                <Mail className="w-5 h-5 text-primary shrink-0" />
+              <div className="flex items-center space-x-3.5">
+                <Mail className="w-5 h-5 text-gold-lt shrink-0" />
                 <a
                   href="mailto:trust@vitthalrakhumai.com"
-                  className="text-sm hover:text-primary transition-colors"
+                  className="text-sm font-body text-cream-dk/80 hover:text-gold transition-colors"
                 >
                   trust@vitthalrakhumai.com
                 </a>
@@ -141,10 +151,10 @@ const Footer = () => {
 
           {/* Column 4: Newsletter & Social */}
           <div>
-            <h4 className="text-lg font-display font-semibold mb-6 text-primary">
+            <h4 className="text-lg font-display font-semibold mb-6 text-saffron-lt uppercase tracking-widest">
               {isMarathi ? "जोडलेले रहा" : "Stay Connected"}
             </h4>
-            <p className="text-sm opacity-90 mb-4">
+            <p className="text-sm font-body text-cream-dk/80 mb-5 leading-relaxed">
               {isMarathi
                 ? "दैनिक दर्शन अपडेट्स आणि आगामी कार्यक्रमांसाठी आमच्या वृत्तपत्राची सदस्यता घ्या."
                 : "Subscribe to our newsletter for daily darshan updates and upcoming events."}
@@ -155,17 +165,17 @@ const Footer = () => {
               <button
                 type="button"
                 onClick={() => setIsModalOpen(true)}
-                className="w-full flex items-center justify-between gap-3 bg-primary/10 border border-primary/20 rounded-xl px-4 py-3 text-white hover:bg-primary/20 transition-all group"
+                className="w-full flex items-center justify-between gap-3 bg-gold/5 border border-gold/30 rounded-md px-4 py-3 text-cream-dk hover:bg-gold/15 transition-all duration-300 group"
               >
                 <div className="flex items-center gap-3">
-                  <div className="p-2 bg-primary/20 rounded-lg group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
+                  <div className="p-2 bg-gold/20 rounded-sm group-hover:bg-gold-lt group-hover:text-maroon-dk transition-colors duration-300">
                     <Send className="w-4 h-4" />
                   </div>
-                  <span className="text-sm font-medium">
+                  <span className="text-[0.9rem] font-heading font-semibold tracking-wide uppercase">
                     {isMarathi ? "आता सबस्क्राईब करा" : "Subscribe Now"}
                   </span>
                 </div>
-                <ArrowRight className="w-4 h-4 text-primary group-hover:translate-x-1 transition-transform" />
+                <ArrowRight className="w-4 h-4 text-gold-lt group-hover:translate-x-1 transition-transform" />
               </button>
             </div>
 
@@ -180,7 +190,7 @@ const Footer = () => {
                 href="https://www.youtube.com/@VitthalRakhumaiAmberkarwadi"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-10 h-10 rounded-full bg-primary/10 hover:bg-primary hover:text-white flex items-center justify-center transition-all duration-300 group"
+                className="w-10 h-10 rounded-full border border-gold/30 hover:border-gold hover:bg-gold/15 text-gold-lt flex items-center justify-center transition-all duration-300 hover:scale-110"
                 aria-label="Youtube"
               >
                 <Youtube className="w-5 h-5" />
@@ -189,7 +199,7 @@ const Footer = () => {
                 href="https://instagram.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-10 h-10 rounded-full bg-primary/10 hover:bg-primary hover:text-white flex items-center justify-center transition-all duration-300 group"
+                className="w-10 h-10 rounded-full border border-gold/30 hover:border-gold hover:bg-gold/15 text-gold-lt flex items-center justify-center transition-all duration-300 hover:scale-110"
                 aria-label="Instagram"
               >
                 <Instagram className="w-5 h-5" />
@@ -199,7 +209,7 @@ const Footer = () => {
         </div>
 
         {/* Bottom Bar */}
-        <div className="border-t border-primary/20 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-xs opacity-75">
+        <div className="border-t border-gold/20 mt-10 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-xs font-body text-cream-dk/60">
           <div className="text-center md:text-left">
             <p>
               © {currentYear}{" "}
@@ -210,14 +220,14 @@ const Footer = () => {
             </p>
           </div>
 
-          <div className="flex gap-6">
+          <div className="flex gap-6 font-heading tracking-widest uppercase text-[0.65rem]">
             <Link
               to="/privacy"
-              className="hover:text-primary transition-colors"
+              className="hover:text-gold-lt transition-colors"
             >
               {isMarathi ? "गोपनीयता धोरण" : "Privacy Policy"}
             </Link>
-            <Link to="/terms" className="hover:text-primary transition-colors">
+            <Link to="/terms" className="hover:text-gold-lt transition-colors">
               {isMarathi ? "सेवा अटी" : "Terms of Service"}
             </Link>
           </div>
@@ -225,10 +235,10 @@ const Footer = () => {
           <div className="text-center md:text-right">
             <p>
               {isMarathi ? "भक्तीभावाने निर्मित " : "Made with devotion By "}
-              <span className="text-primary font-medium">
+              <span className="text-gold-lt font-semibold tracking-wide">
                 Sahil Amberkar
               </span> &{" "}
-              <span className="text-primary font-medium">Sohan Sarang</span>
+              <span className="text-gold-lt font-semibold tracking-wide">Sohan Sarang</span>
             </p>
           </div>
         </div>

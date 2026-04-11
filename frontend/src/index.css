@@ -1,40 +1,65 @@
+@import url("https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;600;700&family=Noto+Serif+Devanagari:wght@400;600;700&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap");
 @import "tailwindcss";
 
 @theme {
   /* Use direct values to ensure stability during JIT generation */
-  --font-display: "CustomFont", "sans-serif";
-  --font-body: "CustomFont", "sans-serif";
-  --font-marathi: "Tiro Devanagari Marathi", "serif";
-  --font-marathi-title: "Mukta", "sans-serif";
+  --font-display: "Cinzel Decorative", serif;
+  --font-heading: "Cinzel", serif;
+  --font-body: "EB Garamond", Georgia, serif;
+  --font-marathi: "Noto Serif Devanagari", serif;
 
-  --color-background: #fffbf0;
-  --color-foreground: #5d0000;
+  --color-background: #fef6e4; /* cream */
+  --color-foreground: #2c1a0e; /* ink dark */
 
-  --color-primary: #ffb700;
+  --color-saffron: #e8650a;
+  --color-saffron-lt: #f5a623;
+  --color-saffron-dk: #b8440a;
+
+  --color-maroon: #6b1a1a;
+  --color-maroon-dk: #4a0f0f;
+  --color-maroon-lt: #8b2222;
+  --color-crimson: #8b1a1a;
+  --color-vermillion: #c0392b;
+
+  --color-gold: #d4af37;
+  --color-gold-lt: #f0d060;
+  --color-gold-dk: #a07820;
+  --color-gold-dim: rgba(212, 175, 55, 0.45);
+
+  --color-cream: #fef6e4;
+  --color-cream-dk: #f5e6c8;
+
+  --color-ink-dark: #2c1a0e;
+  --color-ink-mid: #5c3317;
+  --color-ink-light: #8b5e3c;
+
+  --color-stone: #f0e8d8;
+
+  --color-primary: var(--color-saffron);
   --color-primary-foreground: #ffffff;
-  --color-primary-glow: #ffd700;
+  --color-primary-glow: var(--color-saffron-lt);
 
-  --color-secondary: #5d0000;
-  --color-secondary-foreground: #ffb700;
+  --color-secondary: var(--color-maroon);
+  --color-secondary-foreground: var(--color-gold);
 
-  --color-muted: #f5e6cc;
-  --color-muted-foreground: #775533;
+  --color-muted: var(--color-stone);
+  --color-muted-foreground: var(--color-ink-light);
 
-  --color-accent: #ffd700;
-  --color-accent-foreground: #5d0000;
+  --color-accent: var(--color-gold);
+  --color-accent-foreground: var(--color-maroon-dk);
 
-  --color-destructive: #ef4444;
+  --color-destructive: var(--color-vermillion);
   --color-destructive-foreground: #ffffff;
 
-  --color-border: #e6d2b5;
-  --color-input: #e6d2b5;
-  --color-ring: #ffb700;
+  --color-border: var(--color-gold-dim);
+  --color-input: var(--color-gold-dim);
+  --color-ring: var(--color-saffron);
 
   --color-card: #ffffff;
-  --color-card-foreground: #5d0000;
+  --color-card-foreground: var(--color-ink-dark);
 
   --color-popover: #ffffff;
-  --color-popover-foreground: #5d0000;
+  --color-popover-foreground: var(--color-ink-dark);
 
   --radius-lg: 0.75rem;
   --radius-md: 0.5rem;
@@ -46,6 +71,8 @@
   --animate-slide-up: slideUp 0.5s ease-out forwards;
   --animate-zoom-in: zoomIn 0.5s ease-out forwards;
   --animate-float: float 3s ease-in-out infinite;
+  --animate-spin-slow: spin 12s linear infinite;
+  --animate-pulse-slow: pulse 2s ease-in-out infinite;
 }
 
 @layer base {
@@ -136,7 +163,7 @@
   border-radius: var(--radius-md);
   transition: all 0.3s ease;
   cursor: pointer;
-  border: 2px solid transparent;
+  border: 1px solid transparent;
   font-size: 0.875rem;
   gap: 0.5rem;
 }
@@ -159,17 +186,21 @@
 }
 
 .spiritual-gradient-text {
-  background: linear-gradient(135deg, #ffb700 0%, #5d0000 100%);
+  background: linear-gradient(
+    135deg,
+    var(--color-gold) 0%,
+    var(--color-saffron) 100%
+  );
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
 }
 
 .glass-card {
-  background-color: rgba(255, 255, 255, 0.7);
+  background-color: rgba(254, 246, 228, 0.7);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid var(--color-gold-dim);
 }
 
 /* Modal Classes */
@@ -201,8 +232,14 @@
 }
 
 @keyframes modalScaleIn {
-  0% { transform: scale(0.95); opacity: 0; }
-  100% { transform: scale(1); opacity: 1; }
+  0% {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 .base-modal-close {
@@ -238,18 +275,4 @@
 }
 
 /* Fonts */
-@font-face {
-  font-family: "CustomFont";
-  src: url("./assets/fonts/BwGradualDEMO-Regular.otf") format("opentype");
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "CustomFont";
-  src: url("./assets/fonts/BwGradualDEMO-Bold.otf") format("opentype");
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-}
+/* Custom fonts replaced with Google Fonts at the top of the file */
