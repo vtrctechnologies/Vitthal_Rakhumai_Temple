@@ -6,11 +6,23 @@ const guestSchema = new mongoose.Schema({
         required: [true, 'Guest Name is required'],
         trim: true
     },
+    nameMarathi: {
+        type: String,
+        trim: true
+    },
     prize: {
         type: String,
         trim: true
     },
+    prizeMarathi: {
+        type: String,
+        trim: true
+    },
     description: {
+        type: String,
+        trim: true
+    },
+    descriptionMarathi: {
         type: String,
         trim: true
     },

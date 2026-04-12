@@ -6,9 +6,17 @@ const committeeSchema = new mongoose.Schema({
         required: [true, 'Name is required'],
         trim: true
     },
+    nameMarathi: {
+        type: String,
+        trim: true
+    },
     position: {
         type: String,
         required: [true, 'Position is required'],
+        trim: true
+    },
+    positionMarathi: {
+        type: String,
         trim: true
     },
     imageUrl: {

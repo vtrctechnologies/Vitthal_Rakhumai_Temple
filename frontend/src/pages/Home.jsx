@@ -92,9 +92,8 @@ const SectionHeader = ({
     <DiamondDivider />
     {subtitle && (
       <p
-        className={`text-lg leading-relaxed text-ink-mid max-w-[600px] ${
-          center ? "mx-auto" : ""
-        }`}
+        className={`text-lg leading-relaxed text-ink-mid max-w-[600px] ${center ? "mx-auto" : ""
+          }`}
       >
         {subtitle}
       </p>
@@ -136,7 +135,7 @@ const Home = memo(() => {
         if (response?.status === "success" && response.data) {
           setHeroData((prev) => ({ ...prev, ...response.data }));
         }
-      } catch {}
+      } catch { }
     };
     fetchHeroData();
   }, []);
@@ -334,7 +333,7 @@ const Home = memo(() => {
             />
 
             {/* Three sacred pillars */}
-            <div className="grid grid-cols-3 gap-4 mt-2">
+            {/* <div className="grid grid-cols-3 gap-4 mt-2">
               {[
                 {
                   icon: "🪔",
@@ -365,7 +364,7 @@ const Home = memo(() => {
                   </div>
                 </div>
               ))}
-            </div>
+            </div> */}
           </motion.div>
 
           {/* Image */}
@@ -430,14 +429,8 @@ const Home = memo(() => {
       </Suspense>
 
       {/* ── COMMITTEE ── */}
-      <motion.section className="px-6 py-16 bg-cream" {...fadeUp}>
+      <motion.section className="px-6 py-20 bg-cream" {...fadeUp}>
         <div className="max-w-6xl mx-auto">
-          <SectionHeader
-            eyebrow="Seva Mandal"
-            title="Committee Members"
-            titleMr="समिती सदस्य"
-            center
-          />
           <Suspense
             fallback={
               <div className="flex items-center justify-center p-16 font-body italic text-ink-light text-lg gap-3">

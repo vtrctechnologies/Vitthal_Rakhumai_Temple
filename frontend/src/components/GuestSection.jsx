@@ -3,7 +3,26 @@ import { guestAPI } from "@/services/api";
 import { getImageUrl } from "@/utils/imageUrl";
 import { useLanguage } from "@/context/LanguageContext";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, User } from "lucide-react";
+
+/* ── Section Header (Internal) ── */
+const SectionHeader = ({ title, titleMr, isMarathi }) => (
+  <div className="text-center mb-16 relative">
+    <div className="inline-block relative">
+      <h2 className="font-display text-[clamp(2rem,5vw,3.5rem)] font-bold text-maroon leading-tight relative z-10 px-8">
+        {isMarathi ? titleMr : title}
+      </h2>
+      <div className="absolute top-1/2 left-0 w-6 h-6 border-l-4 border-t-4 border-saffron -translate-y-full -translate-x-2 opacity-50" />
+      <div className="absolute bottom-1/2 right-0 w-6 h-6 border-r-4 border-b-4 border-saffron translate-y-full translate-x-2 opacity-50" />
+    </div>
+    
+    <div className="flex items-center justify-center gap-4 mt-6">
+      <div className="flex-1 max-w-[100px] h-px bg-gradient-to-r from-transparent to-gold" />
+      <div className="w-3 h-3 bg-saffron rotate-45" />
+      <div className="flex-1 max-w-[100px] h-px bg-gradient-to-l from-transparent to-gold" />
+    </div>
+  </div>
+);
 
 const GuestSection = memo(() => {
   const { isMarathi } = useLanguage();
@@ -30,11 +49,7 @@ const GuestSection = memo(() => {
 
   useEffect(() => {
     if (guests.length <= 1) return;
-    
-    const interval = setInterval(() => {
-      handleNext();
-    }, 5000);
-
+    const interval = setInterval(() => handleNext(), 6000);
     return () => clearInterval(interval);
   }, [guests, currentIndex]);
 
@@ -51,44 +66,31 @@ const GuestSection = memo(() => {
   if (!loading && guests.length === 0) return null;
 
   const variants = {
-    enter: (direction) => ({
-      x: direction > 0 ? "100%" : "-100%",
-      opacity: 0,
-    }),
-    center: {
-      zIndex: 1,
-      x: 0,
-      opacity: 1,
-    },
-    exit: (direction) => ({
-      zIndex: 0,
-      x: direction < 0 ? "100%" : "-100%",
-      opacity: 0,
-    }),
+    enter: (direction) => ({ opacity: 0, scale: 1.1, filter: "blur(10px)" }),
+    center: { opacity: 1, scale: 1, filter: "blur(0px)", zIndex: 1 },
+    exit: (direction) => ({ opacity: 0, scale: 0.95, filter: "blur(10px)", zIndex: 0 }),
   };
 
   return (
-    <section className="py-20 bg-[#fffbf5] relative overflow-hidden">
-      <div className="w-full px-4 sm:px-6 lg:px-10">
-        <div className="text-center mb-12">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-          >
-            <h2 className="text-4xl md:text-5xl font-serif font-bold text-stone-800 mb-4">
-              {isMarathi ? "सन्मानित अतिथी" : "Felicitated Guests"}
-            </h2>
-            <div className="h-1.5 w-24 bg-orange-500 rounded-full mx-auto" />
-          </motion.div>
-        </div>
+    <section className="py-24 bg-cream relative overflow-hidden">
+      {/* Background Motifs */}
+      <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-maroon via-gold via-saffron to-maroon" />
+      <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: "radial-gradient(#C0392B 1px, transparent 1px)", backgroundSize: "40px 40px" }} />
+
+      <div className="max-w-6xl mx-auto px-6 relative z-10">
+        <SectionHeader 
+          title="Venerated Guests" 
+          titleMr="विशेष अतिथी आणि मानकरी" 
+          isMarathi={isMarathi} 
+        />
 
         {loading ? (
-          <div className="w-full h-[300px] md:h-[500px] bg-stone-200 animate-pulse rounded-[4rem]" />
+          <div className="w-full aspect-[16/9] md:aspect-[21/9] bg-stone-100 animate-pulse rounded-2xl border border-gold/20" />
         ) : (
-          <div className="relative w-full h-[300px] md:h-[500px] group">
-            <div className="relative w-full h-full overflow-hidden rounded-[4rem] shadow-2xl ring-12 ring-white bg-stone-100">
-              <AnimatePresence initial={false} custom={direction}>
+          <div className="relative group mx-auto max-w-5xl">
+            {/* Main Stage */}
+            <div className="relative aspect-[16/9] md:aspect-[21/9] rounded-2xl overflow-hidden shadow-2xl border-4 border-cream shadow-maroon/10">
+              <AnimatePresence initial={false} custom={direction} mode="wait">
                 <motion.div
                   key={currentIndex}
                   custom={direction}
@@ -96,40 +98,73 @@ const GuestSection = memo(() => {
                   initial="enter"
                   animate="center"
                   exit="exit"
-                  transition={{
-                    x: { type: "spring", stiffness: 300, damping: 30 },
-                    opacity: { duration: 0.4 },
-                  }}
+                  transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
                   className="absolute inset-0 w-full h-full"
                 >
                   <img
                     src={getImageUrl(guests[currentIndex].imageUrl)}
-                    alt={`Guest ${currentIndex + 1}`}
-                    className="w-full h-full object-cover"
+                    alt={guests[currentIndex].name}
+                    className="w-full h-full object-cover saturate-[1.1] brightness-[0.85]"
                   />
+                  {/* Overlay for text legibility */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-maroon/90 via-maroon/20 to-transparent" />
+                  
+                  {/* Guest Info Overlay */}
+                  <div className="absolute bottom-0 left-0 right-0 p-8 md:p-12 text-white text-center md:text-left flex flex-col md:flex-row md:items-end justify-between gap-6">
+                    <div className="flex-1">
+                      <motion.div 
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.3 }}
+                      >
+                         <p className="font-heading text-saffron-lt text-sm tracking-[0.3em] uppercase mb-2">
+                           {isMarathi && guests[currentIndex].prizeMarathi ? guests[currentIndex].prizeMarathi : (guests[currentIndex].prize || "Honored Guest")}
+                         </p>
+                         <h3 className="font-display text-3xl md:text-5xl font-bold leading-tight">
+                           {isMarathi && guests[currentIndex].nameMarathi ? guests[currentIndex].nameMarathi : guests[currentIndex].name}
+                         </h3>
+                         <div className="h-0.5 w-16 bg-gold mt-4 hidden md:block" />
+                      </motion.div>
+                    </div>
+                    
+                    <motion.div 
+                      className="md:max-w-md"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 0.5 }}
+                    >
+                      <p className="font-marathi text-cream-dk/80 text-lg leading-relaxed italic line-clamp-2 md:line-clamp-none">
+                        {isMarathi && guests[currentIndex].descriptionMarathi ? guests[currentIndex].descriptionMarathi : guests[currentIndex].description}
+                      </p>
+                    </motion.div>
+                  </div>
                 </motion.div>
               </AnimatePresence>
             </div>
 
+            {/* Ornamental Frame Overlays */}
+            <div className="absolute -top-6 -left-6 w-24 h-24 border-t-8 border-l-8 border-maroon opacity-20 pointer-events-none" />
+            <div className="absolute -bottom-6 -right-6 w-24 h-24 border-b-8 border-r-8 border-maroon opacity-20 pointer-events-none" />
+
+            {/* Navigation Navigation */}
             {guests.length > 1 && (
               <>
                 <button
                   onClick={handlePrev}
-                  className="absolute left-6 top-1/2 -translate-y-1/2 z-20 p-3 md:p-4 rounded-full bg-white/40 hover:bg-white/60 text-stone-800 backdrop-blur-md transition-all opacity-0 group-hover:opacity-100 -translate-x-4 group-hover:translate-x-0"
-                  aria-label="Previous guest"
+                  className="absolute left-4 top-1/2 -translate-y-1/2 z-20 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 border border-white/30 text-white backdrop-blur-md transition-all flex items-center justify-center opacity-0 group-hover:opacity-100"
                 >
-                  <ChevronLeft size={32} />
+                  <ChevronLeft size={28} />
                 </button>
                 <button
                   onClick={handleNext}
-                  className="absolute right-6 top-1/2 -translate-y-1/2 z-20 p-3 md:p-4 rounded-full bg-white/40 hover:bg-white/60 text-stone-800 backdrop-blur-md transition-all opacity-0 group-hover:opacity-100 translate-x-4 group-hover:translate-x-0"
-                  aria-label="Next guest"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 z-20 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 border border-white/30 text-white backdrop-blur-md transition-all flex items-center justify-center opacity-0 group-hover:opacity-100"
                 >
-                  <ChevronRight size={32} />
+                  <ChevronRight size={28} />
                 </button>
               </>
             )}
 
+            {/* Indicator Dots */}
             <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 flex gap-3">
               {guests.map((_, i) => (
                 <button
@@ -138,10 +173,8 @@ const GuestSection = memo(() => {
                     setDirection(i > currentIndex ? 1 : -1);
                     setCurrentIndex(i);
                   }}
-                  className={`h-2.5 rounded-full transition-all duration-300 ${
-                    i === currentIndex ? "w-10 bg-orange-600" : "w-2.5 bg-orange-200 hover:bg-orange-300"
-                  }`}
-                  aria-label={`Go to slide ${i + 1}`}
+                  className={`h-2 transition-all duration-500 rounded-full ${i === currentIndex ? "w-12 bg-maroon shadow-md shadow-maroon/30" : "w-3 bg-maroon/20 hover:bg-maroon/40"}`}
+                  aria-label={`Guest ${i + 1}`}
                 />
               ))}
             </div>
@@ -153,5 +186,4 @@ const GuestSection = memo(() => {
 });
 
 GuestSection.displayName = "GuestSection";
-
 export default GuestSection;

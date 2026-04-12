@@ -1,4 +1,6 @@
 import mongoose from 'mongoose';
+import dotenv from 'dotenv';
+dotenv.config();
 
 export const connect = async (uri) => {
   const mongoUri = uri || process.env.MONGO_URI;
