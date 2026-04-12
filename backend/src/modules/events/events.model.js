@@ -6,9 +6,16 @@ const eventSchema = new mongoose.Schema({
     required: [true, 'Title is required'],
     trim: true
   },
+  titleMarathi: {
+    type: String,
+    trim: true
+  },
   description: {
     type: String,
     required: [true, 'Description is required']
+  },
+  descriptionMarathi: {
+    type: String
   },
   date: {
     type: Date,
@@ -18,9 +25,15 @@ const eventSchema = new mongoose.Schema({
     type: String,
     required: [false, 'Time is required']
   },
+  timeMarathi: {
+    type: String
+  },
   location: {
     type: String,
     required: [false, 'Location is required'] // Making it optional for featured
+  },
+  locationMarathi: {
+    type: String
   },
   imageUrl: {
     type: String
