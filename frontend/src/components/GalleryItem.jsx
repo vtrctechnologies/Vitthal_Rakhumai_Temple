@@ -43,14 +43,14 @@ const GalleryItem = memo(({ image, index, onClick }) => {
       className={`group relative ${spanClass} ${getShapeClass(
         index,
         image.size
-      )} overflow-hidden bg-black shadow-xl cursor-pointer transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl hover:shadow-amber-900/20`}
+      )} overflow-hidden bg-black shadow-xl cursor-pointer transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl hover:shadow-gold-dk/10`}
       onClick={onClick}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
       {/* Inner Border Frame (The "Gold" Reveal) */}
       <div
-        className={`absolute inset-3 border border-amber-400/0 group-hover:border-amber-400/80 z-20 transition-all duration-700 ${getShapeClass(
+        className={`absolute inset-3 border border-gold/0 group-hover:border-gold/80 z-20 transition-all duration-700 ${getShapeClass(
           index,
           image.size
         )} pointer-events-none scale-95 group-hover:scale-100`}
@@ -58,7 +58,7 @@ const GalleryItem = memo(({ image, index, onClick }) => {
 
       {/* Media Content */}
       <div className="w-full h-full overflow-hidden relative">
-        <div className="absolute inset-0 bg-stone-200 animate-pulse -z-10"></div>
+        <div className="absolute inset-0 bg-cream-dk animate-pulse -z-10"></div>
         {imageUrl ? (
           isVideo ? (
             <div className="w-full h-full relative">
@@ -94,13 +94,13 @@ const GalleryItem = memo(({ image, index, onClick }) => {
           )
         ) : null}
         <div
-          className="image-placeholder absolute inset-0 w-full h-full flex items-center justify-center bg-stone-200"
+          className="image-placeholder absolute inset-0 w-full h-full flex items-center justify-center bg-cream-dk"
           style={{ display: imageUrl ? "none" : "flex" }}
         >
-          <Sparkles className="w-12 h-12 text-stone-400" />
+          <Sparkles className="w-12 h-12 text-gold" />
         </div>
         {/* Gradient Overlay */}
-        <div className="absolute inset-0 bg-linear-to-t from-stone-900/90 via-transparent to-transparent opacity-60 group-hover:opacity-80 transition-opacity duration-500"></div>
+        <div className="absolute inset-0 bg-gradient-to-t from-ink-dark/95 via-ink-dark/30 to-transparent opacity-70 group-hover:opacity-90 transition-opacity duration-500"></div>
       </div>
 
       {/* Content - Always visible but moves */}
@@ -109,16 +109,16 @@ const GalleryItem = memo(({ image, index, onClick }) => {
         style={{ transform: "translateZ(0)" }}
       >
         <div className="flex flex-col items-start">
-          <div className="flex items-center gap-2 mb-2 opacity-0 group-hover:opacity-100 transition-opacity duration-500 delay-100">
-            <Sparkles size={12} className="text-amber-400" />
-            <span className="text-amber-400 text-xs font-bold uppercase tracking-widest">
+          <div className="flex items-center gap-2 mb-2 transition-opacity duration-300">
+            <Sparkles size={12} className="text-saffron-lt" />
+            <span className="text-saffron-lt text-xs font-heading font-bold uppercase tracking-widest">
               {image.category?.name || "Uncategorized"}
             </span>
           </div>
-          <h3 className="text-white font-serif text-2xl leading-none mb-2 drop-shadow-md group-hover:text-amber-100 transition-colors">
+          <h3 className="text-white font-heading text-2xl leading-none mb-2 drop-shadow-md group-hover:text-gold-lt transition-colors">
             {image.title}
           </h3>
-          <div className="h-0.5 w-0 group-hover:w-12 bg-amber-500 transition-all duration-500"></div>
+          <div className="h-0.5 w-0 group-hover:w-12 bg-saffron transition-all duration-500"></div>
         </div>
       </div>
     </div>

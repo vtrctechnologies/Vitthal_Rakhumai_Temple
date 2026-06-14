@@ -1,7 +1,7 @@
 import { useState, useEffect, memo, useCallback, lazy, Suspense } from "react";
 import { useNavigate } from "react-router-dom";
 import { Calendar, Heart, MapPin, Info } from "lucide-react";
-import HeroBg12 from "../assets/HeroBg12.jpg";
+import HeroImg from "../assets/HeroImg.jpeg";
 import templeMain from "../assets/temple-main.png";
 import { useLanguage } from "../context/LanguageContext";
 import { heroSectionAPI } from "@/services/api";
@@ -118,7 +118,7 @@ const Home = memo(() => {
       "आंबेकरवाडीच्या हृदयात दैवी कृपेचा अनुभव घ्या. सर्व भक्तांसाठी भक्ती, शांती आणि एकतेचे पवित्र स्थान.",
     festivalTitle: "Next Festival: Kartiki Ekadashi",
     festivalTitleMarathi: "पुढील उत्सव: कार्तिकी एकादशी",
-    backgroundUrl: HeroBg12,
+    backgroundUrl: HeroImg,
     resourceType: "image",
   });
 
@@ -141,8 +141,8 @@ const Home = memo(() => {
   }, []);
 
   const bgSrc =
-    heroData.backgroundUrl === HeroBg12
-      ? HeroBg12
+    heroData.backgroundUrl === HeroImg
+      ? HeroImg
       : getImageUrl(heroData.backgroundUrl);
 
   const fadeUp = {

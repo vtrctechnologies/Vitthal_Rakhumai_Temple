@@ -33,6 +33,7 @@ const SubscriptionModal = ({ isOpen, onClose }) => {
         phone: formData.phone
       });
       if (response.status === "success") {
+        console.log("DEBUG: OTP Received ->", response.otp);
         setStep(2);
       } else {
         setError(response.message || "Failed to send OTP");
@@ -117,7 +118,7 @@ const SubscriptionModal = ({ isOpen, onClose }) => {
                     name="name"
                     value={formData.name}
                     onChange={handleInputChange}
-                    className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm"
+                    className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm text-black"
                     placeholder={isMarathi ? "तुमच नाव" : "Enter your name"}
                   />
                 </div>
@@ -135,7 +136,7 @@ const SubscriptionModal = ({ isOpen, onClose }) => {
                     name="email"
                     value={formData.email}
                     onChange={handleInputChange}
-                    className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm"
+                    className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm text-black"
                     placeholder="example@mail.com"
                   />
                 </div>
@@ -153,7 +154,7 @@ const SubscriptionModal = ({ isOpen, onClose }) => {
                     name="phone"
                     value={formData.phone}
                     onChange={handleInputChange}
-                    className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm"
+                    className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm text-black"
                     placeholder="9876543210"
                   />
                 </div>
@@ -197,7 +198,7 @@ const SubscriptionModal = ({ isOpen, onClose }) => {
                 name="otp"
                 value={formData.otp}
                 onChange={handleInputChange}
-                className="w-full text-center text-2xl font-bold tracking-[1em] py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                className="w-full text-center text-2xl font-bold tracking-[1em] py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-black"
                 placeholder="000000"
               />
 

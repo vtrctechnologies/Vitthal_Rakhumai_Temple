@@ -1,6 +1,6 @@
 import React, { memo, useState } from "react";
 import { ZoomIn, MapPin, Calendar, Music, Camera } from "lucide-react";
-import HeroBg12 from "../assets/HeroBg12.jpg";
+import HeroImg from "../assets/HeroImg.jpeg";
 import templeMain from "../assets/temple-main.png";
 import HeroBg from "../assets/HeroBg.jpeg";
 import templeHero from "../assets/temple-hero.jpg";
@@ -15,7 +15,7 @@ const BentoGridGallery = memo(() => {
       id: 1,
       type: "tall",
       className: "lg:col-span-2 lg:row-span-1 lg:col-start-1 lg:row-start-1 h-48 lg:h-auto",
-      image: HeroBg12,
+      image: HeroImg,
       title: "Temple Morning",
       subtitle: "Divine Atmosphere",
     },
@@ -55,7 +55,7 @@ const BentoGridGallery = memo(() => {
       id: 5,
       type: "tall",
       className: "lg:col-span-2 lg:row-span-2 lg:col-start-9 lg:row-start-1 h-64 lg:h-auto",
-      image: HeroBg12,
+      image: HeroImg,
       title: "Evening Aarti",
       subtitle: "Peaceful Moments",
     },
