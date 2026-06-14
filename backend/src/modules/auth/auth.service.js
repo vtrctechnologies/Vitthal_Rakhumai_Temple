@@ -95,12 +95,17 @@ export const authService = {
     user.otpExpires = Date.now() + 10 * 60 * 1000; // 10 mins
     await user.save({ validateBeforeSave: false });
 
-    // In a real app, send via SMS
-    console.log(`[AUTH] OTP for ${username}: ${otp}`);
+    // Log OTP to console in a plain, simple format
+    console.log('\n----------------------------------------');
+    console.log('--- AUTHENTICATION OTP REQUEST ---');
+    console.log(`User: ${username}`);
+    console.log(`OTP:  ${otp}  <-- USE THIS`);
+    console.log('----------------------------------------\n');
 
     return {
       status: 'success',
-      message: 'OTP sent to your registered phone number'
+      message: 'OTP sent to your registered phone number',
+      otp: otp // TEMPORARY: For testing on Render
     };
   },
 

@@ -40,7 +40,7 @@ const Footer = () => {
           backgroundSize: "20px 20px",
         }}
       />
-      
+
       <div className="max-w-7xl mx-auto px-6 relative z-10">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-14 mb-14">
           {/* Column 1: About & Donation CTA */}
@@ -114,7 +114,7 @@ const Footer = () => {
                     )}
                   </p>
                   <a
-                    href="https://www.google.com/maps/search/?api=1&query=Shree+Vitthal+Rakhumai+Temple+Amberkarwadi"
+                    href="https://www.google.com/maps/place/Shree+Vitthal+Rakhumai+Mandir,+Amberkarwadi/@16.8103131,73.3221993,3335m/data=!3m1!1e3!4m10!1m2!2m1!1sShree+Vitthal+Rakhumai+Temple+Amberkarwadi!3m6!1s0x3bea717523ce896f:0x7d2fb257f2b9cc4d!8m2!3d16.8103125!4d73.3383125!15sCipTaHJlZSBWaXR0aGFsIFJha2h1bWFpIFRlbXBsZSBBbWJlcmthcndhZGlaLCIqc2hyZWUgdml0dGhhbCByYWtodW1haSB0ZW1wbGUgYW1iZXJrYXJ3YWRpkgEMaGluZHVfdGVtcGxlmgFEQ2k5RFFVbFJRVU52WkVOb2RIbGpSamx2VDJ3NVIySkdiRTVQV0ZwM1lrWm9TbU13VVhoaVNGSllVVlJzYzFWRlJSQULgAQD6AQQIABBC!16s%2Fg%2F11j92c70nc?entry=ttu&g_ep=EgoyMDI2MDYxMC4wIKXMDSoASAFQAw%3D%3D"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-xs text-saffron-lt font-heading font-semibold hover:text-gold transition-colors inline-flex items-center gap-1 uppercase tracking-wider"
@@ -179,9 +179,9 @@ const Footer = () => {
               </button>
             </div>
 
-            <SubscriptionModal 
-              isOpen={isModalOpen} 
-              onClose={() => setIsModalOpen(false)} 
+            <SubscriptionModal
+              isOpen={isModalOpen}
+              onClose={() => setIsModalOpen(false)}
             />
 
             {/* Social Icons */}

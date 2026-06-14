@@ -8,16 +8,17 @@ const GalleryGrid = memo(({ images, onImageClick }) => {
     },
     [onImageClick]
   );
+
   if (!images || images.length === 0) {
     return (
-      <div className="text-center py-24">
-        <p className="text-stone-500 text-lg">No images found in this category.</p>
+      <div className="text-center py-24 border-2 border-dashed border-gold/20 rounded-xl bg-cream-dk/30">
+        <p className="text-ink-light text-lg font-heading italic">No images found in this category.</p>
       </div>
     );
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 auto-rows-[300px] gap-8">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 auto-rows-[320px] gap-6">
       {images.map((image, index) => (
         <GalleryItem
           key={image._id || image.id}
@@ -33,4 +34,3 @@ const GalleryGrid = memo(({ images, onImageClick }) => {
 GalleryGrid.displayName = "GalleryGrid";
 
 export default GalleryGrid;
-

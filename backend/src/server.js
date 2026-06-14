@@ -11,7 +11,9 @@ const start = async () => {
 	try {
 		await connect();
 		const server = http.createServer(app);
-		server.listen(port, () => console.log(`Server listening on port ${port}`));
+		server.listen(port, () => {
+			console.log(`SERVER RUNNING ON PORT ${port}`);
+		});
 	} catch (err) {
 		console.error('Failed to start server due to DB error', err);
 		process.exit(1);

@@ -6,6 +6,7 @@ import { Subscriber } from './subscriber.model.js';
  * @access  Public
  */
 export const requestOTP = async (req, res) => {
+  console.log('DEBUG: requestOTP function called');
   try {
     const { name, email, phone } = req.body;
 
@@ -20,11 +21,23 @@ export const requestOTP = async (req, res) => {
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     const otpExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
 
-    // Find or create subscriber
-    let subscriber = await Subscriber.findOne({ $or: [{ email }, { phone }] });
+    // Find if email or phone already exists in different records
+    // This prevents the 500 duplicate key error when updating a record
+    const existingWithEmail = await Subscriber.findOne({ email });
+    const existingWithPhone = await Subscriber.findOne({ phone });
+
+    // If both exist but belong to different people, this is a conflict
+    if (existingWithEmail && existingWithPhone && existingWithEmail._id.toString() !== existingWithPhone._id.toString()) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'This email and phone number are already registered to different accounts.'
+      });
+    }
+
+    // Use existing record if found by either email or phone
+    let subscriber = existingWithEmail || existingWithPhone;
 
     if (subscriber) {
-      // If already verified, decide if we want to allow re-subscription or just update info
       subscriber.name = name;
       subscriber.email = email;
       subscriber.phone = phone;
@@ -41,17 +54,32 @@ export const requestOTP = async (req, res) => {
       });
     }
 
-    // Log OTP to console as requested
-    console.log('--------------------------------------------------');
-    console.log(`[OTP] Subscription for ${name} (${phone}): ${otp}`);
-    console.log('--------------------------------------------------');
+    // Log OTP to console in a plain, simple format
+    console.log('\n----------------------------------------');
+    console.log('--- SUBSCRIPTION OTP REQUEST ---');
+    console.log(`User:  ${name}`);
+    console.log(`Phone: ${phone}`);
+    console.log(`Email: ${email}`);
+    console.log(`OTP:   ${otp}  <-- USE THIS`);
+    console.log('----------------------------------------\n');
 
     res.status(200).json({
       status: 'success',
-      message: 'OTP sent to your mobile number (check console)'
+      message: 'OTP generated successfully (check terminal)',
+      otp: otp // TEMPORARY: For testing on Render
     });
   } catch (error) {
     console.error('Error in requestOTP:', error);
+    
+    // Handle MongoDB Duplicate Key Error specifically
+    if (error.code === 11000) {
+      const field = Object.keys(error.keyPattern)[0];
+      return res.status(400).json({
+        status: 'error',
+        message: `This ${field} is already registered with another subscriber.`
+      });
+    }
+
     res.status(500).json({
       status: 'error',
       message: error.message || 'Internal server error'
