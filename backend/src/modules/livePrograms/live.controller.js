@@ -1,5 +1,5 @@
 import { LiveCategory, LiveProgram } from './live.model.js';
-import cloudinary from '../../config/cloudinary.js';
+import { uploadToCloudinary, deleteFromCloudinary } from '../../shared/config/cloudinary.js';
 
 // ==========================================
 // CATEGORY CONTROLLERS
@@ -9,10 +9,7 @@ import cloudinary from '../../config/cloudinary.js';
 export const getCategories = async (req, res) => {
   try {
     const categories = await LiveCategory.find({ isActive: true }).sort({ order: 1, name: 1 });
-    res.status(200).json({
-      status: 'success',
-      data: categories
-    });
+    res.status(200).json({ status: 'success', data: categories });
   } catch (error) {
     res.status(500).json({ status: 'error', message: error.message });
   }
@@ -22,10 +19,7 @@ export const getCategories = async (req, res) => {
 export const getCategoriesAdmin = async (req, res) => {
   try {
     const categories = await LiveCategory.find().sort({ order: 1, name: 1 });
-    res.status(200).json({
-      status: 'success',
-      data: categories
-    });
+    res.status(200).json({ status: 'success', data: categories });
   } catch (error) {
     res.status(500).json({ status: 'error', message: error.message });
   }
@@ -35,10 +29,7 @@ export const getCategoriesAdmin = async (req, res) => {
 export const createCategory = async (req, res) => {
   try {
     const category = await LiveCategory.create(req.body);
-    res.status(201).json({
-      status: 'success',
-      data: category
-    });
+    res.status(201).json({ status: 'success', data: category });
   } catch (error) {
     res.status(500).json({ status: 'error', message: error.message });
   }
@@ -54,10 +45,7 @@ export const updateCategory = async (req, res) => {
     if (!category) {
       return res.status(404).json({ status: 'error', message: 'Category not found' });
     }
-    res.status(200).json({
-      status: 'success',
-      data: category
-    });
+    res.status(200).json({ status: 'success', data: category });
   } catch (error) {
     res.status(500).json({ status: 'error', message: error.message });
   }
@@ -66,7 +54,6 @@ export const updateCategory = async (req, res) => {
 // Delete category
 export const deleteCategory = async (req, res) => {
   try {
-    // Check if category is used in any programs
     const programsCount = await LiveProgram.countDocuments({ category: req.params.id });
     if (programsCount > 0) {
       return res.status(400).json({
@@ -79,10 +66,7 @@ export const deleteCategory = async (req, res) => {
     if (!category) {
       return res.status(404).json({ status: 'error', message: 'Category not found' });
     }
-    res.status(200).json({
-      status: 'success',
-      message: 'Category deleted successfully'
-    });
+    res.status(200).json({ status: 'success', message: 'Category deleted successfully' });
   } catch (error) {
     res.status(500).json({ status: 'error', message: error.message });
   }
@@ -102,17 +86,12 @@ export const getLivePrograms = async (req, res) => {
     if (year) filter.year = parseInt(year);
     if (active === 'true') filter.isActive = true;
     else if (active === 'false') filter.isActive = false;
-    // if active === 'all', we don't apply isActive filter
 
     const programs = await LiveProgram.find(filter)
       .populate('category', 'name')
       .sort({ startTimestamp: -1 });
 
-    res.status(200).json({
-      status: 'success',
-      results: programs.length,
-      data: programs
-    });
+    res.status(200).json({ status: 'success', results: programs.length, data: programs });
   } catch (error) {
     res.status(500).json({ status: 'error', message: error.message });
   }
@@ -123,11 +102,7 @@ export const getLiveProgramYears = async (req, res) => {
   try {
     const years = await LiveProgram.distinct('year');
     years.sort((a, b) => b - a);
-    
-    res.status(200).json({
-      status: 'success',
-      data: years
-    });
+    res.status(200).json({ status: 'success', data: years });
   } catch (error) {
     res.status(500).json({ status: 'error', message: error.message });
   }
@@ -140,10 +115,7 @@ export const getLiveProgram = async (req, res) => {
     if (!program) {
       return res.status(404).json({ status: 'error', message: 'Program not found' });
     }
-    res.status(200).json({
-      status: 'success',
-      data: program
-    });
+    res.status(200).json({ status: 'success', data: program });
   } catch (error) {
     res.status(500).json({ status: 'error', message: error.message });
   }
@@ -154,7 +126,6 @@ export const createLiveProgram = async (req, res) => {
   try {
     const programData = { ...req.body };
     
-    // Parse social links if they exist as separate fields
     programData.socialLinks = {
       youtube: req.body.youtube || '',
       facebook: req.body.facebook || '',
@@ -163,7 +134,6 @@ export const createLiveProgram = async (req, res) => {
       other: req.body.other || ''
     };
 
-    // Parse boolean fields from FormData
     if (req.body.isActive !== undefined) {
       programData.isActive = req.body.isActive === 'true' || req.body.isActive === true;
     }
@@ -175,15 +145,15 @@ export const createLiveProgram = async (req, res) => {
     }
 
     if (req.file) {
-      programData.thumbnailUrl = req.file.path;
-      programData.publicId = req.file.filename;
+      const targetYear = programData.year || new Date().getFullYear();
+      const folder = `vrtemple/live-programs/${targetYear}`;
+      const uploadResult = await uploadToCloudinary(req.file.buffer, folder, 'image');
+      programData.thumbnailUrl = uploadResult.secure_url;
+      programData.publicId = uploadResult.public_id;
     }
 
     const program = await LiveProgram.create(programData);
-    res.status(201).json({
-      status: 'success',
-      data: program
-    });
+    res.status(201).json({ status: 'success', data: program });
   } catch (error) {
     res.status(500).json({ status: 'error', message: error.message });
   }
@@ -199,7 +169,6 @@ export const updateLiveProgram = async (req, res) => {
 
     const updateData = { ...req.body };
     
-    // Update social links if provided
     if (req.body.youtube !== undefined || req.body.facebook !== undefined || req.body.other !== undefined) {
       updateData.socialLinks = {
         youtube: req.body.youtube !== undefined ? req.body.youtube : program.socialLinks?.youtube,
@@ -210,7 +179,6 @@ export const updateLiveProgram = async (req, res) => {
       };
     }
 
-    // Parse boolean fields from FormData
     if (req.body.isActive !== undefined) {
       updateData.isActive = req.body.isActive === 'true' || req.body.isActive === true;
     }
@@ -221,17 +189,18 @@ export const updateLiveProgram = async (req, res) => {
       updateData.year = parseInt(req.body.year);
     }
 
-    // Handle Image Upload
     if (req.file) {
-      // Delete old image if exists
       if (program.publicId) {
-        await cloudinary.uploader.destroy(program.publicId);
+        await deleteFromCloudinary(program.publicId, 'image');
       }
-      updateData.thumbnailUrl = req.file.path;
-      updateData.publicId = req.file.filename;
+      const targetYear = updateData.year || program.year || new Date().getFullYear();
+      const folder = `vrtemple/live-programs/${targetYear}`;
+      const uploadResult = await uploadToCloudinary(req.file.buffer, folder, 'image');
+      updateData.thumbnailUrl = uploadResult.secure_url;
+      updateData.publicId = uploadResult.public_id;
     } else if (req.body.deleteThumbnail === 'true') {
       if (program.publicId) {
-        await cloudinary.uploader.destroy(program.publicId);
+        await deleteFromCloudinary(program.publicId, 'image');
       }
       updateData.thumbnailUrl = '';
       updateData.publicId = '';
@@ -242,10 +211,7 @@ export const updateLiveProgram = async (req, res) => {
       runValidators: true
     });
 
-    res.status(200).json({
-      status: 'success',
-      data: updatedProgram
-    });
+    res.status(200).json({ status: 'success', data: updatedProgram });
   } catch (error) {
     res.status(500).json({ status: 'error', message: error.message });
   }
@@ -259,16 +225,12 @@ export const deleteLiveProgram = async (req, res) => {
       return res.status(404).json({ status: 'error', message: 'Program not found' });
     }
 
-    // Delete image from Cloudinary
     if (program.publicId) {
-      await cloudinary.uploader.destroy(program.publicId);
+      await deleteFromCloudinary(program.publicId, 'image');
     }
 
     await LiveProgram.findByIdAndDelete(req.params.id);
-    res.status(200).json({
-      status: 'success',
-      message: 'Program deleted successfully'
-    });
+    res.status(200).json({ status: 'success', message: 'Program deleted successfully' });
   } catch (error) {
     res.status(500).json({ status: 'error', message: error.message });
   }

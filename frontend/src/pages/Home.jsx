@@ -444,12 +444,23 @@ const Home = memo(() => {
       </motion.section>
 
       {/* ── GALLERY ── */}
-      <div className="px-6 py-16 bg-cream">
-        <div className="max-w-6xl mx-auto">
+      <div className="relative px-6 py-16 bg-stone overflow-hidden">
+        {/* Top accent border */}
+        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-maroon via-gold via-saffron to-maroon" />
+        {/* Subtle radial dot pattern */}
+        <div
+          className="absolute inset-0 pointer-events-none opacity-[0.04]"
+          style={{
+            backgroundImage:
+              "radial-gradient(circle, var(--color-maroon) 1.5px, transparent 1.5px)",
+            backgroundSize: "28px 28px",
+          }}
+        />
+        <div className="max-w-7xl mx-auto relative z-10">
           <motion.div {...fadeUp}>
             <SectionHeader
-              eyebrow="Darshan Gallery"
-              title="Sacred Moments"
+              eyebrow="|| Darshan Gallery ||"
+              title="Captured Moments"
               titleMr="पवित्र क्षण"
               center
             />

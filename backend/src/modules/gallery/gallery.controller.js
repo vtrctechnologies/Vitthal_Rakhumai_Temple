@@ -1,6 +1,6 @@
 import { Gallery } from '../gallery/gallery.model.js';
 import { Category } from '../gallery/category.model.js';
-import cloudinary from '../../config/cloudinary.js';
+import { uploadToCloudinary, deleteFromCloudinary } from '../../shared/config/cloudinary.js';
 
 // --- Category Controllers ---
 
@@ -42,7 +42,6 @@ export const updateCategory = async (req, res) => {
 
 export const deleteCategory = async (req, res) => {
   try {
-    // Check if category has images
     const imagesCount = await Gallery.countDocuments({ category: req.params.id });
     if (imagesCount > 0) {
       return res.status(400).json({
@@ -51,7 +50,7 @@ export const deleteCategory = async (req, res) => {
       });
     }
     await Category.findByIdAndDelete(req.params.id);
-    res.status(204).json({ status: 'success', data: null });
+    res.status(200).json({ status: 'success', message: 'Category deleted' });
   } catch (error) {
     res.status(500).json({ status: 'error', message: error.message });
   }
@@ -72,11 +71,7 @@ export const getImages = async (req, res) => {
       .sort({ order: 1, createdAt: -1 })
       .limit(parseInt(limit));
 
-    res.status(200).json({
-      status: 'success',
-      results: images.length,
-      data: images
-    });
+    res.status(200).json({ status: 'success', results: images.length, data: images });
   } catch (error) {
     res.status(500).json({ status: 'error', message: error.message });
   }
@@ -94,11 +89,7 @@ export const getImagesAdmin = async (req, res) => {
       .populate('category', 'name')
       .sort({ order: 1, createdAt: -1 });
 
-    res.status(200).json({
-      status: 'success',
-      results: images.length,
-      data: images
-    });
+    res.status(200).json({ status: 'success', results: images.length, data: images });
   } catch (error) {
     res.status(500).json({ status: 'error', message: error.message });
   }
@@ -111,15 +102,20 @@ export const createImage = async (req, res) => {
     }
 
     const { title, description, category, year, order, isActive } = req.body;
+    const resourceType = req.file.mimetype.startsWith('video') ? 'video' : 'image';
+    const targetYear = parseInt(year) || new Date().getFullYear();
+    const folder = `vrtemple/gallery/${targetYear}`;
+
+    const uploadResult = await uploadToCloudinary(req.file.buffer, folder, resourceType);
 
     const newImage = await Gallery.create({
       title,
       description,
-      imageUrl: req.file.path,
-      publicId: req.file.filename,
-      resourceType: req.file.mimetype.startsWith('video') ? 'video' : 'image',
+      imageUrl: uploadResult.secure_url,
+      publicId: uploadResult.public_id,
+      resourceType,
       category,
-      year: parseInt(year) || new Date().getFullYear(),
+      year: targetYear,
       order: parseInt(order) || 0,
       isActive: isActive === 'true' || isActive === true
     });
@@ -139,13 +135,16 @@ export const updateImage = async (req, res) => {
 
     if (req.file) {
       if (image.publicId) {
-        await cloudinary.uploader.destroy(image.publicId, {
-          resource_type: image.resourceType || 'image'
-        });
+        await deleteFromCloudinary(image.publicId, image.resourceType || 'image');
       }
-      updateData.imageUrl = req.file.path;
-      updateData.publicId = req.file.filename;
-      updateData.resourceType = req.file.mimetype.startsWith('video') ? 'video' : 'image';
+      const resourceType = req.file.mimetype.startsWith('video') ? 'video' : 'image';
+      const targetYear = parseInt(updateData.year) || image.year || new Date().getFullYear();
+      const folder = `vrtemple/gallery/${targetYear}`;
+      const uploadResult = await uploadToCloudinary(req.file.buffer, folder, resourceType);
+
+      updateData.imageUrl = uploadResult.secure_url;
+      updateData.publicId = uploadResult.public_id;
+      updateData.resourceType = resourceType;
     }
 
     if (updateData.year) updateData.year = parseInt(updateData.year);
@@ -171,13 +170,11 @@ export const deleteImage = async (req, res) => {
     if (!image) return res.status(404).json({ status: 'error', message: 'Image not found' });
 
     if (image.publicId) {
-      await cloudinary.uploader.destroy(image.publicId, {
-        resource_type: image.resourceType || 'image'
-      });
+      await deleteFromCloudinary(image.publicId, image.resourceType || 'image');
     }
 
     await Gallery.findByIdAndDelete(req.params.id);
-    res.status(204).json({ status: 'success', data: null });
+    res.status(200).json({ status: 'success', message: 'Image deleted successfully' });
   } catch (error) {
     res.status(500).json({ status: 'error', message: error.message });
   }

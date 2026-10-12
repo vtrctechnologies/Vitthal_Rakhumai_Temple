@@ -30,8 +30,11 @@ const MessagesView = () => {
     setLoading(true);
     try {
       const response = await contactAPI.getMessages();
-      if (response && response.status === "success") {
-        setMessages(Array.isArray(response.data) ? response.data : []);
+      const messagesList = response?.data || (Array.isArray(response) ? response : []);
+      if (Array.isArray(messagesList)) {
+        setMessages(messagesList);
+      } else {
+        setMessages([]);
       }
     } catch (error) {
       console.error("Error fetching messages:", error);

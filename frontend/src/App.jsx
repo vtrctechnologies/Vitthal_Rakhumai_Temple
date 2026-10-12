@@ -30,6 +30,7 @@ const Banners = lazy(() => import("./pages/events/Banners"));
 const LivePrograms = lazy(() => import("./pages/events/LivePrograms"));
 const EventDetail = lazy(() => import("./pages/EventDetail.jsx"));
 const Committee = lazy(() => import("./pages/Committee"));
+const SportsRegistration = lazy(() => import("./pages/events/SportsRegistration"));
 
 // Loading fallback component
 const PageLoader = () => (
@@ -270,6 +271,14 @@ const App = () => {
                 element={
                   <Suspense fallback={<PageLoader />}>
                     <Committee />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="/events/sports-registration"
+                element={
+                  <Suspense fallback={<PageLoader />}>
+                    <SportsRegistration />
                   </Suspense>
                 }
               />

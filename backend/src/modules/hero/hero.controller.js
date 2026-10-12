@@ -1,5 +1,8 @@
 import { HeroSection } from './hero.model.js';
-import cloudinary from '../../config/cloudinary.js';
+import {
+  uploadToCloudinary,
+  deleteFromCloudinary,
+} from '../../shared/config/cloudinary.js';
 
 // Get active hero section (Public)
 export const getActiveHero = async (req, res) => {
@@ -39,9 +42,16 @@ export const createHero = async (req, res) => {
     }
 
     if (req.file) {
-      heroData.backgroundUrl = req.file.path;
-      heroData.publicId = req.file.filename;
-      heroData.resourceType = req.file.mimetype.startsWith('video') ? 'video' : 'image';
+      const isVideo = req.file.mimetype.startsWith('video');
+      const resourceType = isVideo ? 'video' : 'image';
+      const uploadResult = await uploadToCloudinary(
+        req.file.buffer,
+        'vitthal_rakhumai_hero',
+        resourceType
+      );
+      heroData.backgroundUrl = uploadResult.secure_url;
+      heroData.publicId = uploadResult.public_id;
+      heroData.resourceType = resourceType;
     }
 
     const hero = await HeroSection.create(heroData);
@@ -70,15 +80,19 @@ export const updateHero = async (req, res) => {
     }
 
     if (req.file) {
-      // Delete old media
       if (hero.publicId) {
-        await cloudinary.uploader.destroy(hero.publicId, {
-          resource_type: hero.resourceType || 'image'
-        });
+        await deleteFromCloudinary(hero.publicId, hero.resourceType || 'image');
       }
-      updateData.backgroundUrl = req.file.path;
-      updateData.publicId = req.file.filename;
-      updateData.resourceType = req.file.mimetype.startsWith('video') ? 'video' : 'image';
+      const isVideo = req.file.mimetype.startsWith('video');
+      const resourceType = isVideo ? 'video' : 'image';
+      const uploadResult = await uploadToCloudinary(
+        req.file.buffer,
+        'vitthal_rakhumai_hero',
+        resourceType
+      );
+      updateData.backgroundUrl = uploadResult.secure_url;
+      updateData.publicId = uploadResult.public_id;
+      updateData.resourceType = resourceType;
     }
 
     const updatedHero = await HeroSection.findByIdAndUpdate(req.params.id, updateData, {
@@ -103,11 +117,8 @@ export const deleteHero = async (req, res) => {
       return res.status(404).json({ status: 'error', message: 'Hero section not found' });
     }
 
-    // Delete media from Cloudinary
     if (hero.publicId) {
-      await cloudinary.uploader.destroy(hero.publicId, {
-        resource_type: hero.resourceType || 'image'
-      });
+      await deleteFromCloudinary(hero.publicId, hero.resourceType || 'image');
     }
 
     await HeroSection.findByIdAndDelete(req.params.id);

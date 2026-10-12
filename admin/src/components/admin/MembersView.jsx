@@ -232,32 +232,33 @@ const MembersView = () => {
 
   // Theme constants for consistent styling
   const THEME = {
-    primary: "bg-orange-600 hover:bg-orange-700",
-    secondary: "bg-stone-100 hover:bg-stone-200 text-stone-700",
-    accent: "text-orange-600",
-    border: "border-orange-200",
-    gradient: "bg-gradient-to-br from-orange-50 via-amber-50 to-stone-50",
-    cardHover: "hover:shadow-orange-200/50",
+    primary: "bg-gradient-to-r from-[#6b1a1a] to-[#8b2222] hover:from-[#5a1515] hover:to-[#7a1e1e]",
+    secondary: "bg-[#fef6e4] hover:bg-[#f5e6c8] text-[#6b1a1a]",
+    accent: "text-[#6b1a1a]",
+    border: "border-[#d4af37]/30",
+    gradient: "bg-gradient-to-br from-[#fef6e4] via-[#fff8ee] to-[#f5e6c8]",
+    cardHover: "hover:shadow-[#d4af37]/20",
   };
 
   return (
     <div className={`p-6 min-h-screen ${THEME.gradient} animate-fade-in-up`}>
       {/* Header Section */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 border-b border-orange-200 pb-6">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 border-b pb-6" style={{ borderColor: "rgba(212,175,55,0.3)" }}>
         <div>
-          <h2 className="text-3xl font-serif font-bold text-stone-800 flex items-center gap-3">
-            <span className="bg-orange-100 p-2 rounded-lg text-orange-600">
+          <h2 className="text-3xl font-serif font-bold flex items-center gap-3" style={{ color: "#3d0f0f" }}>
+            <span className="p-2 rounded-lg" style={{ background: "rgba(212,175,55,0.15)", color: "#6b1a1a" }}>
               <Users className="w-8 h-8" />
             </span>
             Committee Members
           </h2>
-          <p className="text-stone-600 mt-2 text-base ml-1">
-            Manage the pillars of our temple community across all committees.
+          <p className="mt-2 text-base ml-1" style={{ color: "#5c3317" }}>
+            Manage Utsav &amp; Mahila members. <strong style={{ color: "#6b1a1a", fontSize: "0.85em" }}>Homepage is static — edit <code>StaticCommitteeMembers.jsx</code> to update it.</strong>
           </p>
         </div>
         <Button
           onClick={() => setShowForm(true)}
-          className={`mt-4 md:mt-0 flex items-center gap-2 !w-auto shadow-lg shadow-orange-200 ${THEME.primary} text-white border-none`}
+          className={`mt-4 md:mt-0 flex items-center gap-2 !w-auto ${THEME.primary} text-white border-none`}
+          style={{ boxShadow: "0 4px 15px rgba(107,26,26,0.3)" }}
         >
           <Plus className="w-5 h-5" />
           Add New Member
@@ -265,7 +266,7 @@ const MembersView = () => {
       </div>
 
       {/* Filter & Controls Bar */}
-      <div className="mb-8 flex flex-col lg:flex-row gap-6 justify-between items-start lg:items-center bg-white p-4 rounded-xl shadow-sm border border-orange-100">
+      <div className="mb-8 flex flex-col lg:flex-row gap-6 justify-between items-start lg:items-center bg-white p-4 rounded-xl shadow-sm" style={{ border: "1px solid rgba(212,175,55,0.2)" }}>
         <div className="flex gap-2 flex-wrap w-full lg:w-auto">
           {[
             { id: "all", label: "All Members" },
@@ -278,26 +279,32 @@ const MembersView = () => {
               onClick={() => setFilterType(tab.id)}
               className={`px-5 py-2.5 rounded-full text-sm font-semibold transition-all duration-300 ${
                 filterType === tab.id
-                  ? "bg-orange-600 text-white shadow-md transform scale-105"
-                  : "bg-stone-100 text-stone-600 hover:bg-orange-50 hover:text-orange-700"
+                  ? "text-white shadow-md transform scale-105"
+                  : ""
               }`}
+              style={filterType === tab.id
+                ? { background: "linear-gradient(135deg, #6b1a1a, #8b2222)" }
+                : { background: "rgba(212,175,55,0.1)", color: "#6b1a1a" }
+              }
             >
               {tab.label}
             </button>
           ))}
         </div>
 
-        <div className="flex items-center gap-3 px-4 py-2 bg-stone-50 rounded-lg border border-stone-200">
+        <div className="flex items-center gap-3 px-4 py-2 rounded-lg border" style={{ background: "rgba(212,175,55,0.05)", borderColor: "rgba(212,175,55,0.25)" }}>
           <input
             type="checkbox"
             id="showInactive"
             checked={showInactive}
             onChange={(e) => setShowInactive(e.target.checked)}
-            className="w-4 h-4 text-orange-600 border-gray-300 rounded focus:ring-orange-500 cursor-pointer"
+            className="w-4 h-4 border-gray-300 rounded cursor-pointer"
+            style={{ accentColor: "#6b1a1a" }}
           />
           <label
             htmlFor="showInactive"
-            className="text-sm font-medium text-stone-700 cursor-pointer select-none"
+            className="text-sm font-medium cursor-pointer select-none"
+            style={{ color: "#5c3317" }}
           >
             Show inactive members
           </label>

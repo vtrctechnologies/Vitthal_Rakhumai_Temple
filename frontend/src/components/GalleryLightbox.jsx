@@ -4,7 +4,13 @@ import { getImageUrl } from "@/utils/imageUrl";
 const GalleryLightbox = ({ image, onClose, onNext, onPrev, hasNext, hasPrev }) => {
   if (!image) return null;
 
-  const imageUrl = getImageUrl(image.imageUrl);
+  const rawUrl = image.imageUrl || image.mediaUrl || "";
+  const imageUrl = getImageUrl(rawUrl);
+
+  const isVideo =
+    rawUrl.match(/\.(mp4|mov|avi|mkv|webm)$/i) ||
+    rawUrl.includes("/video/") ||
+    (rawUrl.includes("/upload/v") && !rawUrl.match(/\.(jpg|jpeg|png|webp|gif|svg)$/i));
 
   return (
     <div
@@ -52,9 +58,7 @@ const GalleryLightbox = ({ image, onClose, onNext, onPrev, hasNext, hasPrev }) =
         {/* Image Container */}
         <div className="relative group shadow-2xl shadow-black/80 max-h-[70vh] overflow-hidden rounded-lg border border-gold/30 bg-cream-dk">
           {imageUrl ? (
-            image.imageUrl?.match(/\.(mp4|mov|avi|mkv|webm)$/i) || 
-            image.imageUrl?.includes("/video/") ||
-            image.imageUrl?.includes("/upload/v") && !image.imageUrl?.match(/\.(jpg|jpeg|png|webp|gif|svg)$/i) ? (
+            isVideo ? (
               <video
                 src={imageUrl}
                 controls

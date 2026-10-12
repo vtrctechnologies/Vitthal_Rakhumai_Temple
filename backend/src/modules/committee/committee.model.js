@@ -8,16 +8,28 @@ const committeeSchema = new mongoose.Schema({
     },
     nameMarathi: {
         type: String,
-        trim: true
+        trim: true,
+        default: ''
     },
     position: {
         type: String,
-        required: [true, 'Position is required'],
-        trim: true
+        trim: true,
+        default: 'Member'
+    },
+    role: {
+        type: String,
+        trim: true,
+        default: 'Member'
     },
     positionMarathi: {
         type: String,
-        trim: true
+        trim: true,
+        default: ''
+    },
+    roleMarathi: {
+        type: String,
+        trim: true,
+        default: ''
     },
     imageUrl: {
         type: String,
@@ -25,7 +37,7 @@ const committeeSchema = new mongoose.Schema({
     },
     publicId: {
         type: String,
-        required: [true, 'Public ID is required']
+        default: ''
     },
     resourceType: {
         type: String,
@@ -51,7 +63,33 @@ const committeeSchema = new mongoose.Schema({
         default: true
     }
 }, {
-    timestamps: true
+    timestamps: true,
+    toJSON: {
+        virtuals: true,
+        transform: (doc, ret) => {
+            if (!ret.role && ret.position) ret.role = ret.position;
+            if (!ret.position && ret.role) ret.position = ret.role;
+            return ret;
+        }
+    },
+    toObject: {
+        virtuals: true,
+        transform: (doc, ret) => {
+            if (!ret.role && ret.position) ret.role = ret.position;
+            if (!ret.position && ret.role) ret.position = ret.role;
+            return ret;
+        }
+    }
+});
+
+committeeSchema.pre('save', function() {
+    const finalPos = this.position || this.role || 'Member';
+    this.position = finalPos;
+    this.role = finalPos;
+
+    const finalPosMr = this.positionMarathi || this.roleMarathi || '';
+    this.positionMarathi = finalPosMr;
+    this.roleMarathi = finalPosMr;
 });
 
 export const Committee = mongoose.models.Committee || mongoose.model('Committee', committeeSchema);

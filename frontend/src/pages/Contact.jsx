@@ -37,7 +37,7 @@ const Contact = () => {
     try {
       const response = await contactAPI.sendMessage(formData);
 
-      if (response.status === "success") {
+      if (response && (response.status === "success" || response.success)) {
         Swal.fire({
           icon: "success",
           title: "Message Sent!",

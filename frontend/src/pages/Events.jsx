@@ -43,8 +43,9 @@ const Events = () => {
       try {
         setLoadingFeatured(true);
         const response = await eventsPageAPI.getFeaturedEvent();
-        if (response && response.status === "success" && response.data) {
-          setFeaturedEvent(response.data);
+        const featData = response?.data || (Array.isArray(response) ? response[0] : response);
+        if (featData) {
+          setFeaturedEvent(Array.isArray(featData) ? featData[0] : featData);
         }
       } catch (error) {
         console.error("Error fetching featured event:", error);
@@ -83,8 +84,9 @@ const Events = () => {
     const fetchYears = async () => {
       try {
         const response = await eventsPageAPI.getEventYears();
-        if (response && response.status === "success") {
-          setAvailableYears(response.data || []);
+        const years = response?.data || (Array.isArray(response) ? response : []);
+        if (Array.isArray(years) && years.length > 0) {
+          setAvailableYears(years);
         }
       } catch (error) {
         console.error("Error fetching event years:", error);
@@ -100,10 +102,12 @@ const Events = () => {
         setLoadingUpcoming(true);
         const params = { year: activeYear };
         const response = await eventsPageAPI.getAllEvents(params);
-        if (response && response.status === "success") {
-          const events = Array.isArray(response.data) ? response.data : [];
-          setUpcomingEvents(events);
-        }
+        const events = Array.isArray(response?.data)
+          ? response.data
+          : Array.isArray(response)
+          ? response
+          : [];
+        setUpcomingEvents(events);
       } catch (error) {
         console.error("Error fetching events by year:", error);
         setUpcomingEvents([]);
@@ -127,16 +131,19 @@ const Events = () => {
 
 
   return (
-    <div className="min-h-screen pt-20 bg-[#FFF8E1]">
+    <div className="min-h-screen pt-20 bg-cream font-body text-ink-dark">
 
       {/* Hero Section */}
-      <section className="py-20 px-4 bg-gradient-to-br from-[#FF7F00]/10 to-[#5D0000]/10">
+      <section className="py-20 px-4 bg-gradient-to-br from-saffron/10 via-cream-dk/40 to-maroon/10 border-b border-gold/30">
         <div className="container mx-auto max-w-4xl text-center">
-          <h1 className="text-5xl md:text-6xl font-display font-bold text-[#5D0000] mb-6 animate-fade-in drop-shadow-sm">
+          <span className="block font-heading text-xs tracking-[0.28em] uppercase text-saffron mb-2">
+            Utsav & Celebrations
+          </span>
+          <h1 className="text-5xl md:text-6xl font-display font-bold text-maroon mb-4 animate-fade-in drop-shadow-sm">
             Temple Events
           </h1>
-          <div className="w-32 h-1 bg-gradient-to-r from-[#FFB700] to-[#5D0000] mx-auto mb-6" />
-          <p className="text-xl text-[#770A0A]/80 font-medium">
+          <div className="w-32 h-1 bg-gradient-to-r from-gold via-saffron to-maroon mx-auto mb-4" />
+          <p className="text-xl text-ink-mid font-medium">
             Join us in celebrating divine festivals and spiritual gatherings
           </p>
         </div>
@@ -144,36 +151,36 @@ const Events = () => {
 
       {/* Countdown Section (Visible only when featured loaded) */}
       {!loadingFeatured && featuredEvent && (
-        <section className="py-16 px-4 bg-[#FFF8E1]">
+        <section className="py-16 px-4 bg-cream">
           <div className="container mx-auto max-w-6xl">
-            <Card className="p-8 md:p-12 bg-[#5D0000] rounded-xl shadow-2xl border-4 border-[#FFB700] relative overflow-hidden">
+            <Card className="p-8 md:p-12 bg-maroon rounded-xl shadow-2xl border-2 border-gold relative overflow-hidden">
               {/* Decorative Circles */}
-              <div className="absolute top-0 right-0 w-24 h-24 bg-[#FFB700] opacity-10 rounded-bl-full pointer-events-none"></div>
-              <div className="absolute bottom-0 left-0 w-24 h-24 bg-[#FFB700] opacity-10 rounded-tr-full pointer-events-none"></div>
+              <div className="absolute top-0 right-0 w-32 h-32 bg-gold/10 rounded-bl-full pointer-events-none"></div>
+              <div className="absolute bottom-0 left-0 w-32 h-32 bg-gold/10 rounded-tr-full pointer-events-none"></div>
 
               <div className="text-center mb-10 relative z-10">
-                <Badge variant="gold" className="font-bold mb-4 text-sm px-4 py-1.5 rounded-full shadow-lg border border-[#FFE082]">
+                <Badge variant="gold" className="font-heading font-bold mb-4 text-xs tracking-widest uppercase px-4 py-1.5 rounded-full shadow-lg border border-gold/40 bg-gold/20 text-gold-lt">
                   Upcoming Utsav
                 </Badge>
-                <h2 className="text-4xl md:text-5xl font-display font-extrabold text-[#FFF8E1] mb-4 tracking-tight">
+                <h2 className="text-4xl md:text-5xl font-display font-extrabold text-gold-lt mb-4 tracking-tight">
                   {featuredEvent.title}
                 </h2>
-                <p className="text-lg text-[#FFB700]/90 font-light italic">
+                <p className="text-lg text-cream-dk/90 font-light italic max-w-2xl mx-auto">
                   {featuredEvent.description}
                 </p>
               </div>
 
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10 relative z-10">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4 relative z-10">
                 {/* Reusing existing countdown logic */}
                 {Object.entries(countdown).map(([unit, value]) => (
                   <div
                     key={unit}
-                    className="text-center p-6 bg-[#FFF8E1] rounded-lg shadow-xl border-t-4 border-[#FF7F00]"
+                    className="text-center p-6 bg-cream-dk/90 rounded-lg shadow-xl border border-gold/40 border-t-4 border-t-saffron"
                   >
-                    <div className="text-5xl md:text-6xl font-display font-black text-[#5D0000] mb-1">
+                    <div className="text-5xl md:text-6xl font-display font-black text-maroon mb-1">
                       {value}
                     </div>
-                    <div className="text-sm text-[#770A0A] uppercase tracking-widest font-semibold">
+                    <div className="text-xs text-saffron-dk uppercase tracking-widest font-heading font-bold">
                       {unit}
                     </div>
                   </div>
@@ -193,10 +200,13 @@ const Events = () => {
           {/* Header Row */}
           <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-6">
             <div className="text-left">
-              <h2 className="text-4xl font-display font-bold mb-2 text-[#5D0000]">
+              <span className="block font-heading text-xs tracking-[0.28em] uppercase text-saffron mb-1">
+                Sacred Calendar
+              </span>
+              <h2 className="text-4xl font-display font-bold mb-2 text-maroon">
                 Upcoming Events
               </h2>
-              <div className="w-24 h-1.5 bg-gradient-to-r from-[#FFB700] to-[#5D0000]" />
+              <div className="w-24 h-1 bg-gradient-to-r from-gold to-maroon" />
             </div>
           </div>
 
@@ -207,10 +217,10 @@ const Events = () => {
                 key={year}
                 onClick={() => setActiveYear(year)}
                 className={`
-                  px-5 py-2 rounded-xl text-sm font-bold transition-all duration-300
+                  px-5 py-2 rounded-full text-xs font-heading font-bold uppercase tracking-wider transition-all duration-300 border
                   ${activeYear === year
-                    ? "bg-[#5D0000] text-yellow-500 shadow-md shadow-[#5D0000]/20"
-                    : "bg-white text-[#5D0000] border border-[#FFB700]/30 hover:border-[#FFB700]"
+                    ? "bg-maroon text-gold-lt border-gold shadow-md shadow-maroon/20 scale-105"
+                    : "bg-cream-dk text-ink-mid border-gold/30 hover:border-gold hover:text-maroon"
                   }
                 `}
               >
@@ -221,7 +231,7 @@ const Events = () => {
 
           {/* Loading / Empty States */}
           {loadingUpcoming && (
-            <div className="text-center py-12 text-[#770A0A]">
+            <div className="text-center py-12 text-ink-light font-heading tracking-widest uppercase text-sm">
               Loading upcoming events...
             </div>
           )}
@@ -237,7 +247,7 @@ const Events = () => {
                 >
                   <Card
                     interactive
-                    className="p-6 cursor-glow group bg-[#FFF8E1] border border-[#FFB700]/30 hover:border-[#FFB700] h-full"
+                    className="p-6 cursor-glow group bg-white/70 border border-gold/30 hover:border-gold hover:shadow-xl transition-all duration-300 h-full rounded-xl"
                   >
                     <div className="flex justify-between items-start mb-4">
                       <Badge
@@ -245,27 +255,27 @@ const Events = () => {
                       >
                         {event.status === "upcoming" ? "Upcoming" : "Recurring"}
                       </Badge>
-                      <CalendarIcon className="w-5 h-5 text-[#5D0000] group-hover:scale-110 transition-transform" />
+                      <CalendarIcon className="w-5 h-5 text-maroon group-hover:scale-110 transition-transform" />
                     </div>
-                    <h3 className="text-xl font-display font-semibold mb-3 text-[#5D0000] group-hover:text-[#FF7F00] transition-colors">
+                    <h3 className="text-xl font-display font-bold mb-3 text-maroon group-hover:text-saffron-dk transition-colors">
                       {event.title}
                     </h3>
-                    <div className="space-y-2 mb-4 text-sm text-[#770A0A]/80">
+                    <div className="space-y-2 mb-4 text-sm text-ink-mid">
                       <div className="flex items-center">
-                        <CalendarIcon className="w-4 h-4 mr-2 text-[#FFB700]" />
+                        <CalendarIcon className="w-4 h-4 mr-2 text-saffron shrink-0" />
                         <span>{formatEventDate(event.date)}</span>
                       </div>
                       <div className="flex items-center">
-                        <Clock className="w-4 h-4 mr-2 text-[#FFB700]" />
+                        <Clock className="w-4 h-4 mr-2 text-saffron shrink-0" />
                         <span>{event.time}</span>
                       </div>
                       <div className="flex items-center">
-                        <MapPin className="w-4 h-4 mr-2 text-[#FFB700]" />
+                        <MapPin className="w-4 h-4 mr-2 text-saffron shrink-0" />
                         <span>{event.location}</span>
                       </div>
                     </div>
                     {event.description && (
-                      <p className="text-[#5D0000] text-sm md:text-base italic border-t border-[#FFB700]/30 pt-4 line-clamp-2">
+                      <p className="text-ink-dark text-sm md:text-base italic border-t border-gold/30 pt-4 line-clamp-2">
                         "{event.description}"
                       </p>
                     )}
@@ -274,7 +284,7 @@ const Events = () => {
               ))}
             </div>
           ) : (
-            <div className="text-center py-12 text-[#770A0A]">
+            <div className="text-center py-12 text-ink-light font-heading tracking-widest uppercase text-sm">
               Loading upcoming events...
             </div>
           )}

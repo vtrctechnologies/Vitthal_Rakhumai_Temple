@@ -49,19 +49,20 @@ const Gallery = () => {
           galleryAPI.getImages(),
         ]);
 
-        if (categoriesResponse?.status === "success") {
-          setCategories(categoriesResponse.data || []);
+        const catList = categoriesResponse?.data || (Array.isArray(categoriesResponse) ? categoriesResponse : []);
+        setCategories(Array.isArray(catList) ? catList : []);
+
+        const imagesList = imagesResponse?.data || (Array.isArray(imagesResponse) ? imagesResponse : []);
+        setImages(Array.isArray(imagesList) ? imagesList : []);
+
+        const currentYear = new Date().getFullYear();
+        const years = [...new Set(imagesList.map((img) => img.year ? parseInt(img.year, 10) : currentYear).filter(Boolean))].sort((a, b) => b - a);
+        if (!years.includes(currentYear)) {
+          years.unshift(currentYear);
         }
-        if (imagesResponse?.status === "success") {
-          const imagesData = imagesResponse.data || [];
-          setImages(imagesData);
-          const years = [...new Set(imagesData.map(img => img.year))]
-            .filter(Boolean)
-            .sort((a, b) => b - a);
-          setAvailableYears(years);
-          if (years.length > 0 && !years.includes(activeYear)) {
-            setActiveYear(years[0]);
-          }
+        setAvailableYears(years);
+        if (years.length > 0 && !years.includes(parseInt(activeYear, 10))) {
+          setActiveYear(years[0]);
         }
       } catch (err) {
         console.error("Error fetching gallery data:", err);
@@ -80,7 +81,12 @@ const Gallery = () => {
       img.category?._id === activeCategory ||
       img.category?.slug === activeCategory ||
       img.category?.name?.toLowerCase() === activeCategory.toLowerCase();
-    const yearMatch = img.year === activeYear;
+    const currentYear = new Date().getFullYear();
+    const imgYear = img.year ? parseInt(img.year, 10) : currentYear;
+    const yearMatch =
+      !activeYear ||
+      activeYear === "all" ||
+      imgYear === parseInt(activeYear, 10);
     return categoryMatch && yearMatch;
   });
 

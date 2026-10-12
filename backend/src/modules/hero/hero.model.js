@@ -58,14 +58,13 @@ const heroSectionSchema = new mongoose.Schema({
 });
 
 // Middleware to ensure only one hero section is active at a time if isActive is true
-heroSectionSchema.pre('save', async function(next) {
+heroSectionSchema.pre('save', async function() {
   if (this.isActive) {
     await this.constructor.updateMany(
       { _id: { $ne: this._id } },
       { $set: { isActive: false } }
     );
   }
-  next();
 });
 
 const HeroSection = mongoose.model('HeroSection', heroSectionSchema);
