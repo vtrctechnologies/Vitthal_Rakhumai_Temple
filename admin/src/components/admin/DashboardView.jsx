@@ -23,11 +23,11 @@ import MembersView from "./MembersView";
 import GalleryView from "./GalleryView";
 import BannerView from "./BannerView";
 import SportsView from "./SportsView";
-import HeroSectionView from "./HeroSectionView";
 import LiveProgramsView from "./LiveProgramsView";
 import SubscribersView from "./SubscribersView";
 import MessagesView from "./MessagesView";
 import GuestView from "./GuestView";
+import SportsRegistrationView from "./SportsRegistrationView";
 
 const DashboardView = ({ user, onLogout }) => {
   const navigate = useNavigate();
@@ -41,14 +41,15 @@ const DashboardView = ({ user, onLogout }) => {
     const path = location.pathname.split("/").pop();
     const validTabs = [
       "dashboard",
-      "hero-festival",
       "donations",
       "events",
       "events-page",
       "members",
       "gallery",
+      "categories",
       "banners",
       "sports",
+      "sports-registrations",
       "live-programs",
       "subscribers",
       "messages",
@@ -141,14 +142,15 @@ const DashboardView = ({ user, onLogout }) => {
     const path = location.pathname.split("/").pop();
     const validTabs = [
       "dashboard",
-      "hero-festival",
       "donations",
       "events",
       "events-page",
       "members",
       "gallery",
+      "categories",
       "banners",
       "sports",
+      "sports-registrations",
       "live-programs",
       "subscribers",
       "messages",
@@ -197,20 +199,21 @@ const DashboardView = ({ user, onLogout }) => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 font-sans">
+    <div className="min-h-screen font-sans" style={{ background: "#f9f3e8" }}>
       {/* Top Navbar */}
-      <nav className="bg-white shadow-sm sticky top-0 z-50">
+      <nav style={{ background: "linear-gradient(135deg, #3d0f0f 0%, #5a1515 60%, #6b1a1a 100%)", borderBottom: "2px solid rgba(212,175,55,0.4)", boxShadow: "0 2px 20px rgba(44,26,14,0.3)" }} className="sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
             <div className="flex items-center gap-3">
               <button
                 onClick={() => setSidebarOpen(!sidebarOpen)}
-                className="md:hidden p-2 text-gray-500 hover:bg-gray-100 rounded-md"
+                className="md:hidden p-2 rounded-md transition-colors"
+                style={{ color: "rgba(240,208,96,0.7)" }}
               >
                 <Menu size={24} />
               </button>
-              <Landmark className="text-orange-600 hidden md:block" size={28} />
-              <span className="font-bold lg:text-xl text-gray-800">
+              <Landmark style={{ color: "#d4af37" }} className="hidden md:block" size={28} />
+              <span className="font-bold lg:text-xl" style={{ fontFamily: '"Cinzel", serif', color: "#f0d060", letterSpacing: "0.04em" }}>
                 Vitthal Rakhumai Seva Mandal
               </span>
             </div>
@@ -219,22 +222,23 @@ const DashboardView = ({ user, onLogout }) => {
               <div className="relative">
                 <button
                   onClick={() => setShowNotifications(!showNotifications)}
-                  className="p-2 text-gray-500 hover:bg-gray-100 rounded-full relative transition-colors"
+                  className="p-2 rounded-full relative transition-colors"
+                  style={{ color: "rgba(240,208,96,0.75)" }}
                 >
                   <Bell size={20} />
                   {unreadCount > 0 && (
-                    <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 border-2 border-white rounded-full animate-pulse"></span>
+                    <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-saffron border-2 border-maroon rounded-full animate-pulse" style={{ backgroundColor: "#e8650a" }}></span>
                   )}
                 </button>
 
                 {showNotifications && (
-                  <div className="absolute right-0 mt-3 w-80 md:w-96 bg-white rounded-xl shadow-2xl border border-gray-100 overflow-hidden z-50 animate-in fade-in zoom-in-95 duration-200 origin-top-right">
-                    <div className="px-4 py-3 border-b border-gray-50 flex justify-between items-center bg-gray-50/50">
+                  <div className="absolute right-0 mt-3 w-80 md:w-96 bg-white rounded-xl shadow-2xl overflow-hidden z-50 animate-in fade-in zoom-in-95 duration-200 origin-top-right" style={{ border: "1px solid rgba(212,175,55,0.3)" }}>
+                    <div className="px-4 py-3 border-b flex justify-between items-center" style={{ background: "linear-gradient(135deg, #f9f0e0, #fff8ee)", borderColor: "rgba(212,175,55,0.2)" }}>
                       <div>
                         <h3 className="font-bold text-gray-800">
                           Notifications
                         </h3>
-                        <p className="text-xs text-gray-500">
+                        <p className="text-xs mt-0.5" style={{ color: "#8b5e3c" }}>
                           {unreadCount} unread messages
                         </p>
                       </div>
@@ -307,22 +311,23 @@ const DashboardView = ({ user, onLogout }) => {
               </div>
 
               {/* User Profile */}
-              <div className="hidden md:flex items-center gap-3 pl-4 border-l">
-                <div className="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center text-orange-700 font-bold">
+              <div className="hidden md:flex items-center gap-3 pl-4" style={{ borderLeft: "1px solid rgba(212,175,55,0.3)" }}>
+                <div className="w-8 h-8 rounded-full flex items-center justify-center font-bold" style={{ background: "rgba(212,175,55,0.2)", color: "#d4af37", border: "1px solid rgba(212,175,55,0.4)" }}>
                   {user.name ? user.name.charAt(0) : "U"}
                 </div>
                 <div className="text-sm">
-                  <p className="font-medium text-gray-700">
+                  <p className="font-medium" style={{ color: "rgba(240,208,96,0.9)" }}>
                     {user.name || "Admin"}
                   </p>
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs" style={{ color: "rgba(255,235,200,0.45)" }}>
                     {user.role || "Volunteer"}
                   </p>
                 </div>
               </div>
               <button
                 onClick={onLogout}
-                className="p-2 text-gray-500 hover:text-red-600 transition-colors"
+                className="p-2 transition-colors"
+                style={{ color: "rgba(240,208,96,0.6)" }}
                 title="Logout"
               >
                 <LogOut size={20} />
@@ -454,8 +459,6 @@ const DashboardView = ({ user, onLogout }) => {
                 </div>
               </div>
             </div>
-          ) : activeTab === "hero-section" ? (
-            <HeroSectionView />
           ) : activeTab === "events" ? (
             <EventsView />
           ) : activeTab === "events-page" ? (
@@ -464,6 +467,8 @@ const DashboardView = ({ user, onLogout }) => {
             <MembersView />
           ) : activeTab === "gallery" ? (
             <GalleryView />
+          ) : activeTab === "categories" ? (
+            <GalleryView initialTab="categories" />
           ) : activeTab === "banners" ? (
             <BannerView />
           ) : activeTab === "sports" ? (
@@ -476,6 +481,8 @@ const DashboardView = ({ user, onLogout }) => {
             <MessagesView />
           ) : activeTab === "guests" ? (
             <GuestView />
+          ) : activeTab === "sports-registrations" ? (
+            <SportsRegistrationView />
           ) : activeTab === "settings" ? (
             <SettingsView user={user} />
           ) : (

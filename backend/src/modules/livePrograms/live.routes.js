@@ -1,7 +1,7 @@
 import express from 'express';
 import * as liveController from './live.controller.js';
-import { protect } from '../../middleware/auth.middleware.js';
-import upload from '../../middleware/upload.middleware.js';
+import { protect } from '../../features/auth/auth.middleware.js';
+import upload from '../../shared/middlewares/upload.middleware.js';
 
 const router = express.Router();
 

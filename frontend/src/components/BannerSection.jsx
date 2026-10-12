@@ -15,10 +15,11 @@ const BannerSection = () => {
   const fetchYears = async () => {
     try {
       const response = await bannerAPI.getBannerYears();
-      if (response && response.status === "success" && response.data) {
-        setYears(response.data);
-        if (response.data.length > 0 && !response.data.includes(selectedYear)) {
-          setSelectedYear(response.data[0]);
+      const yearsData = response?.data || (Array.isArray(response) ? response : []);
+      if (Array.isArray(yearsData) && yearsData.length > 0) {
+        setYears(yearsData);
+        if (!yearsData.includes(selectedYear)) {
+          setSelectedYear(yearsData[0]);
         }
       }
     } catch (error) {
@@ -33,8 +34,9 @@ const BannerSection = () => {
         year: selectedYear,
         active: "true" 
       });
-      if (response && response.status === "success") {
-        setBanners(response.data);
+      const bannersData = response?.data || (Array.isArray(response) ? response : []);
+      if (Array.isArray(bannersData)) {
+        setBanners(bannersData);
         setCurrentIndex(0);
       }
     } catch (error) {

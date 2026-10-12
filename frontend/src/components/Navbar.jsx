@@ -158,6 +158,11 @@ const Navbar = memo(() => {
             mr: "थेट कार्यक्रम",
             path: "/events/live-programs",
           },
+          {
+            name: "Registration",
+            mr: "नोंदणी",
+            path: "/events/sports-registration",
+          },
         ],
       },
       { name: "Donation", mr: "देणगी", path: "/donation", icon: Heart },

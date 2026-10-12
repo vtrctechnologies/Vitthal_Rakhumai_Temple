@@ -2,9 +2,9 @@ import apiClient from "./axiosClient";
 
 // Auth API functions
 export const authAPI = {
-  // Register a new admin
-  register: async (username, email, password, phone) => {
-    return apiClient.post("/auth/register", { username, email, password, phone });
+  // Register a new admin (backend uses 'name' not 'username')
+  register: async (name, email, password) => {
+    return apiClient.post("/auth/register", { name, email, password, role: "admin" });
   },
 
   // Login admin
@@ -12,47 +12,14 @@ export const authAPI = {
     return apiClient.post("/auth/login", { email, password });
   },
 
-  // Get current admin info
+  // Get current admin info (token verification)
   getMe: async () => {
     return apiClient.get("/auth/me");
   },
 
-  // Change password (requires current password)
-  changePassword: async (currentPassword, newPassword) => {
-    return apiClient.put("/auth/change-password", {
-      currentPassword,
-      newPassword,
-    });
-  },
-
-  // Reset password (admin can reset without current password)
-  resetPassword: async (newPassword) => {
-    return apiClient.put("/auth/reset-password", { newPassword });
-  },
-
-  // Forgot password - generate OTP (using username)
-  forgotPassword: async (email, username) => {
-    return apiClient.post("/auth/forgot-password", { email, username });
-  },
-
-  // Resend OTP - send OTP via SMS (using username)
-  resendOTP: async (email, username) => {
-    return apiClient.post("/auth/resend-otp", { email, username });
-  },
-
-  // Verify OTP and get access token (using username)
-  verifyOTP: async (email, username, otp) => {
-    return apiClient.post("/auth/verify-otp", { email, username, otp });
-  },
-
-  // Update admin email
-  updateEmail: async (newEmail) => {
-    return apiClient.put("/auth/update-email", { newEmail });
-  },
-
-  // Update admin phone number
-  updatePhone: async (newPhone) => {
-    return apiClient.put("/auth/update-phone", { newPhone });
+  // Update profile (name, email, password)
+  updateProfile: async (data) => {
+    return apiClient.put("/auth/profile", data);
   },
 };
 
@@ -382,6 +349,54 @@ export const sportsAPI = {
   // Delete winner
   deleteWinner: async (id) => {
     return apiClient.delete(`/sports/winners/${id}`);
+  },
+
+  // Competition Registrations
+  getCompetitionsOpen: async () => {
+    return apiClient.get("/sports/competitions/open");
+  },
+
+  // Admin: Get ALL competitions (including closed)
+  getAllCompetitions: async () => {
+    return apiClient.get("/sports/admin/competitions");
+  },
+
+  // Admin: Create a new competition
+  createCompetition: async (data) => {
+    return apiClient.post("/sports/admin/competitions", data);
+  },
+
+  // Admin: Update a competition
+  updateCompetition: async (id, data) => {
+    return apiClient.put(`/sports/admin/competitions/${id}`, data);
+  },
+
+  // Admin: Delete a competition (and all its registrations)
+  deleteCompetition: async (id) => {
+    return apiClient.delete(`/sports/admin/competitions/${id}`);
+  },
+
+  getRegistrations: async (params = {}) => {
+    return apiClient.get("/sports/admin/registrations", { params });
+  },
+
+  toggleRegistration: async (id, data) => {
+    return apiClient.patch(`/sports/admin/competitions/${id}/registration-toggle`, data);
+  },
+
+  updateRegistrationStatus: async (id, status) => {
+    return apiClient.patch(`/sports/admin/registrations/${id}/status`, { status });
+  },
+
+  deleteRegistration: async (id) => {
+    return apiClient.delete(`/sports/admin/registrations/${id}`);
+  },
+
+  exportRegistrationsExcel: async (sportId = "all") => {
+    return apiClient.get("/sports/admin/registrations/export", {
+      params: { sportId },
+      responseType: "blob",
+    });
   },
 };
 

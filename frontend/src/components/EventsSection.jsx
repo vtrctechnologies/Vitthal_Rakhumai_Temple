@@ -29,10 +29,12 @@ const EventsSection = () => {
         const response = await eventsPageAPI.getAllEvents({ upcoming: "true", limit: 6 });
 
         let eventsData = [];
-        if (response && response.status === "success" && Array.isArray(response.data)) {
+        if (response && Array.isArray(response.data)) {
           eventsData = response.data;
         } else if (Array.isArray(response)) {
           eventsData = response;
+        } else if (response && response.events && Array.isArray(response.events)) {
+          eventsData = response.events;
         }
 
         const activeEvents = eventsData

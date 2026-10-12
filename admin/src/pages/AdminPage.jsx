@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import authAPI from "../services/api"; // Adjust path as needed
+import { authAPI } from "../services/api";
 import AuthPage from "../components/admin/AuthPage";
 import DashboardView from "../components/admin/DashboardView";
 
@@ -16,27 +16,22 @@ export default function AdminPage() {
 
       if (token && storedUser) {
         try {
-          // Verify token by fetching user info
           const response = await authAPI.getMe();
-          if (response.status === "success") {
+          if (response.success) {
             const userData = {
-              id: response.data.admin.id,
-              username: response.data.admin.username,
-              name: response.data.admin.username, // Map username to name
-              email: response.data.admin.email,
-              phone: response.data.admin.phone,
-              role: response.data.admin.role || "admin",
+              id: response.data._id,
+              name: response.data.name,
+              email: response.data.email,
+              role: response.data.role || "admin",
             };
             setUser(userData);
             setIsAuthenticated(true);
             localStorage.setItem("temple_admin_user", JSON.stringify(userData));
           } else {
-            // Token invalid, clear storage
             localStorage.removeItem("temple_admin_token");
             localStorage.removeItem("temple_admin_user");
           }
         } catch (error) {
-          // Token invalid or expired, clear storage
           localStorage.removeItem("temple_admin_token");
           localStorage.removeItem("temple_admin_user");
         }

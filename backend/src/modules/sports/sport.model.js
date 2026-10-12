@@ -28,9 +28,47 @@ const sportSchema = new mongoose.Schema({
   isActive: { 
     type: Boolean, 
     default: true 
+  },
+  isRegistrationOpen: {
+    type: Boolean,
+    default: false
+  },
+  registrationStartDate: {
+    type: Date,
+    default: null
+  },
+  registrationEndDate: {
+    type: Date,
+    default: null
+  },
+  category: {
+    type: String,
+    default: 'Sports'
+  },
+  entryFee: {
+    type: String,
+    default: 'Free'
+  },
+  prizes: {
+    type: String,
+    default: ''
+  },
+  rules: {
+    type: String,
+    default: ''
+  },
+  maxParticipants: {
+    type: Number,
+    default: 0
+  },
+  registrationType: {
+    type: String,
+    enum: ['individual', 'team'],
+    default: 'individual'
   }
 }, { timestamps: true });
 
 sportSchema.index({ year: -1, isActive: 1 });
+sportSchema.index({ isRegistrationOpen: 1, registrationEndDate: 1 });
 
 export const Sport = mongoose.models.Sport || mongoose.model('Sport', sportSchema);

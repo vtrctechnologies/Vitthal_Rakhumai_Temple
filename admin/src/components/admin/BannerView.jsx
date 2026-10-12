@@ -57,8 +57,9 @@ const BannerView = () => {
   const fetchAvailableYears = async () => {
     try {
       const response = await bannerAPI.getBannerYears();
-      if (response && response.status === "success" && response.data) {
-        setAvailableYears(response.data);
+      const yearsData = response?.data || (Array.isArray(response) ? response : []);
+      if (Array.isArray(yearsData) && yearsData.length > 0) {
+        setAvailableYears(yearsData);
       }
     } catch (error) {
       console.error("Error fetching banner years:", error);
@@ -68,36 +69,13 @@ const BannerView = () => {
   const fetchBanners = async () => {
     setLoading(true);
     try {
-      // Fetch active banners for selected year
-      const activeResponse = await bannerAPI.getBanners({ 
-        active: "true",
+      // Fetch all banners for selected year
+      const response = await bannerAPI.getBanners({ 
         year: selectedYear.toString()
       });
-      const activeBanners = activeResponse && activeResponse.status === "success" && Array.isArray(activeResponse.data) 
-        ? activeResponse.data 
-        : [];
 
-      // Fetch inactive banners for selected year
-      let inactiveBanners = [];
-      try {
-        const inactiveResponse = await bannerAPI.getBanners({ 
-          active: "false",
-          year: selectedYear.toString()
-        });
-        if (inactiveResponse && inactiveResponse.status === "success" && Array.isArray(inactiveResponse.data)) {
-          inactiveBanners = inactiveResponse.data;
-        }
-      } catch (err) {
-        console.log("Could not fetch inactive banners:", err);
-      }
-
-      // Merge all banners
-      const allBanners = [...activeBanners, ...inactiveBanners];
-      setBanners(allBanners);
-      
-      if (allBanners.length === 0) {
-        console.log(`No banners found for year ${selectedYear}`);
-      }
+      const allBanners = response?.data || (Array.isArray(response) ? response : []);
+      setBanners(Array.isArray(allBanners) ? allBanners : []);
     } catch (error) {
       console.error("Error fetching banners:", error);
       setMessage({ type: "error", text: `Failed to load banners: ${error.message || "Unknown error"}` });
@@ -240,15 +218,21 @@ const BannerView = () => {
         response = await bannerAPI.createBanner(submitFormData);
       }
 
-      if (response && response.status === "success") {
+      if (response && (response.status === "success" || response.success || response.data)) {
         setMessage({
           type: "success",
           text: editingBanner
             ? "Banner updated successfully"
             : "Banner created successfully",
         });
+        const createdYear = parseInt(formData.year);
         resetForm();
-        fetchBanners();
+        if (selectedYear !== createdYear) {
+          setSelectedYear(createdYear);
+        } else {
+          fetchBanners();
+        }
+        fetchAvailableYears();
         // Clear message after 3 seconds
         setTimeout(() => setMessage({ type: "", text: "" }), 3000);
       }
@@ -393,7 +377,10 @@ const BannerView = () => {
               }}
               className="px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
             >
-              {Array.from({ length: 10 }, (_, i) => new Date().getFullYear() - i).map((year) => (
+              {(availableYears.length > 0
+                ? availableYears
+                : Array.from({ length: 15 }, (_, i) => new Date().getFullYear() + 5 - i)
+              ).map((year) => (
                 <option key={year} value={year}>
                   {year}
                 </option>

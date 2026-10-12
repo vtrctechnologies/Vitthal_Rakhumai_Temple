@@ -1,12 +1,11 @@
 import { Event } from './events.model.js';
-import cloudinary from '../../config/cloudinary.js';
+import { uploadToCloudinary, deleteFromCloudinary } from '../../shared/config/cloudinary.js';
 
 // Set featured event (for countdown)
 export const setFeaturedEvent = async (req, res) => {
   try {
     const { title, description, targetDate, eventDate, eventTime, eventDetails } = req.body;
 
-    // Unset all other featured events
     await Event.updateMany({ isFeatured: true }, { isFeatured: false });
 
     const eventData = {
@@ -34,16 +33,10 @@ export const setFeaturedEvent = async (req, res) => {
 // Get featured event (countdown timer)
 export const getFeaturedEvent = async (req, res) => {
   try {
-    const event = await Event.findOne({ isFeatured: true, isActive: true })
-      .sort({ date: 1 });
+    const event = await Event.findOne({ isFeatured: true, isActive: true }).sort({ date: 1 });
     
     if (!event) {
-      // Fallback: get nearest future event if no featured one marked
-      const fallback = await Event.findOne({ 
-        date: { $gte: new Date() }, 
-        isActive: true 
-      }).sort({ date: 1 });
-      
+      const fallback = await Event.findOne({ date: { $gte: new Date() }, isActive: true }).sort({ date: 1 });
       return res.status(200).json({ status: 'success', data: fallback });
     }
 
@@ -57,12 +50,9 @@ export const getFeaturedEvent = async (req, res) => {
 export const getUpcomingEvents = async (req, res) => {
   try {
     const { limit = 10 } = req.query;
-    const events = await Event.find({ 
-      date: { $gte: new Date() }, 
-      isActive: true 
-    })
-    .sort({ date: 1 })
-    .limit(parseInt(limit));
+    const events = await Event.find({ date: { $gte: new Date() }, isActive: true })
+      .sort({ date: 1 })
+      .limit(parseInt(limit));
 
     res.status(200).json({ status: 'success', data: events });
   } catch (error) {
@@ -147,8 +137,11 @@ export const createEvent = async (req, res) => {
     }
 
     if (req.file) {
-      eventData.imageUrl = req.file.path;
-      eventData.publicId = req.file.filename;
+      const targetYear = eventData.year;
+      const folder = `vrtemple/events/${targetYear}`;
+      const uploadResult = await uploadToCloudinary(req.file.buffer, folder, 'image');
+      eventData.imageUrl = uploadResult.secure_url;
+      eventData.publicId = uploadResult.public_id;
     }
 
     const event = await Event.create(eventData);
@@ -168,10 +161,13 @@ export const updateEvent = async (req, res) => {
 
     if (req.file) {
       if (event.publicId) {
-        await cloudinary.uploader.destroy(event.publicId);
+        await deleteFromCloudinary(event.publicId, 'image');
       }
-      updateData.imageUrl = req.file.path;
-      updateData.publicId = req.file.filename;
+      const targetYear = parseInt(updateData.year) || event.year || new Date().getFullYear();
+      const folder = `vrtemple/events/${targetYear}`;
+      const uploadResult = await uploadToCloudinary(req.file.buffer, folder, 'image');
+      updateData.imageUrl = uploadResult.secure_url;
+      updateData.publicId = uploadResult.public_id;
     }
 
     if (updateData.date) updateData.date = new Date(updateData.date);
@@ -204,11 +200,11 @@ export const deleteEvent = async (req, res) => {
     if (!event) return res.status(404).json({ status: 'error', message: 'Event not found' });
 
     if (event.publicId) {
-      await cloudinary.uploader.destroy(event.publicId);
+      await deleteFromCloudinary(event.publicId, 'image');
     }
 
     await Event.findByIdAndDelete(req.params.id);
-    res.status(204).json({ status: 'success', data: null });
+    res.status(200).json({ status: 'success', message: 'Event deleted successfully' });
   } catch (error) {
     res.status(500).json({ status: 'error', message: error.message });
   }

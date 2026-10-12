@@ -1,5 +1,5 @@
 import { Banner } from './banner.model.js';
-import cloudinary from '../../config/cloudinary.js';
+import { uploadToCloudinary, deleteFromCloudinary } from '../../shared/config/cloudinary.js';
 
 // Get all banners with optional filtering
 export const getBanners = async (req, res) => {
@@ -19,10 +19,7 @@ export const getBanners = async (req, res) => {
       data: banners
     });
   } catch (error) {
-    res.status(500).json({
-      status: 'error',
-      message: error.message
-    });
+    res.status(500).json({ status: 'error', message: error.message });
   }
 };
 
@@ -30,18 +27,11 @@ export const getBanners = async (req, res) => {
 export const getBannerYears = async (req, res) => {
   try {
     const years = await Banner.distinct('year');
-    // Sort years descending
     years.sort((a, b) => b - a);
     
-    res.status(200).json({
-      status: 'success',
-      data: years
-    });
+    res.status(200).json({ status: 'success', data: years });
   } catch (error) {
-    res.status(500).json({
-      status: 'error',
-      message: error.message
-    });
+    res.status(500).json({ status: 'error', message: error.message });
   }
 };
 
@@ -50,20 +40,11 @@ export const getBanner = async (req, res) => {
   try {
     const banner = await Banner.findById(req.params.id);
     if (!banner) {
-      return res.status(404).json({
-        status: 'error',
-        message: 'Banner not found'
-      });
+      return res.status(404).json({ status: 'error', message: 'Banner not found' });
     }
-    res.status(200).json({
-      status: 'success',
-      data: banner
-    });
+    res.status(200).json({ status: 'success', data: banner });
   } catch (error) {
-    res.status(500).json({
-      status: 'error',
-      message: error.message
-    });
+    res.status(500).json({ status: 'error', message: error.message });
   }
 };
 
@@ -71,36 +52,32 @@ export const getBanner = async (req, res) => {
 export const createBanner = async (req, res) => {
   try {
     if (!req.file) {
-      return res.status(400).json({
-        status: 'error',
-        message: 'Please upload an image or video'
-      });
+      return res.status(400).json({ status: 'error', message: 'Please upload an image or video' });
     }
 
     const { title, description, position, order, year, isActive, link } = req.body;
+    const resourceType = req.file.mimetype.startsWith('video') ? 'video' : 'image';
+    const targetYear = parseInt(year) || new Date().getFullYear();
+    const folder = `vrtemple/banners/${targetYear}`;
+
+    const uploadResult = await uploadToCloudinary(req.file.buffer, folder, resourceType);
 
     const newBanner = await Banner.create({
       title,
       description,
-      imageUrl: req.file.path, // Cloudinary URL
-      publicId: req.file.filename, // Cloudinary Public ID
-      resourceType: req.file.mimetype.startsWith('video') ? 'video' : 'image',
+      imageUrl: uploadResult.secure_url,
+      publicId: uploadResult.public_id,
+      resourceType,
       position,
       order: parseInt(order) || 0,
-      year: parseInt(year) || new Date().getFullYear(),
+      year: targetYear,
       isActive: isActive === 'true' || isActive === true,
       link
     });
 
-    res.status(201).json({
-      status: 'success',
-      data: newBanner
-    });
+    res.status(201).json({ status: 'success', data: newBanner });
   } catch (error) {
-    res.status(500).json({
-      status: 'error',
-      message: error.message
-    });
+    res.status(500).json({ status: 'error', message: error.message });
   }
 };
 
@@ -109,29 +86,25 @@ export const updateBanner = async (req, res) => {
   try {
     let banner = await Banner.findById(req.params.id);
     if (!banner) {
-      return res.status(404).json({
-        status: 'error',
-        message: 'Banner not found'
-      });
+      return res.status(404).json({ status: 'error', message: 'Banner not found' });
     }
 
     const updateData = { ...req.body };
     
-    // If new file is uploaded, delete old one from Cloudinary
     if (req.file) {
-      // Delete old file if publicId exists
       if (banner.publicId) {
-        await cloudinary.uploader.destroy(banner.publicId, { 
-          resource_type: banner.resourceType || 'image'
-        });
+        await deleteFromCloudinary(banner.publicId, banner.resourceType || 'image');
       }
-      
-      updateData.imageUrl = req.file.path;
-      updateData.publicId = req.file.filename;
-      updateData.resourceType = req.file.mimetype.startsWith('video') ? 'video' : 'image';
+      const resourceType = req.file.mimetype.startsWith('video') ? 'video' : 'image';
+      const targetYear = parseInt(updateData.year) || banner.year || new Date().getFullYear();
+      const folder = `vrtemple/banners/${targetYear}`;
+      const uploadResult = await uploadToCloudinary(req.file.buffer, folder, resourceType);
+
+      updateData.imageUrl = uploadResult.secure_url;
+      updateData.publicId = uploadResult.public_id;
+      updateData.resourceType = resourceType;
     }
 
-    // Convert types
     if (updateData.order) updateData.order = parseInt(updateData.order);
     if (updateData.year) updateData.year = parseInt(updateData.year);
     if (updateData.isActive !== undefined) {
@@ -143,15 +116,9 @@ export const updateBanner = async (req, res) => {
       runValidators: true
     });
 
-    res.status(200).json({
-      status: 'success',
-      data: updatedBanner
-    });
+    res.status(200).json({ status: 'success', data: updatedBanner });
   } catch (error) {
-    res.status(500).json({
-      status: 'error',
-      message: error.message
-    });
+    res.status(500).json({ status: 'error', message: error.message });
   }
 };
 
@@ -160,30 +127,16 @@ export const deleteBanner = async (req, res) => {
   try {
     const banner = await Banner.findById(req.params.id);
     if (!banner) {
-      return res.status(404).json({
-        status: 'error',
-        message: 'Banner not found'
-      });
+      return res.status(404).json({ status: 'error', message: 'Banner not found' });
     }
 
-    // Delete from Cloudinary if publicId exists
     if (banner.publicId) {
-      await cloudinary.uploader.destroy(banner.publicId, { 
-        resource_type: banner.resourceType || 'image'
-      });
+      await deleteFromCloudinary(banner.publicId, banner.resourceType || 'image');
     }
 
-    // Delete from Database
     await Banner.findByIdAndDelete(req.params.id);
-
-    res.status(204).json({
-      status: 'success',
-      data: null
-    });
+    res.status(200).json({ status: 'success', message: 'Banner deleted successfully' });
   } catch (error) {
-    res.status(500).json({
-      status: 'error',
-      message: error.message
-    });
+    res.status(500).json({ status: 'error', message: error.message });
   }
 };

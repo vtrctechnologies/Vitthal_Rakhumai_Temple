@@ -1,5 +1,5 @@
 import { Committee } from '../committee/committee.model.js';
-import cloudinary from '../../config/cloudinary.js';
+import { uploadToCloudinary, deleteFromCloudinary } from '../../shared/config/cloudinary.js';
 
 // Get all committee members (public)
 export const getMembers = async (req, res) => {
@@ -56,22 +56,45 @@ export const getMember = async (req, res) => {
 // Create committee member
 export const createMember = async (req, res) => {
   try {
-    const { name, role, bio, position, committeeType, year, order, isActive } = req.body;
-
-    const memberData = {
+    const {
       name,
+      nameMarathi,
       role,
       bio,
       position,
+      designation,
+      post,
+      positionMarathi,
+      roleMarathi,
+      designationMarathi,
       committeeType,
-      year: parseInt(year) || new Date().getFullYear(),
+      year,
+      order,
+      isActive,
+    } = req.body;
+    const targetYear = parseInt(year) || new Date().getFullYear();
+    const finalPos = (position || role || designation || post || 'Member').trim();
+    const finalPosMr = (positionMarathi || roleMarathi || designationMarathi || '').trim();
+
+    const memberData = {
+      name: (name || '').trim(),
+      nameMarathi: (nameMarathi || '').trim(),
+      role: finalPos,
+      position: finalPos,
+      positionMarathi: finalPosMr,
+      roleMarathi: finalPosMr,
+      bio,
+      committeeType: committeeType || 'register',
+      year: targetYear,
       order: parseInt(order) || 0,
-      isActive: isActive === 'true' || isActive === true
+      isActive: isActive === 'false' || isActive === false ? false : true,
     };
 
     if (req.file) {
-      memberData.imageUrl = req.file.path;
-      memberData.publicId = req.file.filename;
+      const folder = `vrtemple/committee/${targetYear}`;
+      const uploadResult = await uploadToCloudinary(req.file.buffer, folder, 'image');
+      memberData.imageUrl = uploadResult.secure_url;
+      memberData.publicId = uploadResult.public_id;
     }
 
     const member = await Committee.create(memberData);
@@ -90,12 +113,14 @@ export const updateMember = async (req, res) => {
     const updateData = { ...req.body };
 
     if (req.file) {
-      // Delete old image if exists
       if (member.publicId) {
-        await cloudinary.uploader.destroy(member.publicId);
+        await deleteFromCloudinary(member.publicId, 'image');
       }
-      updateData.imageUrl = req.file.path;
-      updateData.publicId = req.file.filename;
+      const targetYear = parseInt(updateData.year) || member.year || new Date().getFullYear();
+      const folder = `vrtemple/committee/${targetYear}`;
+      const uploadResult = await uploadToCloudinary(req.file.buffer, folder, 'image');
+      updateData.imageUrl = uploadResult.secure_url;
+      updateData.publicId = uploadResult.public_id;
     }
 
     if (updateData.year) updateData.year = parseInt(updateData.year);
@@ -121,13 +146,12 @@ export const deleteMember = async (req, res) => {
     const member = await Committee.findById(req.params.id);
     if (!member) return res.status(404).json({ status: 'error', message: 'Member not found' });
 
-    // Delete image from Cloudinary
     if (member.publicId) {
-      await cloudinary.uploader.destroy(member.publicId);
+      await deleteFromCloudinary(member.publicId, 'image');
     }
 
     await Committee.findByIdAndDelete(req.params.id);
-    res.status(204).json({ status: 'success', data: null });
+    res.status(200).json({ status: 'success', message: 'Member deleted successfully' });
   } catch (error) {
     res.status(500).json({ status: 'error', message: error.message });
   }

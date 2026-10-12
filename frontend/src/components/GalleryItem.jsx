@@ -21,8 +21,9 @@ const GalleryItem = memo(({ image, index, onClick }) => {
 
   const [isHovered, setIsHovered] = React.useState(false);
 
+  const rawUrl = image.imageUrl || image.mediaUrl || "";
   // Use utility function for image URL
-  const imageUrl = getImageUrl(image.imageUrl);
+  const imageUrl = getImageUrl(rawUrl);
 
   // Construct video thumbnail URL (Cloudinary specific optimization)
   const getThumbnailUrl = (url) => {
@@ -35,8 +36,8 @@ const GalleryItem = memo(({ image, index, onClick }) => {
   };
 
   const isVideo = image.resourceType === 'video' ||
-    image.imageUrl?.match(/\.(mp4|mov|avi|mkv|webm)$/i) ||
-    image.imageUrl?.includes("/video/");
+    rawUrl.match(/\.(mp4|mov|avi|mkv|webm)$/i) ||
+    rawUrl.includes("/video/");
 
   return (
     <div

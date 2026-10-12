@@ -2,40 +2,37 @@ import apiClient from "./axiosClient";
 
 // Gallery API functions
 export const galleryAPI = {
-  // Get all gallery images (public)
   getImages: async (params = {}) => {
-    return apiClient.get("/gallery/images", { params });
+    return apiClient.get("/gallery", { params });
   },
 
-  // Get all gallery categories (public)
   getCategories: async () => {
-    return apiClient.get("/gallery/categories");
+    return apiClient.get("/categories");
   },
 };
 
 // Events Page API functions
 export const eventsPageAPI = {
-  // Get featured event (countdown timer)
   getFeaturedEvent: async () => {
     return apiClient.get("/events/featured");
   },
 
-  // Get all upcoming events
   getUpcomingEvents: async () => {
     return apiClient.get("/events/upcoming");
   },
 
-  // Get single upcoming event
-  getUpcomingEvent: async (id) => {
-    return apiClient.get(`/events/upcoming/${id}`);
-  },
-
-  // Get all events (for calendar view)
   getAllEvents: async (params = {}) => {
     return apiClient.get("/events", { params });
   },
 
-  // Get available event years
+  getEventById: async (id) => {
+    return apiClient.get(`/events/${id}`);
+  },
+
+  getUpcomingEvent: async (id) => {
+    return apiClient.get(`/events/${id}`);
+  },
+
   getEventYears: async () => {
     return apiClient.get("/events/years");
   },
@@ -43,19 +40,20 @@ export const eventsPageAPI = {
 
 // Banner API functions
 export const bannerAPI = {
-  // Get all banners (public)
   getBanners: async (params = {}) => {
     return apiClient.get("/banners", { params });
   },
 
-  // Get available years
-  getBannerYears: async () => {
-    return apiClient.get("/banners/years");
+  getActiveBanners: async (params = {}) => {
+    return apiClient.get("/banners/active", { params });
   },
 
-  // Get single banner (public)
   getBanner: async (id) => {
     return apiClient.get(`/banners/${id}`);
+  },
+
+  getBannerYears: async () => {
+    return apiClient.get("/banners/years");
   },
 };
 
@@ -84,9 +82,9 @@ export const sportsAPI = {
 
 // Hero Section API functions
 export const heroSectionAPI = {
-  // Get active hero section (public)
+  // Get active banner for hero (public)
   getHeroSection: async () => {
-    return apiClient.get("/hero/active");
+    return apiClient.get("/banners/active");
   },
 };
 
@@ -110,19 +108,16 @@ export const liveProgramsAPI = {
 
 // Committee API functions
 export const committeeAPI = {
-  // Get all committee members (public)
   getMembers: async (params = {}) => {
     return apiClient.get("/committee", { params });
   },
 
-  // Get single committee member (public)
-  getMember: async (id) => {
-    return apiClient.get(`/committee/${id}`);
+  getActiveMembers: async () => {
+    return apiClient.get("/committee/active");
   },
 
-  // Get available years for committee (public)
-  getCommitteeYears: async () => {
-    return apiClient.get("/committee/years");
+  getMember: async (id) => {
+    return apiClient.get(`/committee/${id}`);
   },
 };
 
@@ -169,17 +164,30 @@ export const subscriberAPI = {
 export const contactAPI = {
   // Send a new message (Public)
   sendMessage: async (data) => {
-    return apiClient.post("/contact/send", data);
+    return apiClient.post("/contact", data);
   },
 };
 
 // Guest API functions
 export const guestAPI = {
-  // Get all guests (public)
   getGuests: async (params = {}) => {
     return apiClient.get("/guests", { params });
+  },
+
+  getActiveGuests: async () => {
+    return apiClient.get("/guests/active");
+  },
+};
+
+// Competition & Sports Registration API functions
+export const sportsRegistrationAPI = {
+  getOpenCompetitions: async () => {
+    return apiClient.get("/sports/competitions/open");
+  },
+
+  register: async (sportId, data) => {
+    return apiClient.post(`/sports/competitions/${sportId}/register`, data);
   },
 };
 
 export default galleryAPI;
-

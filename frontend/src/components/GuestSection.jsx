@@ -34,9 +34,14 @@ const GuestSection = memo(() => {
   useEffect(() => {
     const fetchGuests = async () => {
       try {
-        const response = await guestAPI.getGuests();
-        if (response && response.status === "success") {
-          setGuests(response.data);
+        const response = await guestAPI.getActiveGuests();
+        const guestList = response?.data || (Array.isArray(response) ? response : []);
+        if (Array.isArray(guestList) && guestList.length > 0) {
+          setGuests(guestList);
+        } else {
+          const fallbackResp = await guestAPI.getGuests();
+          const fallbackList = fallbackResp?.data || (Array.isArray(fallbackResp) ? fallbackResp : []);
+          setGuests(Array.isArray(fallbackList) ? fallbackList.filter((g) => g.isActive !== false) : []);
         }
       } catch (error) {
         console.error("Error fetching guests:", error);

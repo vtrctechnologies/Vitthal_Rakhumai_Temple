@@ -15,13 +15,13 @@ import { galleryAPI } from "../../services/api";
 import { Button, InputField } from "../customUi/AdminShared";
 import { getImageUrl } from "../../utils/imageUrl";
 
-const GalleryView = () => {
+const GalleryView = ({ initialTab = "images" }) => {
   const [images, setImages] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
   const [showImageForm, setShowImageForm] = useState(false);
-  const [showCategoryForm, setShowCategoryForm] = useState(false);
+  const [showCategoryForm, setShowCategoryForm] = useState(initialTab === "categories");
   const [editingImage, setEditingImage] = useState(null);
   const [editingCategory, setEditingCategory] = useState(null);
   const [message, setMessage] = useState({ type: "", text: "" });
@@ -32,7 +32,13 @@ const GalleryView = () => {
   const [filterYear, setFilterYear] = useState("all");
   const [showInactive, setShowInactive] = useState(false);
   const [availableYears, setAvailableYears] = useState([]);
-  const [activeTab, setActiveTab] = useState("images"); // "images" or "categories"
+  const [activeTab, setActiveTab] = useState(initialTab || "images");
+
+  useEffect(() => {
+    if (initialTab) {
+      setActiveTab(initialTab);
+    }
+  }, [initialTab]);
 
   const [imageFormData, setImageFormData] = useState({
     title: "",
@@ -61,8 +67,8 @@ const GalleryView = () => {
     setFetching(true);
     try {
       const response = await galleryAPI.getImagesAdmin();
-      if (response && response.status === "success") {
-        const imagesData = Array.isArray(response.data) ? response.data : [];
+      const imagesData = response?.data || (Array.isArray(response) ? response : []);
+      if (Array.isArray(imagesData)) {
         setImages(imagesData);
         
         // Extract available years
@@ -86,8 +92,8 @@ const GalleryView = () => {
   const fetchCategories = async () => {
     try {
       const response = await galleryAPI.getCategoriesAdmin();
-      if (response && response.status === "success") {
-        const categoriesData = Array.isArray(response.data) ? response.data : [];
+      const categoriesData = response?.data || (Array.isArray(response) ? response : []);
+      if (Array.isArray(categoriesData)) {
         setCategories(categoriesData);
       } else {
         setCategories([]);
@@ -214,7 +220,7 @@ const GalleryView = () => {
         response = await galleryAPI.createCategory(categoryFormData);
       }
 
-      if (response.status === "success") {
+      if (response && (response.status === "success" || response.success || response.data)) {
         setMessage({
           type: "success",
           text: editingCategory
@@ -244,7 +250,8 @@ const GalleryView = () => {
       image: null,
       isActive: image.isActive !== undefined ? image.isActive : true,
     });
-    setImagePreview(image.imageUrl ? getImageUrl(image.imageUrl) : null);
+    const rawUrl = image.imageUrl || image.mediaUrl;
+    setImagePreview(rawUrl ? getImageUrl(rawUrl) : null);
     setShowImageForm(true);
     setMessage({ type: "", text: "" });
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -298,7 +305,7 @@ const GalleryView = () => {
     setLoading(true);
     try {
       const response = await galleryAPI.deleteCategory(deleteCategoryId);
-      if (response.status === "success") {
+      if (response && (response.status === "success" || response.success)) {
         setMessage({ type: "success", text: "Category deleted successfully!" });
         fetchCategories();
       }
@@ -343,7 +350,7 @@ const GalleryView = () => {
   const filteredImages = images
     .filter((img) => {
       if (filterCategory !== "all" && img.category?._id !== filterCategory && img.category !== filterCategory) return false;
-      if (filterYear !== "all" && img.year?.toString() !== filterYear) return false;
+      if (filterYear !== "all" && (img.year || new Date().getFullYear()).toString() !== filterYear.toString()) return false;
       if (!showInactive && !img.isActive) return false;
       return true;
     })
@@ -901,53 +908,60 @@ const GalleryView = () => {
                   ` in ${categories.find((c) => c._id === filterCategory)?.name || "category"}`}
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {filteredImages.map((image) => (
-                  <div
-                    key={image._id}
-                    className="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200 hover:shadow-lg transition-shadow duration-300 group relative"
-                  >
-                    <div className="relative h-48 bg-gray-100">
-                      {image.imageUrl ? (
-                        image.imageUrl.match(/\.(mp4|mov|avi|mkv|webm)$/i) || 
-                        image.imageUrl.includes("/video/") ||
-                        (image.imageUrl.includes("/upload/v") && !image.imageUrl.match(/\.(jpg|jpeg|png|webp|gif|svg)$/i)) ? (
-                          <div className="w-full h-full relative">
-                            <video
-                              src={getImageUrl(image.imageUrl)}
+                {filteredImages.map((image) => {
+                  const mediaUrl = image.imageUrl || image.mediaUrl;
+                  const isVideo =
+                    mediaUrl &&
+                    (mediaUrl.match(/\.(mp4|mov|avi|mkv|webm)$/i) ||
+                      mediaUrl.includes("/video/") ||
+                      (mediaUrl.includes("/upload/v") &&
+                        !mediaUrl.match(/\.(jpg|jpeg|png|webp|gif|svg)$/i)));
+
+                  return (
+                    <div
+                      key={image._id}
+                      className="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200 hover:shadow-lg transition-shadow duration-300 group relative"
+                    >
+                      <div className="relative h-48 bg-gray-100">
+                        {mediaUrl ? (
+                          isVideo ? (
+                            <div className="w-full h-full relative">
+                              <video
+                                src={getImageUrl(mediaUrl)}
+                                className="w-full h-full object-cover"
+                                muted
+                                loop
+                                autoPlay
+                                playsInline
+                                onMouseOver={(e) => e.target.play()}
+                                onMouseOut={(e) => {
+                                  e.target.pause();
+                                  e.target.currentTime = 0;
+                                }}
+                              />
+                              <div className="absolute top-2 right-2 bg-black/50 p-1 rounded-full">
+                                <Loader2 className="w-4 h-4 text-white" />
+                              </div>
+                            </div>
+                          ) : (
+                            <img
+                              src={getImageUrl(mediaUrl)}
+                              alt={image.title}
                               className="w-full h-full object-cover"
-                              muted
-                              loop
-                              autoPlay
-                              playsInline
-                              onMouseOver={(e) => e.target.play()}
-                              onMouseOut={(e) => {
-                                e.target.pause();
-                                e.target.currentTime = 0;
+                              onError={(e) => {
+                                e.target.style.display = "none";
+                                e.target.nextSibling.style.display = "flex";
                               }}
                             />
-                            <div className="absolute top-2 right-2 bg-black/50 p-1 rounded-full">
-                               <Loader2 className="w-4 h-4 text-white" />
-                            </div>
-                          </div>
-                        ) : (
-                          <img
-                            src={getImageUrl(image.imageUrl)}
-                            alt={image.title}
-                            className="w-full h-full object-cover"
-                            onError={(e) => {
-                              e.target.style.display = "none";
-                              e.target.nextSibling.style.display = "flex";
-                            }}
-                          />
-                        )
-                      ) : null}
-                      <div
-                        className={`w-full h-full flex items-center justify-center ${
-                          image.imageUrl ? "hidden" : ""
-                        }`}
-                      >
-                        <ImageIcon className="w-16 h-16 text-gray-400" />
-                      </div>
+                          )
+                        ) : null}
+                        <div
+                          className={`w-full h-full flex items-center justify-center ${
+                            mediaUrl ? "hidden" : ""
+                          }`}
+                        >
+                          <ImageIcon className="w-16 h-16 text-gray-400" />
+                        </div>
                       {/* Hover Overlay with Title and Category */}
                       <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-70 transition-all duration-300 flex items-center justify-center opacity-0 group-hover:opacity-100">
                         <div className="text-center text-white p-4">
@@ -989,7 +1003,8 @@ const GalleryView = () => {
                       </div>
                     </div>
                   </div>
-                ))}
+                );
+                })}
               </div>
             </>
           )}

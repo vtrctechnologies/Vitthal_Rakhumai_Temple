@@ -172,7 +172,7 @@ const EventsView = () => {
         response = await eventsAPI.createEvent(formDataToSend);
       }
 
-      if (response.status === "success") {
+      if (response && (response.status === "success" || response.success || response.data)) {
         setMessage({
           type: "success",
           text: editingEvent
@@ -224,7 +224,7 @@ const EventsView = () => {
     setLoading(true);
     try {
       const response = await eventsAPI.deleteEvent(deleteId);
-      if (response.status === "success") {
+      if (response && (response.status === "success" || response.success)) {
         setMessage({ type: "success", text: "Event deleted successfully!" });
         fetchEvents(); // Re-fetch from server
       }

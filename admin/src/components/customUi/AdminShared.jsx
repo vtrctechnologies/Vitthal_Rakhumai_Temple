@@ -13,8 +13,8 @@ export const Button = ({
     "w-full py-3 px-4 rounded-lg font-medium transition-all duration-300 transform active:scale-95 flex items-center justify-center gap-2 shadow-md";
   const variants = {
     primary:
-      "bg-gradient-to-r from-orange-600 to-red-600 text-white hover:from-orange-700 hover:to-red-700 hover:shadow-lg",
-    outline: "border-2 border-orange-600 text-orange-700 hover:bg-orange-50",
+      "bg-gradient-to-r from-[#6b1a1a] to-[#8b2222] text-white hover:from-[#5a1515] hover:to-[#7a1e1e] hover:shadow-lg",
+    outline: "border-2 border-[#d4af37] text-[#6b1a1a] hover:bg-[#d4af37]/10",
     ghost: "bg-transparent text-gray-600 hover:bg-gray-100 shadow-none",
     danger: "bg-red-50 text-red-600 hover:bg-red-100 border border-red-200",
     dangerPrimary: "bg-red-600 text-white hover:bg-red-700 hover:shadow-lg",
@@ -60,7 +60,7 @@ export const InputField = ({
         className={`relative flex items-center border-2 rounded-lg bg-gray-50 transition-colors focus-within:bg-white ${
           error
             ? "border-red-400"
-            : "border-gray-200 focus-within:border-orange-500"
+            : "border-gray-200 focus-within:border-[#d4af37]"
         }`}
       >
         <div className="pl-3 text-gray-400">
@@ -77,7 +77,7 @@ export const InputField = ({
           <button
             type="button"
             onClick={() => setShowPassword(!showPassword)}
-            className="pr-3 text-gray-400 hover:text-orange-600 transition-colors"
+            className="pr-3 text-gray-400 hover:text-[#6b1a1a] transition-colors"
           >
             {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
           </button>
@@ -90,14 +90,14 @@ export const InputField = ({
 
 export const BackgroundPattern = () => (
   <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
-    <div className="absolute inset-0 bg-gradient-to-br from-orange-50 to-orange-100" />
-    <div className="absolute -top-24 -right-24 w-96 h-96 bg-orange-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse" />
+    <div className="absolute inset-0" style={{ background: "linear-gradient(135deg, #fef6e4 0%, #f5e6c8 100%)" }} />
+    <div className="absolute -top-24 -right-24 w-96 h-96 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse" style={{ background: "#d4af37" }} />
     <div
-      className="absolute -bottom-24 -left-24 w-96 h-96 bg-yellow-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse"
-      style={{ animationDelay: "2s" }}
+      className="absolute -bottom-24 -left-24 w-96 h-96 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse"
+      style={{ animationDelay: "2s", background: "#e8650a" }}
     />
-    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] border border-orange-200/40 rounded-full" />
-    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] border border-orange-300/30 rounded-full" />
+    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] border rounded-full" style={{ borderColor: "rgba(212,175,55,0.2)" }} />
+    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] border rounded-full" style={{ borderColor: "rgba(107,26,26,0.1)" }} />
   </div>
 );
 

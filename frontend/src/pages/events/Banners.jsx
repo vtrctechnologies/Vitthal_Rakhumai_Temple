@@ -9,33 +9,8 @@ import {
   Sparkles,
 } from "lucide-react";
 
-// --- API Configuration & Service (Inline implementation to fix import error) ---
-const API_BASE_URL = "http://localhost:5000";
-
-const bannerAPI = {
-  getBannerYears: async () => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/api/banners/years`);
-      if (!response.ok) throw new Error("Network response was not ok");
-      return await response.json();
-    } catch (error) {
-      console.error("Error fetching years:", error);
-      return { status: "error", data: [] };
-    }
-  },
-  getBanners: async (params) => {
-    try {
-      const query = new URLSearchParams(params).toString();
-      const response = await fetch(`${API_BASE_URL}/api/banners?${query}`);
-      if (!response.ok) throw new Error("Network response was not ok");
-      return await response.json();
-    } catch (error) {
-      console.error("Error fetching banners:", error);
-      return { status: "error", data: [] };
-    }
-  },
-};
-// --------------------------------------------------------------------------
+import { bannerAPI } from "@/services/api";
+import { getImageUrl } from "@/utils/imageUrl";
 
 const Banners = () => {
   const [banners, setBanners] = useState({
@@ -76,17 +51,14 @@ const Banners = () => {
   const fetchAvailableYears = async () => {
     try {
       const response = await bannerAPI.getBannerYears();
-      if (
-        response &&
-        response.status === "success" &&
-        Array.isArray(response.data)
-      ) {
-        setAvailableYears(response.data);
+      const yearsData = response?.data || (Array.isArray(response) ? response : []);
+      if (Array.isArray(yearsData) && yearsData.length > 0) {
+        setAvailableYears(yearsData);
         const currentYear = new Date().getFullYear();
-        if (response.data.includes(currentYear)) {
+        if (yearsData.includes(currentYear)) {
           setSelectedYear(currentYear);
-        } else if (response.data.length > 0) {
-          setSelectedYear(response.data[0]);
+        } else {
+          setSelectedYear(yearsData[0]);
         }
       }
     } catch (error) {
@@ -103,11 +75,9 @@ const Banners = () => {
         year: selectedYear.toString(),
       });
 
-      if (
-        response &&
-        response.status === "success" &&
-        Array.isArray(response.data)
-      ) {
+      const bannersList = response?.data || (Array.isArray(response) ? response : []);
+
+      if (Array.isArray(bannersList)) {
         const groupedBanners = {
           hero: null,
           "top-right": null,
@@ -115,16 +85,13 @@ const Banners = () => {
           "bottom-right": null,
         };
 
-        response.data.forEach((banner) => {
+        bannersList.forEach((banner) => {
           if (banner.position && groupedBanners[banner.position] === null) {
             groupedBanners[banner.position] = banner;
           }
         });
 
         setBanners(groupedBanners);
-        setError(null);
-      } else {
-        // Handle case where API returns success but no data or malformed data
         setError(null);
       }
     } catch (error) {
@@ -134,12 +101,6 @@ const Banners = () => {
       setLoading(false);
       setTimeout(() => setIsAnimating(false), 500);
     }
-  };
-
-  const getImageUrl = (imageUrl) => {
-    if (!imageUrl) return null;
-    if (imageUrl.startsWith("http")) return imageUrl;
-    return `${API_BASE_URL}${imageUrl}`;
   };
 
   const handleBannerClick = (banner) => {

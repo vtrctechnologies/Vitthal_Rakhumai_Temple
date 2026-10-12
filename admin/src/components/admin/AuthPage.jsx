@@ -12,7 +12,7 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import authAPI from "../../services/api";
+import { authAPI } from "../../services/api";
 import { Button, InputField, BackgroundPattern } from "../customUi/AdminShared";
 
 const AuthPage = ({ onLoginSuccess }) => {
@@ -143,17 +143,17 @@ const AuthPage = ({ onLoginSuccess }) => {
           formData.password,
           formData.phone
         );
-        if (res.status === "success") {
+        if (res.success) {
           localStorage.setItem("temple_admin_token", res.data.token);
-          onLoginSuccess(res.data.admin);
+          onLoginSuccess({ id: res.data._id, name: res.data.name, email: res.data.email, role: res.data.role });
         }
       }
       // 4. LOGIN
       else {
         const res = await authAPI.login(formData.email, formData.password);
-        if (res.status === "success") {
+        if (res.success) {
           localStorage.setItem("temple_admin_token", res.data.token);
-          onLoginSuccess(res.data.admin);
+          onLoginSuccess({ id: res.data._id, name: res.data.name, email: res.data.email, role: res.data.role });
         }
       }
     } catch (error) {
