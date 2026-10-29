@@ -1,21 +1,44 @@
-import express from 'express';
-import { authController } from './auth.controller.js';
-import { authValidator } from './auth.validator.js';
-import { protect } from '../../middleware/auth.middleware.js';
+import express from "express";
+import {
+  registerUser,
+  loginUser,
+  getUserProfile,
+  updateUserProfile,
+  deleteUserProfile,
+  getAllUsers,
+  getUserById,
+  updateUser,
+  deleteUser,
+  createUser,
+} from "./auth.controller.js";
+import { protect, admin } from "./auth.middleware.js";
 
 const router = express.Router();
 
-router.post('/register', authValidator.register, authController.register);
-router.post('/login', authValidator.login, authController.login);
-router.post('/forgot-password', authValidator.forgotPassword, authController.forgotPassword);
-router.post('/verify-otp', authValidator.verifyOTP, authController.verifyOTP);
-router.post('/resend-otp', authValidator.forgotPassword, authController.resendOTP);
+// Public Authentication Routes
+router.post("/register", registerUser);
+router.post("/login", loginUser);
 
-// Protected routes
-router.get('/me', protect, authController.getMe);
-router.put('/change-password', protect, authValidator.changePassword, authController.changePassword);
-router.put('/reset-password', protect, authValidator.resetPassword, authController.resetPassword);
-router.put('/update-email', protect, authValidator.updateEmail, authController.updateEmail);
-router.put('/update-phone', protect, authValidator.updatePhone, authController.updatePhone);
+// /me alias (used by admin panel to verify token on load)
+router.get("/me", protect, getUserProfile);
+
+// User Profile Routes (Protected - User operations)
+router
+  .route("/profile")
+  .get(protect, getUserProfile)
+  .put(protect, updateUserProfile)
+  .delete(protect, deleteUserProfile);
+
+// Admin User Management Routes (Protected - Admin operations)
+router
+  .route("/users")
+  .get(protect, admin, getAllUsers)
+  .post(protect, admin, createUser);
+
+router
+  .route("/users/:id")
+  .get(protect, admin, getUserById)
+  .put(protect, admin, updateUser)
+  .delete(protect, admin, deleteUser);
 
 export default router;

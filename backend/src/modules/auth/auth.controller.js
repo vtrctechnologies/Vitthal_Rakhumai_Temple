@@ -1,184 +1,336 @@
-import { authService } from './auth.service.js';
-import { validationResult } from 'express-validator';
+import User from "./user.model.js";
+import generateToken from "../../shared/utils/generateToken.js";
 
-export const authController = {
-  /**
-   * Register a new admin/user
-   */
-  register: async (req, res) => {
-    try {
-      // 1) Validate request
-      const errors = validationResult(req);
-      if (!errors.isEmpty()) {
-        return res.status(400).json({ status: 'fail', errors: errors.array() });
+// @desc    Register a new user
+// @route   POST /api/auth/register
+// @access  Public
+export const registerUser = async (req, res, next) => {
+  try {
+    const { name, email, password } = req.body;
+
+    if (!name || !email || !password) {
+      res.status(400);
+      throw new Error("Please provide name, email, and password");
+    }
+
+    if (typeof password !== "string" || password.length < 6) {
+      res.status(400);
+      throw new Error("Password must be at least 6 characters");
+    }
+
+    const trimmedEmail = email.toLowerCase().trim();
+    const trimmedName = name.trim();
+
+    // Check if user already exists
+    const userExists = await User.findOne({ email: trimmedEmail });
+    if (userExists) {
+      res.status(400);
+      throw new Error("User with this email already exists");
+    }
+
+    // Create user - strictly enforce role: "user" for public registration (SEC-001)
+    const user = await User.create({
+      name: trimmedName,
+      email: trimmedEmail,
+      password,
+      role: "user",
+    });
+
+    if (user) {
+      const userData = {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        token: generateToken(user._id),
+      };
+      res.status(201).json({
+        success: true,
+        status: "success",
+        data: userData,
+      });
+    } else {
+      res.status(400);
+      throw new Error("Invalid user data");
+    }
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Authenticate user & get token
+// @route   POST /api/auth/login
+// @access  Public
+export const loginUser = async (req, res, next) => {
+  try {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      res.status(400);
+      throw new Error("Please provide email and password");
+    }
+
+    // Find user by email or name
+    const user = await User.findOne({
+      $or: [{ email: email.toLowerCase() }, { name: email }],
+    });
+
+    if (user && (await user.matchPassword(password))) {
+      const userData = {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        token: generateToken(user._id),
+      };
+      res.json({
+        success: true,
+        status: "success",
+        data: {
+          ...userData,
+          admin: { id: user._id, name: user.name, email: user.email, role: user.role },
+        },
+      });
+    } else {
+      res.status(401);
+      throw new Error("Invalid email or password");
+    }
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Get logged in user profile (Read - Self)
+// @route   GET /api/auth/profile
+// @access  Private
+export const getUserProfile = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.user._id).select("-password");
+    if (user) {
+      res.json({
+        success: true,
+        status: "success",
+        data: {
+          _id: user._id,
+          name: user.name,
+          email: user.email,
+          role: user.role,
+          admin: { id: user._id, name: user.name, email: user.email, role: user.role },
+        },
+      });
+    } else {
+      res.status(404);
+      throw new Error("User not found");
+    }
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Update logged in user profile (Update - Self)
+// @route   PUT /api/auth/profile
+// @access  Private
+export const updateUserProfile = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.user._id);
+
+    if (user) {
+      user.name = req.body.name || user.name;
+      user.email = req.body.email || user.email;
+
+      if (req.body.password) {
+        user.password = req.body.password;
       }
 
-      // 2) Business logic
-      const result = await authService.registerUser(req.body);
-      
-      // 3) Respond
-      res.status(201).json(result);
-    } catch (err) {
-      res.status(400).json({ status: 'fail', message: err.message });
+      const updatedUser = await user.save();
+
+      res.json({
+        success: true,
+        data: {
+          _id: updatedUser._id,
+          name: updatedUser.name,
+          email: updatedUser.email,
+          role: updatedUser.role,
+          token: generateToken(updatedUser._id),
+        },
+      });
+    } else {
+      res.status(404);
+      throw new Error("User not found");
     }
-  },
+  } catch (error) {
+    next(error);
+  }
+};
 
-  /**
-   * Login user
-   */
-  login: async (req, res) => {
-    try {
-      // 1) Validate request
-      const errors = validationResult(req);
-      if (!errors.isEmpty()) {
-        return res.status(400).json({ status: 'fail', errors: errors.array() });
-      }
+// @desc    Delete own user profile (Delete - Self)
+// @route   DELETE /api/auth/profile
+// @access  Private
+export const deleteUserProfile = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.user._id);
 
-      // 2) Business logic
-      const result = await authService.loginUser(req.body.email, req.body.password);
-      
-      // 3) Respond
-      res.status(200).json(result);
-    } catch (err) {
-      res.status(401).json({ status: 'fail', message: err.message });
+    if (user) {
+      await user.deleteOne();
+      res.json({
+        success: true,
+        message: "User account deleted successfully",
+      });
+    } else {
+      res.status(404);
+      throw new Error("User not found");
     }
-  },
+  } catch (error) {
+    next(error);
+  }
+};
 
-  /**
-   * Forgot password - Generate OTP
-   */
-  forgotPassword: async (req, res) => {
-    try {
-      // 1) Validate request
-      const errors = validationResult(req);
-      if (!errors.isEmpty()) {
-        return res.status(400).json({ status: 'fail', errors: errors.array() });
-      }
+// ==========================================
+// ADMIN CONTROLLERS (Manage all users)
+// ==========================================
 
-      // 2) Business logic
-      const result = await authService.forgotPassword(req.body.username);
-      
-      // 3) Respond
-      res.status(200).json(result);
-    } catch (err) {
-      res.status(400).json({ status: 'fail', message: err.message });
+// @desc    Create a user/admin (Admin only)
+// @route   POST /api/auth/users
+// @access  Private/Admin
+export const createUser = async (req, res, next) => {
+  try {
+    const { name, email, password, role } = req.body;
+
+    if (!name || !email || !password) {
+      res.status(400);
+      throw new Error("Please provide name, email, and password");
     }
-  },
 
-  /**
-   * Verify OTP
-   */
-  verifyOTP: async (req, res) => {
-    try {
-      // 1) Validate request
-      const errors = validationResult(req);
-      if (!errors.isEmpty()) {
-        return res.status(400).json({ status: 'fail', errors: errors.array() });
-      }
-
-      // 2) Business logic
-      const result = await authService.verifyOTP(req.body.username, req.body.otp);
-      
-      // 3) Respond
-      res.status(200).json(result);
-    } catch (err) {
-      res.status(401).json({ status: 'fail', message: err.message });
+    if (typeof password !== "string" || password.length < 6) {
+      res.status(400);
+      throw new Error("Password must be at least 6 characters");
     }
-  },
 
-  /**
-   * Resend OTP
-   */
-  resendOTP: async (req, res) => {
-    try {
-      const result = await authService.forgotPassword(req.body.username);
-      res.status(200).json(result);
-    } catch (err) {
-      res.status(400).json({ status: 'fail', message: err.message });
+    const trimmedEmail = email.toLowerCase().trim();
+    const trimmedName = name.trim();
+    const assignedRole = role === "admin" ? "admin" : "user";
+
+    // Check if user already exists
+    const userExists = await User.findOne({ email: trimmedEmail });
+    if (userExists) {
+      res.status(400);
+      throw new Error("User with this email already exists");
     }
-  },
 
-  /**
-   * Get Current Admin/User
-   */
-  getMe: async (req, res) => {
-    try {
-      const result = await authService.getMe(req.user.id);
-      res.status(200).json(result);
-    } catch (err) {
-      res.status(404).json({ status: 'fail', message: err.message });
+    // Create user with authorized role
+    const user = await User.create({
+      name: trimmedName,
+      email: trimmedEmail,
+      password,
+      role: assignedRole,
+    });
+
+    if (user) {
+      res.status(201).json({
+        success: true,
+        status: "success",
+        data: {
+          _id: user._id,
+          name: user.name,
+          email: user.email,
+          role: user.role,
+        },
+      });
+    } else {
+      res.status(400);
+      throw new Error("Invalid user data");
     }
-  },
+  } catch (error) {
+    next(error);
+  }
+};
 
-  /**
-   * Change Password
-   */
-  changePassword: async (req, res) => {
-    try {
-      const errors = validationResult(req);
-      if (!errors.isEmpty()) {
-        return res.status(400).json({ status: 'fail', errors: errors.array() });
-      }
+// @desc    Get all users (Read - Admin)
+// @route   GET /api/auth/users
+// @access  Private/Admin
+export const getAllUsers = async (req, res, next) => {
+  try {
+    const users = await User.find({}).select("-password");
+    res.json({
+      success: true,
+      count: users.length,
+      data: users,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
 
-      const result = await authService.changePassword(
-        req.user.id,
-        req.body.currentPassword,
-        req.body.newPassword
-      );
-      res.status(200).json(result);
-    } catch (err) {
-      res.status(400).json({ status: 'fail', message: err.message });
+// @desc    Get single user by ID (Read - Admin)
+// @route   GET /api/auth/users/:id
+// @access  Private/Admin
+export const getUserById = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.params.id).select("-password");
+    if (user) {
+      res.json({
+        success: true,
+        data: user,
+      });
+    } else {
+      res.status(404);
+      throw new Error("User not found");
     }
-  },
+  } catch (error) {
+    next(error);
+  }
+};
 
-  /**
-   * Reset Password
-   */
-  resetPassword: async (req, res) => {
-    try {
-      const errors = validationResult(req);
-      if (!errors.isEmpty()) {
-        return res.status(400).json({ status: 'fail', errors: errors.array() });
-      }
+// @desc    Update user by ID (Update - Admin)
+// @route   PUT /api/auth/users/:id
+// @access  Private/Admin
+export const updateUser = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.params.id);
 
-      const result = await authService.resetPassword(req.user.id, req.body.newPassword);
-      res.status(200).json(result);
-    } catch (err) {
-      res.status(400).json({ status: 'fail', message: err.message });
+    if (user) {
+      user.name = req.body.name || user.name;
+      user.email = req.body.email || user.email;
+      user.role = req.body.role || user.role;
+
+      const updatedUser = await user.save();
+
+      res.json({
+        success: true,
+        data: {
+          _id: updatedUser._id,
+          name: updatedUser.name,
+          email: updatedUser.email,
+          role: updatedUser.role,
+        },
+      });
+    } else {
+      res.status(404);
+      throw new Error("User not found");
     }
-  },
+  } catch (error) {
+    next(error);
+  }
+};
 
-  /**
-   * Update Email
-   */
-  updateEmail: async (req, res) => {
-    try {
-      const errors = validationResult(req);
-      if (!errors.isEmpty()) {
-        return res.status(400).json({ status: 'fail', errors: errors.array() });
-      }
+// @desc    Delete user by ID (Delete - Admin)
+// @route   DELETE /api/auth/users/:id
+// @access  Private/Admin
+export const deleteUser = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.params.id);
 
-      const result = await authService.updateEmail(req.user.id, req.body.newEmail);
-      res.status(200).json(result);
-    } catch (err) {
-      res.status(400).json({ status: 'fail', message: err.message });
+    if (user) {
+      await user.deleteOne();
+      res.json({
+        success: true,
+        message: "User removed successfully",
+      });
+    } else {
+      res.status(404);
+      throw new Error("User not found");
     }
-  },
-
-  /**
-   * Update Phone
-   */
-  updatePhone: async (req, res) => {
-    try {
-      const errors = validationResult(req);
-      if (!errors.isEmpty()) {
-        return res.status(400).json({ status: 'fail', errors: errors.array() });
-      }
-
-      const result = await authService.updatePhone(req.user.id, req.body.newPhone);
-      res.status(200).json(result);
-    } catch (err) {
-      res.status(400).json({ status: 'fail', message: err.message });
-    }
+  } catch (error) {
+    next(error);
   }
 };

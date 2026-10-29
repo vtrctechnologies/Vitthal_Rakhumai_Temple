@@ -1,56 +1,62 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
-const guestSchema = new mongoose.Schema({
+const guestSchema = new mongoose.Schema(
+  {
     name: {
-        type: String,
-        required: [true, 'Guest Name is required'],
-        trim: true
+      type: String,
+      required: [true, "Guest Name is required"],
+      trim: true,
     },
     nameMarathi: {
-        type: String,
-        trim: true
+      type: String,
+      trim: true,
     },
     prize: {
-        type: String,
-        trim: true
+      type: String,
+      trim: true,
     },
     prizeMarathi: {
-        type: String,
-        trim: true
+      type: String,
+      trim: true,
     },
     description: {
-        type: String,
-        trim: true
+      type: String,
+      trim: true,
     },
     descriptionMarathi: {
-        type: String,
-        trim: true
+      type: String,
+      trim: true,
     },
     imageUrl: {
-        type: String,
-        required: [true, 'Image URL is required']
+      type: String,
+      required: [true, "Image URL is required"],
     },
     publicId: {
-        type: String,
-        required: [true, 'Cloudinary Public ID is required']
+      type: String,
+      default: "",
     },
     year: {
-        type: Number,
-        required: [true, 'Year is required'],
-        default: () => new Date().getFullYear()
+      type: Number,
+      required: [true, "Year is required"],
+      default: () => new Date().getFullYear(),
     },
     order: {
-        type: Number,
-        default: 0
+      type: Number,
+      default: 0,
     },
     isActive: {
-        type: Boolean,
-        default: true
-    }
-}, {
-    timestamps: true
-});
+      type: Boolean,
+      default: true,
+    },
+  },
+  {
+    timestamps: true,
+  },
+);
 
 guestSchema.index({ year: 1, isActive: 1, order: 1 });
+guestSchema.index({ isActive: 1, order: 1, createdAt: -1 });
+guestSchema.index({ order: 1, createdAt: -1 });
 
-export const Guest = mongoose.models.Guest || mongoose.model('Guest', guestSchema);
+export const Guest =
+  mongoose.models.Guest || mongoose.model("Guest", guestSchema);

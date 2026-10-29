@@ -2,9 +2,14 @@ import apiClient from "./axiosClient";
 
 // Auth API functions
 export const authAPI = {
-  // Register a new admin (backend uses 'name' not 'username')
+  // Register a new user (public registration endpoint creates standard user)
   register: async (name, email, password) => {
-    return apiClient.post("/auth/register", { name, email, password, role: "admin" });
+    return apiClient.post("/auth/register", { name, email, password });
+  },
+
+  // Create user or admin (Admin only, requires protect + admin)
+  createUser: async (userData) => {
+    return apiClient.post("/auth/users", userData);
   },
 
   // Login admin

@@ -1,6 +1,6 @@
 import express from 'express';
 import * as ctrl from './subscriber.controller.js';
-import { protect } from '../../features/auth/auth.middleware.js';
+import { protect, admin } from '../auth/auth.middleware.js';
 
 const router = express.Router();
 
@@ -8,7 +8,7 @@ const router = express.Router();
 router.post('/subscribe', ctrl.requestOTP);
 router.post('/verify', ctrl.verifyOTP);
 
-// Admin routes (Protected)
-router.get('/', protect, ctrl.getSubscribers);
+// Admin routes (Protected - Admin only)
+router.get('/', protect, admin, ctrl.getSubscribers);
 
 export default router;

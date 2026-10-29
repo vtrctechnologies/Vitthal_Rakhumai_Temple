@@ -1,6 +1,6 @@
 import express from 'express';
 import * as liveController from './live.controller.js';
-import { protect } from '../../features/auth/auth.middleware.js';
+import { protect, admin } from '../auth/auth.middleware.js';
 import upload from '../../shared/middlewares/upload.middleware.js';
 
 const router = express.Router();
@@ -18,10 +18,10 @@ router.get('/years', liveController.getLiveProgramYears);
 router.get('/:id', liveController.getLiveProgram);
 
 // ==========================================
-// ADMIN ROUTES (Protected)
+// ADMIN ROUTES (Protected - Admin only)
 // ==========================================
 
-router.use(protect);
+router.use(protect, admin);
 
 // Admin Category routes
 router.get('/categories/admin/all', liveController.getCategoriesAdmin);

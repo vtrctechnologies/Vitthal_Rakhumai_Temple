@@ -161,13 +161,37 @@ export const getCloudinaryFolderPath = (categorySlug, year) => {
  */
 export const deleteFromCloudinary = async (publicId, resourceType = "image") => {
   try {
-    if (!publicId) return { result: "ok" };
+    if (!publicId || typeof publicId !== "string") return { result: "ok" };
 
     if (publicId.startsWith("local_")) {
-      const filename = publicId.replace("local_", "");
-      const filepath = path.join(process.cwd(), "uploads", filename);
-      if (fs.existsSync(filepath)) {
-        fs.unlinkSync(filepath);
+      const rawTarget = publicId.replace(/^local_/, "").trim();
+
+      // Block path traversal attempts (null bytes, directory traversal patterns)
+      if (!rawTarget || rawTarget.includes("\0") || rawTarget.includes("..")) {
+        console.warn(`[Security Alert] Blocked path traversal attempt in deleteFromCloudinary: "${publicId}"`);
+        return { result: "error", error: "Path traversal attempt blocked" };
+      }
+
+      const uploadsDir = path.resolve(process.cwd(), "uploads");
+      const resolvedPath = path.resolve(uploadsDir, rawTarget);
+
+      // Verify that the resolved target is strictly contained inside the uploads root directory (SEC-006)
+      const relative = path.relative(uploadsDir, resolvedPath);
+      const isContained =
+        !relative.startsWith("..") &&
+        !path.isAbsolute(relative) &&
+        relative !== "";
+
+      if (!isContained) {
+        console.warn(`[Security Alert] Blocked attempt to delete file outside uploads directory: "${resolvedPath}"`);
+        return { result: "error", error: "Path traversal detected: target is outside uploads directory" };
+      }
+
+      if (fs.existsSync(resolvedPath)) {
+        const stat = fs.statSync(resolvedPath);
+        if (stat.isFile()) {
+          fs.unlinkSync(resolvedPath);
+        }
       }
       return { result: "ok" };
     }

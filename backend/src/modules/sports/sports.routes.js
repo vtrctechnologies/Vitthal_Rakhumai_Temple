@@ -1,6 +1,6 @@
 import express from 'express';
 import * as ctrl from './sports.controller.js';
-import { protect } from '../../features/auth/auth.middleware.js';
+import { protect, admin } from '../auth/auth.middleware.js';
 import upload from '../../shared/middlewares/upload.middleware.js';
 
 const router = express.Router();
@@ -12,8 +12,8 @@ router.get('/competitions/open', ctrl.getCompetitionsOpen);
 router.post('/competitions/:id/register', ctrl.registerForCompetition);
 router.get('/:id', ctrl.getSportWithWinners);
 
-// Admin routes
-router.use(protect);
+// Admin routes (Protected - Admin only)
+router.use(protect, admin);
 router.post('/', upload.single('image'), ctrl.createSport);
 router.put('/:id', upload.single('image'), ctrl.updateSport);
 router.delete('/:id', ctrl.deleteSport);

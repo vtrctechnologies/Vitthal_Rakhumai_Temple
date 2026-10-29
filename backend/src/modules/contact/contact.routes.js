@@ -1,14 +1,40 @@
-import express from 'express';
-import * as ctrl from './message.controller.js';
-import { protect } from '../../middleware/auth.middleware.js';
+import express from "express";
+import {
+  submitMessage,
+  getMessages,
+  getMessageById,
+  updateMessageStatus,
+  deleteMessage,
+  bulkDeleteMessages,
+} from "./contact.controller.js";
+import { protect, admin } from "../auth/auth.middleware.js";
 
 const router = express.Router();
 
-// Public routes
-router.post('/send', ctrl.sendMessage);
+// Root route: POST (public) + GET/DELETE (admin)
+router
+  .route("/")
+  .post(submitMessage)
+  .get(protect, admin, getMessages)
+  .delete(protect, admin, bulkDeleteMessages);
 
-// Admin routes (Protected)
-router.get('/messages', protect, ctrl.getMessages);
-router.delete('/messages/:id', protect, ctrl.deleteMessage);
+// Messages alias for admin panel
+router
+  .route("/messages")
+  .get(protect, admin, getMessages)
+  .delete(protect, admin, bulkDeleteMessages);
+
+router
+  .route("/messages/:id")
+  .get(protect, admin, getMessageById)
+  .delete(protect, admin, deleteMessage);
+
+router
+  .route("/:id")
+  .get(protect, admin, getMessageById)
+  .delete(protect, admin, deleteMessage);
+
+// Admin Route – Toggle read/unread status
+router.patch("/:id/status", protect, admin, updateMessageStatus);
 
 export default router;
