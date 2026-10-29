@@ -1,51 +1,78 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
-const gallerySchema = new mongoose.Schema({
+const gallerySchema = new mongoose.Schema(
+  {
     title: {
-        type: String,
-        required: [true, 'Title is required'],
-        trim: true
+      type: String,
+      required: [true, "Please add a gallery item title"],
+      trim: true,
     },
     description: {
-        type: String,
-        trim: true
-    },
-    imageUrl: {
-        type: String,
-        required: [true, 'Image/Video URL is required']
-    },
-    publicId: {
-        type: String,
-        required: [true, 'Cloudinary Public ID is required']
-    },
-    resourceType: {
-        type: String,
-        enum: ['image', 'video'],
-        default: 'image'
+      type: String,
+      trim: true,
+      default: "",
     },
     category: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Category',
-        required: [true, 'Category is required']
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Category",
+      required: [true, "Please assign a category to this gallery item"],
+    },
+    mediaUrl: {
+      type: String,
+      required: [true, "Media URL is required"],
+    },
+    publicId: {
+      type: String,
+      required: [true, "Cloudinary public_id is required"],
+    },
+    mediaType: {
+      type: String,
+      enum: ["image", "video"],
+      default: "image",
+      required: true,
     },
     year: {
-        type: Number,
-        required: [true, 'Year is required'],
-        default: () => new Date().getFullYear()
+      type: Number,
+      required: [true, "Year is required"],
+      default: () => new Date().getFullYear(),
+    },
+    imageUrl: {
+      type: String,
     },
     order: {
-        type: Number,
-        default: 0
+      type: Number,
+      default: 0,
     },
     isActive: {
-        type: Boolean,
-        default: true
-    }
-}, {
-    timestamps: true
+      type: Boolean,
+      default: true,
+    },
+    tags: [
+      {
+        type: String,
+        trim: true,
+      },
+    ],
+    uploadedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+  },
+  {
+    timestamps: true,
+  }
+);
+
+// Synchronize imageUrl and mediaUrl automatically
+gallerySchema.pre("save", function () {
+  if (this.mediaUrl && !this.imageUrl) {
+    this.imageUrl = this.mediaUrl;
+  }
+  if (this.imageUrl && !this.mediaUrl) {
+    this.mediaUrl = this.imageUrl;
+  }
 });
 
-// Index for filtering
-gallerySchema.index({ category: 1, year: 1, isActive: 1, order: 1 });
+const Gallery = mongoose.model("Gallery", gallerySchema);
 
-export const Gallery = mongoose.models.Gallery || mongoose.model('Gallery', gallerySchema);
+export default Gallery;

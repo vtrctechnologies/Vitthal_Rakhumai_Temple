@@ -1,50 +1,63 @@
-import React from "react";
-import { useLanguage } from "../context/LanguageContext"; // Import the hook
+import { memo } from "react";
+import { useLanguage } from "../context/LanguageContext";
 
-const Switch = () => {
-  // Use global state instead of local useState
+/**
+ * Switch - High-performance bilingual language toggle (Marathi / English)
+ * Optimized with light gradients, crisp typography, and zero heavy raster filters.
+ */
+const Switch = memo(({ className = "" }) => {
   const { isMarathi, toggleLanguage } = useLanguage();
 
   return (
-    <div className="relative flex flex-col items-center group">
-      {/* Your Custom Button Switch */}
+    <div className={`relative inline-flex items-center ${className}`}>
+      {/* Light Gradient Language Switch Pill */}
       <button
-        onClick={toggleLanguage} // Use the context toggle function
-        className="relative inline-flex h-7 w-16 items-center rounded-full bg-red-950/50 border border-yellow-500/30 transition-colors hover:bg-red-950/70"
-        aria-label="Toggle Language"
+        type="button"
+        role="switch"
+        aria-checked={isMarathi}
+        onClick={toggleLanguage}
+        className="relative inline-flex items-center h-7 sm:h-8 px-1 rounded-full bg-[#1e0404]/90 border border-gold/35 hover:border-gold/70 shadow-sm transition-colors duration-200 cursor-pointer select-none focus:outline-none focus:ring-1 focus:ring-gold/50"
+        aria-label={isMarathi ? "Switch to English" : "मराठी भाषेत बदला"}
+        title={isMarathi ? "Switch to English" : "मराठी भाषेत बदला"}
       >
-        <span
-          className={`absolute left-2 text-[10px] font-bold text-yellow-100 transition-opacity ${
-            isMarathi ? "opacity-40" : "opacity-100"
-          }`}
-        >
-          EN
-        </span>
-        <span
-          className={`absolute right-2 text-[10px] font-bold text-yellow-100 transition-opacity ${
-            !isMarathi ? "opacity-40" : "opacity-100"
-          }`}
-        >
-          म
-        </span>
-        <span
-          className={`${
-            isMarathi
-              ? "translate-x-9 bg-yellow-500"
-              : "translate-x-1 bg-yellow-100"
-          } inline-block h-5 w-5 transform rounded-full shadow-md transition-transform duration-300 ease-in-out`}
-        />
-      </button>
+        <div className="relative flex items-center justify-between w-[64px] sm:w-[68px] text-[10px] sm:text-[10.5px] font-heading font-bold uppercase tracking-wider px-1">
+          {/* English label */}
+          <span
+            className={`z-10 transition-colors duration-200 flex items-center justify-center w-6 text-center ${
+              !isMarathi
+                ? "text-maroon-dk font-extrabold"
+                : "text-cream/55 hover:text-cream"
+            }`}
+          >
+            EN
+          </span>
 
-      {/* Tooltip Container */}
-      <div className="absolute top-full mt-3 hidden flex-col items-center group-hover:flex transition-all duration-200 ease-in-out opacity-0 group-hover:opacity-100">
-        <div className="w-3 h-3 -mb-2 rotate-45 bg-red-900"></div>
-        <span className="relative z-10 p-2 text-xs font-semibold leading-none text-yellow-100 whitespace-no-wrap bg-red-900 shadow-lg rounded-md whitespace-nowrap border border-yellow-500/30">
-          Switch to {isMarathi ? "English" : "Marathi"}
-        </span>
-      </div>
+          {/* Marathi label */}
+          <span
+            className={`z-10 font-marathi text-[11px] sm:text-xs transition-colors duration-200 flex items-center justify-center w-7 text-center ${
+              isMarathi
+                ? "text-maroon-dk font-black"
+                : "text-cream/55 hover:text-cream"
+            }`}
+          >
+            मराठी
+          </span>
+
+          {/* Sliding Light Gold Pill Indicator */}
+          <span
+            className={`absolute top-[2px] bottom-[2px] w-[30px] sm:w-[32px] rounded-full bg-gradient-to-r from-amber-300 to-amber-500 shadow-sm transition-transform duration-250 ease-out ${
+              isMarathi
+                ? "translate-x-[30px] sm:translate-x-[32px]"
+                : "translate-x-0"
+            }`}
+          />
+        </div>
+      </button>
     </div>
   );
-};
+});
 
+Switch.displayName = "Switch";
 export default Switch;
+
+

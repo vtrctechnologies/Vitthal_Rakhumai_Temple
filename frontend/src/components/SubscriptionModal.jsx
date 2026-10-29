@@ -33,7 +33,6 @@ const SubscriptionModal = ({ isOpen, onClose }) => {
         phone: formData.phone
       });
       if (response.status === "success") {
-        console.log("DEBUG: OTP Received ->", response.otp);
         setStep(2);
       } else {
         setError(response.message || "Failed to send OTP");
@@ -186,8 +185,8 @@ const SubscriptionModal = ({ isOpen, onClose }) => {
                 </h4>
                 <p className="text-xs text-gray-500 mt-1">
                   {isMarathi 
-                    ? `${formData.phone} वर पाठवलेला OTP टाका (कंसोल तपासा)` 
-                    : `Enter the code sent to ${formData.phone} (Check console)`}
+                    ? `${formData.phone} वर पाठवलेला 6-अंकी OTP टाका` 
+                    : `Enter the 6-digit code sent to ${formData.phone}`}
                 </p>
               </div>
 

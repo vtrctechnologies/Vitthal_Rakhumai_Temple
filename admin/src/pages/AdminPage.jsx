@@ -8,7 +8,7 @@ export default function AdminPage() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Initialize checks - verify token and get user info
+  // Initialize checks - verify token and ensure user has admin role
   useEffect(() => {
     const checkAuth = async () => {
       const token = localStorage.getItem("temple_admin_token");
@@ -17,23 +17,32 @@ export default function AdminPage() {
       if (token && storedUser) {
         try {
           const response = await authAPI.getMe();
-          if (response.success) {
+          const userRole = response?.data?.role;
+          if (
+            response.success &&
+            (userRole === "admin" || userRole === "superadmin")
+          ) {
             const userData = {
               id: response.data._id,
               name: response.data.name,
               email: response.data.email,
-              role: response.data.role || "admin",
+              role: userRole,
             };
             setUser(userData);
             setIsAuthenticated(true);
             localStorage.setItem("temple_admin_user", JSON.stringify(userData));
           } else {
+            // Disallow standard non-admin users from admin dashboard
             localStorage.removeItem("temple_admin_token");
             localStorage.removeItem("temple_admin_user");
+            setUser(null);
+            setIsAuthenticated(false);
           }
         } catch (error) {
           localStorage.removeItem("temple_admin_token");
           localStorage.removeItem("temple_admin_user");
+          setUser(null);
+          setIsAuthenticated(false);
         }
       }
       setLoading(false);
@@ -43,10 +52,18 @@ export default function AdminPage() {
   }, []);
 
   const handleLogin = (userData) => {
+    if (userData.role !== "admin" && userData.role !== "superadmin") {
+      localStorage.removeItem("temple_admin_token");
+      localStorage.removeItem("temple_admin_user");
+      setUser(null);
+      setIsAuthenticated(false);
+      return;
+    }
+
     // Ensure 'name' is present for components that use it (like DashboardView)
     const processedUser = {
       ...userData,
-      name: userData.name || userData.username
+      name: userData.name || userData.username,
     };
     localStorage.setItem("temple_admin_user", JSON.stringify(processedUser));
     setUser(processedUser);

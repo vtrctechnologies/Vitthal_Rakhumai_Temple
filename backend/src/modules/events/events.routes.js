@@ -1,29 +1,62 @@
-import express from 'express';
-import * as ctrl from './events.controller.js';
-import upload from '../../middleware/upload.middleware.js';
-import { protect } from '../../middleware/auth.middleware.js';
+import express from "express";
+import {
+  createEvent,
+  getEvents,
+  getFeaturedEvents,
+  getAllFeaturedEvents,
+  setFeaturedEvent,
+  updateFeaturedEvent,
+  getUpcomingEvents,
+  getUpcomingEvent,
+  createUpcomingEvent,
+  updateUpcomingEvent,
+  deleteUpcomingEvent,
+  getEventYears,
+  getEventsAdmin,
+  getEventById,
+  updateEvent,
+  deleteEvent,
+} from "./events.controller.js";
+import { protect, admin } from "../auth/auth.middleware.js";
+import upload from "../../shared/middlewares/upload.middleware.js";
 
 const router = express.Router();
 
-// Public routes
-router.get('/featured', ctrl.getFeaturedEvent);
-router.get('/upcoming', ctrl.getUpcomingEvents);
-router.get('/years', ctrl.getEventYears);
-router.get('/', ctrl.getEvents);
-router.get('/:id', ctrl.getEvent);
-router.get('/upcoming/:id', ctrl.getEvent); // Mapping for existing frontend calls
+// ==================== FEATURED EVENT ROUTES ====================
+router
+  .route("/featured")
+  .get(getFeaturedEvents)
+  .post(protect, admin, setFeaturedEvent);
 
-// Admin routes (Protected)
-router.use(protect);
+router.get("/featured/all", protect, admin, getAllFeaturedEvents);
+router.put("/featured/:id", protect, admin, updateFeaturedEvent);
 
-router.get('/admin/all', ctrl.getEventsAdmin);
-router.post('/featured', ctrl.setFeaturedEvent); // Updated to dedicated function
-router.put('/featured/:id', ctrl.updateEvent); // Simple mapping for now
-router.post('/', upload.single('image'), ctrl.createEvent);
-router.post('/upcoming', upload.single('image'), ctrl.createEvent); // Mapping
-router.put('/:id', upload.single('image'), ctrl.updateEvent);
-router.put('/upcoming/:id', upload.single('image'), ctrl.updateEvent); // Mapping
-router.delete('/:id', ctrl.deleteEvent);
-router.delete('/upcoming/:id', ctrl.deleteEvent); // Mapping
+// ==================== UPCOMING EVENT ROUTES ====================
+router
+  .route("/upcoming")
+  .get(getUpcomingEvents)
+  .post(protect, admin, upload.single("image"), createUpcomingEvent);
+
+router
+  .route("/upcoming/:id")
+  .get(getUpcomingEvent)
+  .put(protect, admin, upload.single("image"), updateUpcomingEvent)
+  .delete(protect, admin, deleteUpcomingEvent);
+
+// ==================== YEARS & ADMIN ALL ====================
+router.get("/years", getEventYears);
+router.get("/admin/all", protect, admin, getEventsAdmin);
+
+// ==================== GENERAL EVENT CRUD ====================
+router
+  .route("/")
+  .get(getEvents)
+  .post(protect, admin, upload.single("image"), createEvent);
+
+router
+  .route("/:id")
+  .get(getEventById)
+  .put(protect, admin, upload.single("image"), updateEvent)
+  .delete(protect, admin, deleteEvent);
 
 export default router;

@@ -144,6 +144,11 @@ const AuthPage = ({ onLoginSuccess }) => {
           formData.phone
         );
         if (res.success) {
+          if (res.data.role !== "admin" && res.data.role !== "superadmin") {
+            setApiSuccess("Account created successfully. Note: Administrative privileges must be assigned by an existing administrator or server CLI seed script before you can access the admin dashboard.");
+            setView("login");
+            return;
+          }
           localStorage.setItem("temple_admin_token", res.data.token);
           onLoginSuccess({ id: res.data._id, name: res.data.name, email: res.data.email, role: res.data.role });
         }
@@ -152,6 +157,10 @@ const AuthPage = ({ onLoginSuccess }) => {
       else {
         const res = await authAPI.login(formData.email, formData.password);
         if (res.success) {
+          if (res.data.role !== "admin" && res.data.role !== "superadmin") {
+            setApiError("Access denied. Only administrators are authorized to log in to this portal.");
+            return;
+          }
           localStorage.setItem("temple_admin_token", res.data.token);
           onLoginSuccess({ id: res.data._id, name: res.data.name, email: res.data.email, role: res.data.role });
         }

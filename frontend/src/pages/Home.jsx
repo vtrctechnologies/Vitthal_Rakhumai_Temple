@@ -1,6 +1,6 @@
 import { useState, useEffect, memo, useCallback, lazy, Suspense } from "react";
 import { useNavigate } from "react-router-dom";
-import { Calendar, Heart, MapPin, Info } from "lucide-react";
+import { Calendar, Heart, MapPin, Info, Sparkles, Clock } from "lucide-react";
 import HeroImg from "../assets/HeroImg.jpeg";
 import templeMain from "../assets/temple-main.png";
 import { useLanguage } from "../context/LanguageContext";
@@ -155,11 +155,11 @@ const Home = memo(() => {
   return (
     <div className="w-full overflow-x-hidden bg-cream font-body text-ink-dark">
       {/* ── HERO ── */}
-      <header className="relative flex items-center justify-center overflow-hidden">
-        {/* Top arch border motif */}
-        <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-maroon via-gold via-saffron to-maroon z-10" />
+      <header className="relative min-h-[88vh] sm:min-h-[92vh] flex items-center justify-center overflow-hidden">
+        {/* Subtle Light Gold Arch Top Accent Line */}
+        <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-amber-400 to-transparent z-10 opacity-70" />
 
-        {/* Background */}
+        {/* Cinematic Divine Background Layer */}
         <div className="absolute inset-0 z-0">
           {heroData.resourceType === "video" ? (
             <video
@@ -167,128 +167,154 @@ const Home = memo(() => {
               autoPlay
               muted
               loop
+              playsInline
               className="w-full h-full object-cover"
             />
           ) : (
             <img
               src={bgSrc}
-              alt="Temple"
+              alt="Temple Sanctum"
               fetchpriority="high"
               loading="eager"
               decoding="async"
-              className="w-full h-full object-cover object-center saturate-50 brightness-75"
+              className="w-full h-full object-cover object-center brightness-[0.70] contrast-[1.05]"
             />
           )}
 
-          {/* Layered temple-like overlays */}
-          <div className="absolute inset-0 bg-gradient-to-b from-ink-dark/55 via-maroon-lt/35 to-ink-dark/95 via-40% to-85%" />
-          <div
-            className="absolute inset-0 opacity-5"
-            style={{
-              backgroundImage:
-                "repeating-linear-gradient(45deg, var(--color-gold) 0, var(--color-gold) 1px, transparent 0, transparent 50%)",
-              backgroundSize: "20px 20px",
-            }}
-          />
+          {/* Clean High-Performance Directional Lighting Overlays */}
+          {/* 1. Top Navbar Contrast Bleed */}
+          <div className="absolute top-0 left-0 right-0 h-44 bg-gradient-to-b from-[#180303]/90 via-[#180303]/45 to-transparent" />
+
+          {/* 2. Center Cinematic Vignette */}
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(24,4,4,0.30)_0%,_rgba(18,3,3,0.70)_75%,_rgba(12,2,2,0.92)_100%)]" />
+
+          {/* 3. Bottom Smooth Fade to Ticker */}
+          <div className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-[#140202] via-[#140202]/70 to-transparent" />
         </div>
 
-        {/* Content */}
-        <div className="relative z-10 max-w-4xl mx-auto pt-28 pb-30 px-8 text-center flex flex-col items-center">
+        {/* Hero Content Center Stack */}
+        <div className="relative z-10 max-w-4xl mx-auto pt-24 sm:pt-28 pb-16 sm:pb-20 px-4 sm:px-6 text-center flex flex-col items-center justify-center my-auto">
+          {/* Festival Announcement Badge */}
           <motion.div
-            className="inline-flex items-center gap-2.5 bg-gold/40 border border-gold/90 rounded-full px-5 py-1.5 font-body text-sm font-medium  text-gold-lt tracking-wide mb-6 backdrop-blur-sm"
-            initial={{ opacity: 0, y: -16 }}
+            className="inline-flex items-center gap-2 bg-black/45 border border-amber-400/40 rounded-full px-3.5 py-1.5 sm:px-4 sm:py-1.5 font-heading text-xs sm:text-[0.82rem] font-medium text-amber-200 tracking-wide mb-4 sm:mb-6 shadow-sm backdrop-blur-xs select-none"
+            initial={{ opacity: 0, y: -14 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
+            transition={{ duration: 0.5 }}
           >
-            <span className="w-2 h-2  rounded-full bg-saffron animate-pulse-slow" />
-            {isMarathi ? heroData.festivalTitleMarathi : heroData.festivalTitle}
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-400" />
+            </span>
+            <Sparkles size={13} className="text-amber-300 shrink-0" />
+            <span>
+              {isMarathi ? heroData.festivalTitleMarathi : heroData.festivalTitle}
+            </span>
           </motion.div>
 
+          {/* Main Titles */}
           <motion.h1
-            initial={{ opacity: 0, y: 24 }}
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.2 }}
-            className="flex flex-col items-center"
+            transition={{ duration: 0.6, delay: 0.15 }}
+            className="flex flex-col items-center select-none"
           >
-            <span className="font-heading text-[clamp(2.6rem,7vw,5.5rem)] font-black text-white leading-tight tracking-wide drop-shadow-2xl">
+            <span className="font-heading text-[clamp(2.1rem,6.2vw,4.8rem)] font-black text-white leading-tight tracking-wider drop-shadow-[0_4px_24px_rgba(0,0,0,0.9)]">
               {isMarathi ? heroData.mainTitleMarathi : heroData.mainTitle}
             </span>
-            <span className="font-heading text-[clamp(1.6rem,4vw,3rem)] font-bold text-transparent bg-clip-text bg-gradient-to-r from-gold-lt via-saffron-lt to-gold tracking-wider mt-1 block">
+            <span className="font-heading text-[clamp(1.35rem,3.8vw,2.6rem)] font-bold tracking-[0.16em] uppercase text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-amber-300 to-amber-100 drop-shadow-[0_2px_14px_rgba(0,0,0,0.9)] mt-1 sm:mt-1.5 block">
               {isMarathi ? heroData.accentTitleMarathi : heroData.accentTitle}
             </span>
           </motion.h1>
 
-          <div className="flex items-center gap-3 my-6 w-full max-w-[440px]">
-            <div className="flex-1 h-px bg-gradient-to-r from-transparent via-gold to-transparent" />
-            <div className="w-2.5 h-2.5 bg-gold rotate-45 shrink-0" />
-            <div className="flex-1 h-px bg-gradient-to-r from-transparent via-gold to-transparent" />
+          {/* Sacred Diamond Divider */}
+          <div className="flex items-center gap-3 my-4 sm:my-5 w-full max-w-[320px] sm:max-w-[420px]">
+            <div className="flex-1 h-px bg-gradient-to-r from-transparent via-amber-400/60 to-transparent" />
+            <div className="w-2 h-2 rotate-45 bg-amber-300 border border-amber-200/60 shadow-xs shrink-0" />
+            <div className="flex-1 h-px bg-gradient-to-r from-transparent via-amber-400/60 to-transparent" />
           </div>
 
+          {/* Subtitle Description */}
           <motion.p
-            className="font-marathi text-[clamp(1rem,2.5vw,1.35rem)] text-cream-dk/80 mt-6 leading-loose max-w-[600px] font-normal"
+            className="font-body text-[clamp(0.95rem,2.2vw,1.2rem)] text-cream/90 mt-1 sm:mt-2 leading-relaxed max-w-[620px] font-normal drop-shadow-sm px-2"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ duration: 0.7, delay: 0.35 }}
+            transition={{ duration: 0.6, delay: 0.3 }}
           >
             {isMarathi ? heroData.subTitleMarathi : heroData.subTitle}
           </motion.p>
 
+          {/* Interactive CTAs */}
           <motion.div
-            className="flex gap-4 flex-wrap justify-center mt-12"
-            initial={{ opacity: 0, y: 16 }}
+            className="flex flex-wrap sm:flex-nowrap gap-3 sm:gap-4 justify-center items-center mt-7 sm:mt-9 w-full max-w-sm sm:max-w-none"
+            initial={{ opacity: 0, y: 14 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.5 }}
+            transition={{ duration: 0.5, delay: 0.45 }}
           >
+            {/* Primary Donate CTA */}
             <button
+              type="button"
               onClick={handleDonateClick}
-              className="group relative flex items-center gap-2.5 bg-gradient-to-br from-vermillion to-saffron-dk border-none rounded-md px-8 py-3.5 font-heading text-[0.95rem] font-semibold tracking-widest text-white cursor-pointer uppercase overflow-hidden shadow-[0_4px_20px_rgba(192,57,43,0.45)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_6px_28px_rgba(192,57,43,0.55)] active:translate-y-0"
+              className="group flex-1 sm:flex-initial inline-flex items-center justify-center gap-2 px-6 sm:px-7 py-3 sm:py-3.5 rounded-full font-heading text-xs sm:text-[0.8rem] font-bold tracking-widest uppercase bg-gradient-to-r from-amber-400 via-amber-300 to-amber-400 hover:from-amber-300 hover:to-amber-200 text-maroon-dk shadow-[0_4px_16px_rgba(245,166,35,0.35)] hover:shadow-[0_6px_22px_rgba(245,166,35,0.5)] active:scale-95 transition-all duration-200 cursor-pointer select-none"
             >
-              <div className="absolute inset-0 bg-gradient-to-br from-saffron-lt/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
-              <Heart size={18} strokeWidth={2} className="relative z-10" />
-              <span className="relative z-10">
+              <Heart
+                size={15}
+                className="fill-maroon-dk text-maroon-dk group-hover:scale-110 transition-transform duration-200 shrink-0"
+              />
+              <span className="whitespace-nowrap">
                 {isMarathi ? "देणगी द्या" : "Donate Now"}
               </span>
             </button>
+
+            {/* Secondary Events CTA */}
             <button
+              type="button"
               onClick={handleEventsClick}
-              className="flex items-center gap-2.5 bg-transparent border border-gold/80 rounded-md px-8 py-3.5 font-heading text-[0.95rem] font-semibold tracking-widest text-gold-lt cursor-pointer uppercase transition-all duration-200 hover:bg-gold/10 hover:-translate-y-0.5"
+              className="group flex-1 sm:flex-initial inline-flex items-center justify-center gap-2 px-6 sm:px-7 py-3 sm:py-3.5 rounded-full font-heading text-xs sm:text-[0.8rem] font-bold tracking-widest uppercase bg-white/10 hover:bg-white/15 border border-amber-300/40 hover:border-amber-300 text-amber-100 hover:text-white backdrop-blur-xs transition-all duration-200 active:scale-95 cursor-pointer select-none"
             >
-              <Calendar size={18} strokeWidth={2} />
-              {isMarathi ? "कार्यक्रम" : "View Events"}
+              <Calendar
+                size={15}
+                className="text-amber-300 group-hover:scale-110 transition-transform duration-200 shrink-0"
+              />
+              <span className="whitespace-nowrap">
+                {isMarathi ? "कार्यक्रम" : "View Events"}
+              </span>
             </button>
           </motion.div>
         </div>
 
-        {/* Bottom info strip */}
-        <div className="absolute bottom-0 left-0 right-0 z-10 border-t border-gold/40 bg-ink-dark/75 backdrop-blur-md">
-          <div className="max-w-[1100px] mx-auto px-6 py-3.5 flex flex-wrap gap-4 items-center justify-between sm:flex-col sm:items-start md:flex-row md:items-center">
-            <div className="flex items-center gap-2 text-cream-dk font-body text-base">
-              <MapPin size={18} className="text-saffron-lt shrink-0" />
-              <span>
+        {/* Modern Responsive Bottom Info Dock */}
+        <div className="absolute bottom-0 left-0 right-0 z-10 border-t border-amber-400/20 bg-[#140303]/90 backdrop-blur-xs">
+          <div className="max-w-6xl mx-auto px-4 py-2 sm:py-2.5 flex items-center justify-between gap-3 text-xs sm:text-[0.82rem]">
+            {/* Location */}
+            <div className="flex items-center gap-1.5 sm:gap-2 text-cream/90 truncate min-w-0">
+              <MapPin size={14} className="text-amber-400 shrink-0" />
+              <span className="truncate">
                 {isMarathi
                   ? "आंबेकरवाडी, गावडे अंबेरे, रत्नागिरी"
-                  : "Amberkarwadi, Gavade Ambere, Ratnagiri, Maharashtra"}
+                  : "Amberkarwadi, Gavade Ambere, Ratnagiri"}
               </span>
             </div>
-            <div className="hidden md:block w-px h-5 bg-gold/40" />
-            <div className="flex items-center gap-2 text-cream-dk font-body text-base">
-              <Info size={18} className="text-saffron-lt shrink-0" />
+
+            {/* Timing */}
+            <div className="flex items-center gap-1.5 sm:gap-2 text-cream/90 whitespace-nowrap shrink-0">
+              <Clock size={14} className="text-amber-400 shrink-0" />
               <span>
                 {isMarathi
                   ? "२४ तास खुले | प्रवेश विनामूल्य"
                   : "Open 24 Hours · Free Entry"}
               </span>
             </div>
-            <div className="hidden md:block w-px h-5 bg-gold/40" />
-            <div className="flex items-center gap-2 text-gold-lt/75 font-body text-base italic">
-              || राम कृष्ण हरी ||
+
+            {/* Sacred Mantra */}
+            <div className="hidden md:flex items-center gap-1.5 text-amber-200/85 font-marathi whitespace-nowrap shrink-0">
+              <span>|| राम कृष्ण हरी ||</span>
             </div>
           </div>
         </div>
       </header>
 
       {/* ── DONATION TICKER ── */}
-      <Suspense fallback={<div className="h-[52px] bg-maroon border-y-2 border-gold" />}>
+      <Suspense fallback={<div className="h-[46px] bg-[#160303] border-y border-amber-400/25" />}>
         <DonationTicker />
       </Suspense>
 
