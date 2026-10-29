@@ -23,6 +23,7 @@ import {
 import { liveProgramsAPI, liveProgramCategoriesAPI } from "../../services/api";
 
 import { motion } from "framer-motion";
+import { openSafeUrl } from "../../utils/urlSecurity";
 
 // =========================================================================
 //                             Program Card Component
@@ -493,7 +494,7 @@ const LivePrograms = () => {
 
   const handleSocialLinkClick = (url) => {
     if (url && url.trim()) {
-      window.open(url, "_blank", "noopener,noreferrer");
+      openSafeUrl(url);
     }
   };
 

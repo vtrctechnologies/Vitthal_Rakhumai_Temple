@@ -22,6 +22,11 @@ export const authAPI = {
     return apiClient.get("/auth/me");
   },
 
+  // Logout admin & clear HttpOnly session cookie
+  logout: async () => {
+    return apiClient.post("/auth/logout");
+  },
+
   // Update profile (name, email, password)
   updateProfile: async (data) => {
     return apiClient.put("/auth/profile", data);

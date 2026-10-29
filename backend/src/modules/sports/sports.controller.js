@@ -2,6 +2,7 @@ import { Sport } from './sport.model.js';
 import { Winner } from './winner.model.js';
 import { Registration } from './registration.model.js';
 import { uploadToCloudinary, deleteFromCloudinary } from '../../shared/config/cloudinary.js';
+import { escapeRegex } from '../../shared/utils/escapeRegex.js';
 
 // Get all sports (with year filter)
 export const getSports = async (req, res) => {
@@ -86,7 +87,7 @@ export const createSport = async (req, res) => {
 
     if (req.file) {
       const folder = `vrtemple/sports/${targetYear}`;
-      const uploadResult = await uploadToCloudinary(req.file.buffer, folder, 'image');
+      const uploadResult = await uploadToCloudinary(req.file.path || req.file.buffer || req.file, folder, 'image');
       sportData.imageUrl = uploadResult.secure_url;
       sportData.publicId = uploadResult.public_id;
     }
@@ -127,7 +128,7 @@ export const updateSport = async (req, res) => {
       }
       const targetYear = updateData.year || sport.year || new Date().getFullYear();
       const folder = `vrtemple/sports/${targetYear}`;
-      const uploadResult = await uploadToCloudinary(req.file.buffer, folder, 'image');
+      const uploadResult = await uploadToCloudinary(req.file.path || req.file.buffer || req.file, folder, 'image');
       updateData.imageUrl = uploadResult.secure_url;
       updateData.publicId = uploadResult.public_id;
     }
@@ -175,7 +176,7 @@ export const setWinners = async (req, res) => {
       const sport = await Sport.findById(sportId);
       const targetYear = sport ? sport.year : new Date().getFullYear();
       const folder = `vrtemple/sports/winners/${targetYear}`;
-      const uploadResult = await uploadToCloudinary(req.file.buffer, folder, 'image');
+      const uploadResult = await uploadToCloudinary(req.file.path || req.file.buffer || req.file, folder, 'image');
       winnerData.imageUrl = uploadResult.secure_url;
       winnerData.publicId = uploadResult.public_id;
     }
@@ -371,13 +372,14 @@ export const getRegistrationsAdmin = async (req, res) => {
 
     if (sportId && sportId !== 'all') query.sport = sportId;
     if (status && status !== 'all') query.status = status;
-    if (search) {
+    const sanitizedSearch = escapeRegex(search);
+    if (sanitizedSearch) {
       query.$or = [
-        { participantName: { $regex: search, $options: 'i' } },
-        { teamName: { $regex: search, $options: 'i' } },
-        { mobile: { $regex: search, $options: 'i' } },
-        { sportName: { $regex: search, $options: 'i' } },
-        { villageOrCity: { $regex: search, $options: 'i' } },
+        { participantName: { $regex: sanitizedSearch, $options: 'i' } },
+        { teamName: { $regex: sanitizedSearch, $options: 'i' } },
+        { mobile: { $regex: sanitizedSearch, $options: 'i' } },
+        { sportName: { $regex: sanitizedSearch, $options: 'i' } },
+        { villageOrCity: { $regex: sanitizedSearch, $options: 'i' } },
       ];
     }
 
@@ -473,9 +475,13 @@ export const exportRegistrationsExcel = async (req, res) => {
     registrations.forEach((r, idx) => {
       const sName = r.sport?.name || r.sportName || 'N/A';
       const isTeam = r.sport?.registrationType === 'team' || !!r.teamName;
+      // Mitigate CSV / Formula Injection (CWE-1236): Prepend single quote if string starts with formula characters
       const escape = (val) => {
         if (val === undefined || val === null) return '""';
-        const str = String(val).replace(/"/g, '""');
+        let str = String(val).replace(/"/g, '""');
+        if (/^[=+@|\-\t\r%]/.test(str)) {
+          str = "'" + str;
+        }
         return `"${str}"`;
       };
 

@@ -1,4 +1,5 @@
 import Category from "./category.model.js";
+import { escapeRegex } from "../../shared/utils/escapeRegex.js";
 
 // @desc    Create a new category
 // @route   POST /api/categories or /api/gallery/categories
@@ -14,7 +15,7 @@ export const createCategory = async (req, res, next) => {
 
     const trimmedName = name.trim();
     const categoryExists = await Category.findOne({
-      name: { $regex: new RegExp(`^${trimmedName}$`, "i") },
+      name: new RegExp(`^${escapeRegex(trimmedName)}$`, "i"),
     });
     if (categoryExists) {
       res.status(400);

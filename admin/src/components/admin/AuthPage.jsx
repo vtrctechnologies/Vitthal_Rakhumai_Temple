@@ -118,7 +118,7 @@ const AuthPage = ({ onLoginSuccess }) => {
         const res = await authAPI.verifyOTP(null, formData.forgotUsername, formData.otp);
         if (res.status === "success") {
           // Store token
-          localStorage.setItem("temple_admin_token", res.token);
+          localStorage.removeItem("temple_admin_token");
 
           // Switch to Victory view
           setApiSuccess("Identity Verified!");
@@ -149,7 +149,7 @@ const AuthPage = ({ onLoginSuccess }) => {
             setView("login");
             return;
           }
-          localStorage.setItem("temple_admin_token", res.data.token);
+          localStorage.removeItem("temple_admin_token");
           onLoginSuccess({ id: res.data._id, name: res.data.name, email: res.data.email, role: res.data.role });
         }
       }
@@ -161,7 +161,7 @@ const AuthPage = ({ onLoginSuccess }) => {
             setApiError("Access denied. Only administrators are authorized to log in to this portal.");
             return;
           }
-          localStorage.setItem("temple_admin_token", res.data.token);
+          localStorage.removeItem("temple_admin_token");
           onLoginSuccess({ id: res.data._id, name: res.data.name, email: res.data.email, role: res.data.role });
         }
       }

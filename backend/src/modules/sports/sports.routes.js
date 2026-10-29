@@ -2,6 +2,7 @@ import express from 'express';
 import * as ctrl from './sports.controller.js';
 import { protect, admin } from '../auth/auth.middleware.js';
 import upload from '../../shared/middlewares/upload.middleware.js';
+import { competitionRegisterLimiter } from '../../shared/middlewares/rateLimiter.js';
 
 const router = express.Router();
 
@@ -9,7 +10,7 @@ const router = express.Router();
 router.get('/', ctrl.getSports);
 router.get('/years', ctrl.getSportYears);
 router.get('/competitions/open', ctrl.getCompetitionsOpen);
-router.post('/competitions/:id/register', ctrl.registerForCompetition);
+router.post('/competitions/:id/register', competitionRegisterLimiter, ctrl.registerForCompetition);
 router.get('/:id', ctrl.getSportWithWinners);
 
 // Admin routes (Protected - Admin only)

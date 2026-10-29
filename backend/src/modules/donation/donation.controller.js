@@ -269,10 +269,20 @@ export const getLeaderboard = asyncHandler(async (req, res, next) => {
   // Calculate total donors
   const totalDonors = await Donation.countDocuments({ paymentStatus: "success" });
 
+  // Mask names of anonymous donors to protect devotee privacy (SEC-013)
+  const sanitizedLeaderboard = donations.map((d) => ({
+    _id: d._id,
+    name: d.isAnonymous ? "Anonymous Devotee" : (d.name || "Devotee"),
+    amount: d.amount,
+    message: d.message || "",
+    isAnonymous: Boolean(d.isAnonymous),
+    createdAt: d.createdAt,
+  }));
+
   res.json({
     status: "success",
     data: {
-      leaderboard: donations,
+      leaderboard: sanitizedLeaderboard,
       stats: {
         totalRaised: totalRaised[0]?.total || 0,
         totalDonors: totalDonors,

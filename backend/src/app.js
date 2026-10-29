@@ -1,26 +1,50 @@
 import express from 'express';
 import cors from 'cors';
+import helmet from 'helmet';
 import path from 'path';
 import apiRouter from './routes/api.js';
 import { notFound, errorHandler } from './shared/middlewares/error.middleware.js';
+import { globalLimiter } from './shared/middlewares/rateLimiter.js';
 
 const app = express();
 
-// Allowed Origins for CORS
-const allowedOrigins = [
+// Trust reverse proxy (e.g. Render, Vercel, AWS ALB) for accurate client IP detection & rate limiting
+app.set('trust proxy', 1);
+
+// HTTP Security Headers via Helmet
+app.use(
+  helmet({
+    crossOriginResourcePolicy: { policy: 'cross-origin' },
+  })
+);
+
+// Environment-Aware CORS Configuration
+const devOrigins = [
   'http://localhost:5173',
   'http://localhost:5174',
   'http://localhost:5175',
   'http://localhost:8080',
+  'http://127.0.0.1:5173',
+  'http://127.0.0.1:5174',
+  'http://127.0.0.1:5175',
+  'http://127.0.0.1:8080',
+];
+
+const prodOrigins = [
   process.env.CLIENT_URL,
   process.env.ADMIN_URL,
+  ...(process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',').map((o) => o.trim()) : []),
 ].filter(Boolean);
+
+const isProduction = process.env.NODE_ENV === 'production';
+const allowedOrigins = isProduction ? prodOrigins : [...devOrigins, ...prodOrigins];
 
 app.use(
   cors({
     origin: (origin, callback) => {
+      // Allow requests with no origin (such as mobile apps, curl, or server-to-server)
       if (!origin || allowedOrigins.includes(origin)) return callback(null, true);
-      callback(new Error('Not allowed by CORS'));
+      callback(new Error('Not allowed by CORS policy'));
     },
     credentials: true,
   })
@@ -38,9 +62,6 @@ if (process.env.NODE_ENV !== 'production') {
   });
 }
 
-// Static Files (for local uploaded media)
-app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
-
 // Health check / root
 app.get('/', (req, res) => {
   res.json({
@@ -50,8 +71,8 @@ app.get('/', (req, res) => {
   });
 });
 
-// Mount modular API routes
-app.use('/api', apiRouter);
+// Mount modular API routes with global rate limiting protection
+app.use('/api', globalLimiter, apiRouter);
 
 // Error Handling Middlewares
 app.use(notFound);

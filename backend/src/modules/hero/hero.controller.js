@@ -45,7 +45,7 @@ export const createHero = async (req, res) => {
       const isVideo = req.file.mimetype.startsWith('video');
       const resourceType = isVideo ? 'video' : 'image';
       const uploadResult = await uploadToCloudinary(
-        req.file.buffer,
+        req.file.path || req.file.buffer || req.file,
         'vitthal_rakhumai_hero',
         resourceType
       );
@@ -86,7 +86,7 @@ export const updateHero = async (req, res) => {
       const isVideo = req.file.mimetype.startsWith('video');
       const resourceType = isVideo ? 'video' : 'image';
       const uploadResult = await uploadToCloudinary(
-        req.file.buffer,
+        req.file.path || req.file.buffer || req.file,
         'vitthal_rakhumai_hero',
         resourceType
       );

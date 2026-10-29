@@ -8,13 +8,14 @@ import {
   bulkDeleteMessages,
 } from "./contact.controller.js";
 import { protect, admin } from "../auth/auth.middleware.js";
+import { contactLimiter } from "../../shared/middlewares/rateLimiter.js";
 
 const router = express.Router();
 
-// Root route: POST (public) + GET/DELETE (admin)
+// Root route: POST (public message submission protected by contactLimiter) + GET/DELETE (admin)
 router
   .route("/")
-  .post(submitMessage)
+  .post(contactLimiter, submitMessage)
   .get(protect, admin, getMessages)
   .delete(protect, admin, bulkDeleteMessages);
 

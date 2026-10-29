@@ -147,7 +147,7 @@ export const createLiveProgram = async (req, res) => {
     if (req.file) {
       const targetYear = programData.year || new Date().getFullYear();
       const folder = `vrtemple/live-programs/${targetYear}`;
-      const uploadResult = await uploadToCloudinary(req.file.buffer, folder, 'image');
+      const uploadResult = await uploadToCloudinary(req.file.path || req.file.buffer || req.file, folder, 'image');
       programData.thumbnailUrl = uploadResult.secure_url;
       programData.publicId = uploadResult.public_id;
     }
@@ -195,7 +195,7 @@ export const updateLiveProgram = async (req, res) => {
       }
       const targetYear = updateData.year || program.year || new Date().getFullYear();
       const folder = `vrtemple/live-programs/${targetYear}`;
-      const uploadResult = await uploadToCloudinary(req.file.buffer, folder, 'image');
+      const uploadResult = await uploadToCloudinary(req.file.path || req.file.buffer || req.file, folder, 'image');
       updateData.thumbnailUrl = uploadResult.secure_url;
       updateData.publicId = uploadResult.public_id;
     } else if (req.body.deleteThumbnail === 'true') {

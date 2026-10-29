@@ -84,8 +84,8 @@ const DonationTicker = () => {
         if (isMounted && response?.status === "success" && Array.isArray(response.data?.leaderboard) && response.data.leaderboard.length > 0) {
           // Merge API data with mock details for richer display
           const mapped = response.data.leaderboard.map((d, idx) => ({
-            name: d.name || "Devotee",
-            marathiName: d.marathiName || d.name,
+            name: d.isAnonymous ? "Anonymous Devotee" : (d.name || "Devotee"),
+            marathiName: d.isAnonymous ? "गुप्त देणगीदार" : (d.marathiName || d.name || "भाविक"),
             amount: d.amount,
             tag: DEFAULT_DONORS[idx % DEFAULT_DONORS.length]?.tag || "दानशूर",
           }));

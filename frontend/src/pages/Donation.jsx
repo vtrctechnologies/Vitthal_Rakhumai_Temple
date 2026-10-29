@@ -209,7 +209,9 @@ const Donation = () => {
                 setNotification({
                   type: "success",
                   title: "Payment Successful!",
-                  message: `Thank you ${formData.name}! Your generous donation of ₹${formData.amount} has been received. Your name has been added to our donor leaderboard.`,
+                  message: formData.isAnonymous
+                    ? `Thank you for your generous anonymous donation of ₹${formData.amount}! Your contribution has been safely recorded.`
+                    : `Thank you ${formData.name}! Your generous donation of ₹${formData.amount} has been received. Your name has been added to our donor leaderboard.`,
                 });
                 setFormData({
                   name: "",
@@ -524,6 +526,9 @@ const Donation = () => {
                                 {/* Avatar / Initials */}
                                 <div className="flex-shrink-0 h-10 w-10 rounded-full bg-white border-2 border-orange-100 text-orange-600 font-bold flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform duration-300">
                                   {(() => {
+                                    if (donor.isAnonymous) {
+                                      return <User className="w-5 h-5 text-orange-500" />;
+                                    }
                                     const parts = (donor.name || "")
                                       .split(/\s+/)
                                       .filter(Boolean);

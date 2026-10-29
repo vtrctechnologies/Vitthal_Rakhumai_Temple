@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import Gallery from "./gallery.model.js";
 import Category from "../category/category.model.js";
+import { escapeRegex } from "../../shared/utils/escapeRegex.js";
 import {
   uploadToCloudinary,
   deleteFromCloudinary,
@@ -37,7 +38,7 @@ export const createGalleryItem = async (req, res, next) => {
         categoryDoc = await Category.findOne({
           $or: [
             { slug: category.toString().toLowerCase() },
-            { name: new RegExp(`^${category}$`, "i") },
+            { name: new RegExp(`^${escapeRegex(category.toString())}$`, "i") },
           ],
         });
       }
@@ -68,7 +69,7 @@ export const createGalleryItem = async (req, res, next) => {
 
     if (req.file) {
       const uploadResult = await uploadToCloudinary(
-        req.file.buffer,
+        req.file.path || req.file.buffer || req.file,
         folderPath,
         detectedType === "video" ? "video" : "image"
       );
@@ -141,11 +142,12 @@ export const getGalleryItems = async (req, res, next) => {
       query.mediaType = mediaType;
     }
 
-    if (search) {
+    const sanitizedSearch = escapeRegex(search);
+    if (sanitizedSearch) {
       query.$or = [
-        { title: { $regex: search, $options: "i" } },
-        { description: { $regex: search, $options: "i" } },
-        { tags: { $regex: search, $options: "i" } },
+        { title: { $regex: sanitizedSearch, $options: "i" } },
+        { description: { $regex: sanitizedSearch, $options: "i" } },
+        { tags: { $regex: sanitizedSearch, $options: "i" } },
       ];
     }
 
@@ -268,7 +270,7 @@ export const updateGalleryItem = async (req, res, next) => {
 
       // Upload new file to Cloudinary in subfolder
       const uploadResult = await uploadToCloudinary(
-        req.file.buffer,
+        req.file.path || req.file.buffer || req.file,
         folderPath,
         detectedType === "video" ? "video" : "image"
       );

@@ -1,9 +1,6 @@
 import cloudinary from "cloudinary";
 import dotenv from "dotenv";
 import fs from "fs";
-import path from "path";
-import https from "https";
-import crypto from "crypto";
 
 dotenv.config();
 
@@ -16,129 +13,87 @@ cld.config({
   secure: true,
 });
 
-// Diagnostic helper to obtain exact Cloudinary header reason on 403 / upload failure
-const getCloudinaryErrorReason = () => {
-  return new Promise((resolve) => {
-    try {
-      const cloud = (process.env.CLOUDINARY_CLOUD_NAME || "").trim();
-      const key = (process.env.CLOUDINARY_API_KEY || "").trim();
-      const secret = (process.env.CLOUDINARY_API_SECRET || "").trim();
-      const timestamp = Math.floor(Date.now() / 1000);
-      const strToSign = `timestamp=${timestamp}${secret}`;
-      const signature = crypto.createHash("sha1").update(strToSign).digest("hex");
-
-      const boundary = "------Boundary" + Date.now();
-      const pixelBuffer = Buffer.from(
-        "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==",
-        "base64"
-      );
-
-      const pre = Buffer.from(
-        `--${boundary}\r\nContent-Disposition: form-data; name="api_key"\r\n\r\n${key}\r\n` +
-          `--${boundary}\r\nContent-Disposition: form-data; name="timestamp"\r\n\r\n${timestamp}\r\n` +
-          `--${boundary}\r\nContent-Disposition: form-data; name="signature"\r\n\r\n${signature}\r\n` +
-          `--${boundary}\r\nContent-Disposition: form-data; name="file"; filename="test.png"\r\nContent-Type: image/png\r\n\r\n`
-      );
-      const post = Buffer.from(`\r\n--${boundary}--\r\n`);
-      const payload = Buffer.concat([pre, pixelBuffer, post]);
-
-      const req = https.request(
-        {
-          hostname: "api.cloudinary.com",
-          path: `/v1_1/${cloud}/image/upload`,
-          method: "POST",
-          headers: {
-            "Content-Type": `multipart/form-data; boundary=${boundary}`,
-            "Content-Length": payload.length,
-          },
-        },
-        (res) => {
-          let text = "";
-          res.on("data", (chunk) => (text += chunk));
-          res.on("end", () => {
-            const errHeader = res.headers["x-cld-error"];
-            if (errHeader) return resolve(errHeader);
-            try {
-              const parsed = JSON.parse(text);
-              if (parsed?.error?.message) return resolve(parsed.error.message);
-            } catch {}
-            resolve(text || `HTTP ${res.statusCode}`);
-          });
-        }
-      );
-      req.on("error", (e) => resolve(e.message));
-      req.write(payload);
-      req.end();
-    } catch (e) {
-      resolve(e.message);
-    }
-  });
-};
-
 /**
- * Upload buffer to Cloudinary with local fallback if Cloudinary credentials/account return 403
- * @param {Buffer} fileBuffer - File buffer from Multer memory storage
- * @param {String} folder - Cloudinary folder name
- * @param {String} resourceType - 'auto', 'image', or 'video'
- * @returns {Promise<Object>} Upload result containing secure_url and public_id
+ * Uploads media asset strictly to Cloudinary CDN (no local disk fallback).
+ * Streams directly from disk path or memory buffer to eliminate memory exhaustion (SEC-014).
+ *
+ * @param {string|Buffer|Object} fileInput - Temporary file path, Buffer, or Multer file object
+ * @param {string} folder - Target Cloudinary folder
+ * @param {string} resourceType - 'auto', 'image', or 'video'
+ * @returns {Promise<Object>} Cloudinary upload result containing secure_url and public_id
  */
-export const uploadToCloudinary = (
-  fileBuffer,
+export const uploadToCloudinary = async (
+  fileInput,
   folder = "vitthal_rakhumai_gallery",
   resourceType = "auto"
 ) => {
-  return new Promise((resolve, reject) => {
-    const uploadStream = cld.uploader.upload_stream(
-      {
-        folder,
-        resource_type: resourceType,
-      },
-      (error, result) => {
-        if (error) {
-          getCloudinaryErrorReason().then((reason) => {
-            console.warn(
-              `⚠️ Cloudinary upload rejected (HTTP 403). Exact reason from Cloudinary: "${reason}". Saving file to local storage fallback.`
+  if (!fileInput) {
+    throw new Error("No media file or buffer provided for Cloudinary upload");
+  }
+
+  const filePath =
+    typeof fileInput === "string"
+      ? fileInput
+      : typeof fileInput === "object" && fileInput.path
+      ? fileInput.path
+      : null;
+
+  const buffer =
+    Buffer.isBuffer(fileInput)
+      ? fileInput
+      : typeof fileInput === "object" && Buffer.isBuffer(fileInput.buffer)
+      ? fileInput.buffer
+      : null;
+
+  if (!filePath && !buffer) {
+    throw new Error("Invalid media input: neither file path nor buffer available");
+  }
+
+  const options = {
+    folder,
+    resource_type: resourceType,
+  };
+
+  try {
+    if (filePath && fs.existsSync(filePath)) {
+      // Stream file directly from temporary disk storage to Cloudinary (zero Node heap RAM overhead)
+      const result = await cld.uploader.upload(filePath, options);
+      return result;
+    } else if (buffer) {
+      // Fallback for direct memory buffers (e.g. testing or programmatic calls)
+      return await new Promise((resolve, reject) => {
+        const uploadStream = cld.uploader.upload_stream(options, (error, result) => {
+          if (error) {
+            return reject(
+              new Error(`Cloudinary upload failed: ${error.message || "Unknown Cloudinary error"}`)
             );
-          });
-          try {
-            const uploadsDir = path.join(process.cwd(), "uploads");
-            if (!fs.existsSync(uploadsDir)) {
-              fs.mkdirSync(uploadsDir, { recursive: true });
-            }
-            const ext = resourceType === "video" ? ".mp4" : ".jpg";
-            const filename = `file_${Date.now()}_${Math.round(Math.random() * 1e9)}${ext}`;
-            const filepath = path.join(uploadsDir, filename);
-            fs.writeFileSync(filepath, fileBuffer);
-
-            const serverUrl =
-              process.env.SERVER_URL ||
-              `http://localhost:${process.env.PORT || 5000}`;
-            const fileUrl = `${serverUrl}/uploads/${filename}`;
-
-            return resolve({
-              secure_url: fileUrl,
-              url: fileUrl,
-              public_id: `local_${filename}`,
-              resource_type: resourceType === "auto" ? "image" : resourceType,
-            });
-          } catch (fallbackError) {
-            console.error("Local upload fallback failed:", fallbackError);
-            return reject(error);
           }
-        }
-        resolve(result);
-      }
-    );
-
-    uploadStream.end(fileBuffer);
-  });
+          resolve(result);
+        });
+        uploadStream.end(buffer);
+      });
+    } else {
+      throw new Error("File path does not exist on disk for upload");
+    }
+  } catch (error) {
+    console.error("Cloudinary upload error:", error.message || error);
+    throw new Error(`Media upload failed: ${error.message || "Cloudinary error"}`);
+  } finally {
+    // Automatically cleanup temporary streaming file if a path was used
+    if (filePath && fs.existsSync(filePath)) {
+      try {
+        fs.unlinkSync(filePath);
+      } catch {}
+    }
+  }
 };
 
 /**
- * Helper to construct Cloudinary subfolder path by category and year
- * @param {String} categorySlug - Slug or name of category
- * @param {Number|String} year - Year of the media asset
- * @returns {String} Subfolder path (e.g., "vitthal_rakhumai_gallery/festivals/2026")
+ * Constructs Cloudinary subfolder path by category and year.
+ *
+ * @param {string} categorySlug - Slug or name of category
+ * @param {number|string} year - Year of the media asset
+ * @returns {string} Subfolder path (e.g., "vitthal_rakhumai_gallery/festivals/2026")
  */
 export const getCloudinaryFolderPath = (categorySlug, year) => {
   const baseFolder = process.env.CLOUDINARY_BASE_FOLDER || "vitthal_rakhumai_gallery";
@@ -154,44 +109,22 @@ export const getCloudinaryFolderPath = (categorySlug, year) => {
 };
 
 /**
- * Delete resource from Cloudinary or local storage
- * @param {String} publicId - Asset public ID
- * @param {String} resourceType - 'image' or 'video'
+ * Deletes an asset strictly from Cloudinary CDN.
+ *
+ * @param {string} publicId - Cloudinary asset public ID
+ * @param {string} resourceType - 'image' or 'video'
  * @returns {Promise<Object>} Deletion result
  */
 export const deleteFromCloudinary = async (publicId, resourceType = "image") => {
   try {
     if (!publicId || typeof publicId !== "string") return { result: "ok" };
 
+    // Media is solely stored on Cloudinary; reject traversal and ignore local IDs safely
     if (publicId.startsWith("local_")) {
       const rawTarget = publicId.replace(/^local_/, "").trim();
-
-      // Block path traversal attempts (null bytes, directory traversal patterns)
       if (!rawTarget || rawTarget.includes("\0") || rawTarget.includes("..")) {
         console.warn(`[Security Alert] Blocked path traversal attempt in deleteFromCloudinary: "${publicId}"`);
         return { result: "error", error: "Path traversal attempt blocked" };
-      }
-
-      const uploadsDir = path.resolve(process.cwd(), "uploads");
-      const resolvedPath = path.resolve(uploadsDir, rawTarget);
-
-      // Verify that the resolved target is strictly contained inside the uploads root directory (SEC-006)
-      const relative = path.relative(uploadsDir, resolvedPath);
-      const isContained =
-        !relative.startsWith("..") &&
-        !path.isAbsolute(relative) &&
-        relative !== "";
-
-      if (!isContained) {
-        console.warn(`[Security Alert] Blocked attempt to delete file outside uploads directory: "${resolvedPath}"`);
-        return { result: "error", error: "Path traversal detected: target is outside uploads directory" };
-      }
-
-      if (fs.existsSync(resolvedPath)) {
-        const stat = fs.statSync(resolvedPath);
-        if (stat.isFile()) {
-          fs.unlinkSync(resolvedPath);
-        }
       }
       return { result: "ok" };
     }

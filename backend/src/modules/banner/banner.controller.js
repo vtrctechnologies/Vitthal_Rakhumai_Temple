@@ -34,7 +34,7 @@ export const createBanner = async (req, res, next) => {
       resourceType = req.file.mimetype.startsWith("video") ? "video" : "image";
       const folderPath = getCloudinaryFolderPath("banners", targetYear);
       const uploadResult = await uploadToCloudinary(
-        req.file.buffer,
+        req.file.path || req.file.buffer || req.file,
         folderPath,
         resourceType
       );
@@ -243,7 +243,7 @@ export const updateBanner = async (req, res, next) => {
       const folderPath = getCloudinaryFolderPath("banners", targetYear);
 
       const uploadResult = await uploadToCloudinary(
-        req.file.buffer,
+        req.file.path || req.file.buffer || req.file,
         folderPath,
         resourceType
       );

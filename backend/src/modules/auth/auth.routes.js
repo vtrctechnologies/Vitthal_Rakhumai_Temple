@@ -2,6 +2,7 @@ import express from "express";
 import {
   registerUser,
   loginUser,
+  logoutUser,
   getUserProfile,
   updateUserProfile,
   deleteUserProfile,
@@ -12,12 +13,15 @@ import {
   createUser,
 } from "./auth.controller.js";
 import { protect, admin } from "./auth.middleware.js";
+import { authLimiter } from "../../shared/middlewares/rateLimiter.js";
 
 const router = express.Router();
 
-// Public Authentication Routes
-router.post("/register", registerUser);
-router.post("/login", loginUser);
+// Public Authentication Routes (Protected by authLimiter against brute force & credential stuffing)
+router.post("/register", authLimiter, registerUser);
+router.post("/login", authLimiter, loginUser);
+router.post("/logout", logoutUser);
+router.get("/logout", logoutUser);
 
 // /me alias (used by admin panel to verify token on load)
 router.get("/me", protect, getUserProfile);

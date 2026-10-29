@@ -58,7 +58,7 @@ export const createCommitteeMember = async (req, res, next) => {
       resourceType = req.file.mimetype.startsWith("video") ? "video" : "image";
       const folderPath = getCloudinaryFolderPath("committee", targetYear);
       const uploadResult = await uploadToCloudinary(
-        req.file.buffer,
+        req.file.path || req.file.buffer || req.file,
         folderPath,
         resourceType
       );
@@ -298,7 +298,7 @@ export const updateCommitteeMember = async (req, res, next) => {
       const folderPath = getCloudinaryFolderPath("committee", targetYear);
 
       const uploadResult = await uploadToCloudinary(
-        req.file.buffer,
+        req.file.path || req.file.buffer || req.file,
         folderPath,
         resourceType
       );

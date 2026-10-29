@@ -49,3 +49,6 @@ pnpm-debug.log*
 *.sw?
 .DS_Store
 Thumbs.db
+
+#Security Audit
+WEBSITE_AUDIT_REPORT.md

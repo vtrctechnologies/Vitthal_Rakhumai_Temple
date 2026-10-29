@@ -1,5 +1,6 @@
 import { Event } from "./events.model.js";
 import AppError from "../../shared/utils/AppError.js";
+import { escapeRegex } from "../../shared/utils/escapeRegex.js";
 import {
   uploadToCloudinary,
   deleteFromCloudinary,
@@ -58,7 +59,7 @@ export const createEvent = async (req, res, next) => {
     if (req.file) {
       const folderPath = getCloudinaryFolderPath("events", targetYear);
       const uploadResult = await uploadToCloudinary(
-        req.file.buffer,
+        req.file.path || req.file.buffer || req.file,
         folderPath,
         "image"
       );
@@ -128,12 +129,13 @@ export const getEvents = async (req, res, next) => {
 
     if (year && year !== "all") query.year = parseYear(year);
     if (isFeatured !== undefined) query.isFeatured = isFeatured === "true";
-    if (search) {
+    const sanitizedSearch = escapeRegex(search);
+    if (sanitizedSearch) {
       query.$or = [
-        { title: { $regex: search, $options: "i" } },
-        { description: { $regex: search, $options: "i" } },
-        { location: { $regex: search, $options: "i" } },
-        { titleMarathi: { $regex: search, $options: "i" } },
+        { title: { $regex: sanitizedSearch, $options: "i" } },
+        { description: { $regex: sanitizedSearch, $options: "i" } },
+        { location: { $regex: sanitizedSearch, $options: "i" } },
+        { titleMarathi: { $regex: sanitizedSearch, $options: "i" } },
       ];
     }
 
@@ -402,12 +404,13 @@ export const getEventsAdmin = async (req, res, next) => {
     const query = {};
 
     if (year && year !== "all") query.year = parseYear(year);
-    if (search) {
+    const sanitizedSearch = escapeRegex(search);
+    if (sanitizedSearch) {
       query.$or = [
-        { title: { $regex: search, $options: "i" } },
-        { description: { $regex: search, $options: "i" } },
-        { location: { $regex: search, $options: "i" } },
-        { titleMarathi: { $regex: search, $options: "i" } },
+        { title: { $regex: sanitizedSearch, $options: "i" } },
+        { description: { $regex: sanitizedSearch, $options: "i" } },
+        { location: { $regex: sanitizedSearch, $options: "i" } },
+        { titleMarathi: { $regex: sanitizedSearch, $options: "i" } },
       ];
     }
 
@@ -509,7 +512,7 @@ export const updateEvent = async (req, res, next) => {
       const targetYear = parseYear(year || event.year);
       const folderPath = getCloudinaryFolderPath("events", targetYear);
       const uploadResult = await uploadToCloudinary(
-        req.file.buffer,
+        req.file.path || req.file.buffer || req.file,
         folderPath,
         "image"
       );

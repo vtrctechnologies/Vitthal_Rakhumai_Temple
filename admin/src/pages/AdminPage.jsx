@@ -8,44 +8,42 @@ export default function AdminPage() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Initialize checks - verify token and ensure user has admin role
+  // Initialize checks - verify authentication via secure HttpOnly cookie or token (SEC-015)
   useEffect(() => {
     const checkAuth = async () => {
-      const token = localStorage.getItem("temple_admin_token");
-      const storedUser = localStorage.getItem("temple_admin_user");
-
-      if (token && storedUser) {
-        try {
-          const response = await authAPI.getMe();
-          const userRole = response?.data?.role;
-          if (
-            response.success &&
-            (userRole === "admin" || userRole === "superadmin")
-          ) {
-            const userData = {
-              id: response.data._id,
-              name: response.data.name,
-              email: response.data.email,
-              role: userRole,
-            };
-            setUser(userData);
-            setIsAuthenticated(true);
-            localStorage.setItem("temple_admin_user", JSON.stringify(userData));
-          } else {
-            // Disallow standard non-admin users from admin dashboard
-            localStorage.removeItem("temple_admin_token");
-            localStorage.removeItem("temple_admin_user");
-            setUser(null);
-            setIsAuthenticated(false);
-          }
-        } catch (error) {
+      try {
+        const response = await authAPI.getMe();
+        const userRole = response?.data?.role;
+        if (
+          response.success &&
+          (userRole === "admin" || userRole === "superadmin")
+        ) {
+          const userData = {
+            id: response.data._id,
+            name: response.data.name,
+            email: response.data.email,
+            role: userRole,
+          };
+          setUser(userData);
+          setIsAuthenticated(true);
+          localStorage.setItem("temple_admin_user", JSON.stringify(userData));
+        } else {
+          // Disallow standard non-admin users from admin dashboard
           localStorage.removeItem("temple_admin_token");
           localStorage.removeItem("temple_admin_user");
           setUser(null);
           setIsAuthenticated(false);
         }
+      } catch {
+        localStorage.removeItem("temple_admin_token");
+        localStorage.removeItem("temple_admin_user");
+        setUser(null);
+        setIsAuthenticated(false);
+      } finally {
+        // Securely purge any legacy raw JWT token from LocalStorage to prevent XSS exfiltration (SEC-015)
+        localStorage.removeItem("temple_admin_token");
+        setLoading(false);
       }
-      setLoading(false);
     };
 
     checkAuth();
@@ -60,6 +58,9 @@ export default function AdminPage() {
       return;
     }
 
+    // Securely purge any raw token from LocalStorage (handled via HttpOnly cookie)
+    localStorage.removeItem("temple_admin_token");
+
     // Ensure 'name' is present for components that use it (like DashboardView)
     const processedUser = {
       ...userData,
@@ -70,7 +71,10 @@ export default function AdminPage() {
     setIsAuthenticated(true);
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    try {
+      await authAPI.logout();
+    } catch {}
     localStorage.removeItem("temple_admin_token");
     localStorage.removeItem("temple_admin_user");
     setIsAuthenticated(false);

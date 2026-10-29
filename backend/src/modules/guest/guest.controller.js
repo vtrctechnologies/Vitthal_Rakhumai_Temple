@@ -35,7 +35,7 @@ export const createGuest = async (req, res, next) => {
     if (req.file) {
       const folderPath = getCloudinaryFolderPath("guests", targetYear);
       const uploadResult = await uploadToCloudinary(
-        req.file.buffer,
+        req.file.path || req.file.buffer || req.file,
         folderPath,
         "image"
       );
@@ -204,7 +204,7 @@ export const updateGuest = async (req, res, next) => {
       const folderPath = getCloudinaryFolderPath("guests", targetYear);
 
       const uploadResult = await uploadToCloudinary(
-        req.file.buffer,
+        req.file.path || req.file.buffer || req.file,
         folderPath,
         "image"
       );

@@ -1,6 +1,39 @@
 import User from "./user.model.js";
 import generateToken from "../../shared/utils/generateToken.js";
 
+/**
+ * Issues an HttpOnly, Secure, SameSite cookie containing the JWT session token
+ * to protect against Cross-Site Scripting (XSS) and token theft from browser LocalStorage (SEC-015).
+ */
+export const sendTokenCookie = (res, token) => {
+  const isProduction = process.env.NODE_ENV === "production";
+  res.cookie("temple_admin_token", token, {
+    httpOnly: true,
+    secure: isProduction,
+    sameSite: isProduction ? "strict" : "lax",
+    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    path: "/",
+  });
+};
+
+/**
+ * Clears the session cookie upon logout.
+ */
+export const logoutUser = (req, res) => {
+  const isProduction = process.env.NODE_ENV === "production";
+  res.clearCookie("temple_admin_token", {
+    httpOnly: true,
+    secure: isProduction,
+    sameSite: isProduction ? "strict" : "lax",
+    path: "/",
+  });
+  res.json({
+    success: true,
+    status: "success",
+    message: "Logged out successfully",
+  });
+};
+
 // @desc    Register a new user
 // @route   POST /api/auth/register
 // @access  Public
@@ -37,12 +70,14 @@ export const registerUser = async (req, res, next) => {
     });
 
     if (user) {
+      const token = generateToken(user._id);
+      sendTokenCookie(res, token);
       const userData = {
         _id: user._id,
         name: user.name,
         email: user.email,
         role: user.role,
-        token: generateToken(user._id),
+        token,
       };
       res.status(201).json({
         success: true,
@@ -76,12 +111,14 @@ export const loginUser = async (req, res, next) => {
     });
 
     if (user && (await user.matchPassword(password))) {
+      const token = generateToken(user._id);
+      sendTokenCookie(res, token);
       const userData = {
         _id: user._id,
         name: user.name,
         email: user.email,
         role: user.role,
-        token: generateToken(user._id),
+        token,
       };
       res.json({
         success: true,
@@ -143,6 +180,8 @@ export const updateUserProfile = async (req, res, next) => {
       }
 
       const updatedUser = await user.save();
+      const token = generateToken(updatedUser._id);
+      sendTokenCookie(res, token);
 
       res.json({
         success: true,
@@ -151,7 +190,7 @@ export const updateUserProfile = async (req, res, next) => {
           name: updatedUser.name,
           email: updatedUser.email,
           role: updatedUser.role,
-          token: generateToken(updatedUser._id),
+          token,
         },
       });
     } else {

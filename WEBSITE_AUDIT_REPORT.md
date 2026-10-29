@@ -432,6 +432,8 @@ flowchart TD
 - **Category:** Vulnerable and Outdated Components (OWASP A06:2021)
 - **Severity:** **HIGH**
 - **Confidence:** High (Confirmed by `npm audit`)
+- **Status:** **RESOLVED** (Patched October 29, 2026)
+- **Fix Applied:** Resolved 100% of vulnerabilities in `backend` (0 vulnerabilities found via `npm audit`), patching `proxy-addr` (Critical), `multer` (High), and `body-parser` (High). Resolved all 11 High severity vulnerabilities in `frontend`, patching `axios`, `vite`, `nanoid`, `lodash`, and `zod` (`4.6.7`). Confirmed production build clean via `npm run build`.
 - **Affected Packages:**
   - `backend`:
     - `proxy-addr` (1.1.0 – 2.0.7): **Critical** — IP spoofing via IPv4-mapped IPv6 trust subnet ([GHSA-jqcg-44mw-7w3h](https://github.com/advisories/GHSA-jqcg-44mw-7w3h)).
@@ -451,6 +453,8 @@ flowchart TD
 - **Category:** Identification and Authentication Failures / Resource Exhaustion (OWASP A07:2021, A04:2021)
 - **Severity:** **MEDIUM**
 - **Confidence:** High (Confirmed)
+- **Status:** **RESOLVED** (Patched October 29, 2026)
+- **Fix Applied:** Implemented modular rate limiting in `backend/src/shared/middlewares/rateLimiter.js` using `express-rate-limit`: `globalLimiter` (300 req/15m) mounted on `/api`, `authLimiter` (10 req/15m) mounted on `/api/auth/login` and `/api/auth/register`, `otpRequestLimiter` (5 req/10m) on `/api/subscribers/subscribe`, `otpVerifyLimiter` (10 req/10m) on `/api/subscribers/verify`, and `contactLimiter` (10 req/15m) on `/api/contact`; verified via automated suite `backend/src/scripts/verifyRateLimitFix.js`.
 - **Affected Files:** `backend/src/app.js`, `backend/src/modules/auth/auth.routes.js`, `backend/src/modules/contact/contact.routes.js`, `backend/src/modules/subscriber/subscriber.routes.js`
 - **Explanation:** Neither `express-rate-limit` nor any rate-limiting mechanism is registered in `app.js`. Endpoints such as `/api/auth/login`, `/api/auth/register`, `/api/subscribers/subscribe`, and `/api/contact` can receive infinite requests in rapid succession without throttling.
 - **Potential Impact:** Credential stuffing attacks against admin accounts, SMS/OTP exhaustion, and MongoDB database storage exhaustion via automated form spam.
@@ -468,6 +472,8 @@ flowchart TD
 - **Category:** Security Misconfiguration (OWASP A05:2021)
 - **Severity:** **MEDIUM**
 - **Confidence:** High (Confirmed)
+- **Status:** **RESOLVED** (Patched October 29, 2026)
+- **Fix Applied:** Integrated `helmet` middleware in `backend/src/app.js` with cross-origin resource policy enabled for uploads; restricted localhost origins exclusively to non-production environments while enforcing explicit whitelist in production; added standard HTTP security headers to `frontend/vercel.json` and `admin/vercel.json`; verified via automated suite `backend/src/scripts/verifyHeadersAndCorsFix.js`.
 - **Affected File:** `backend/src/app.js` (Lines 9–27), `frontend/vercel.json`, `admin/vercel.json`
 - **Explanation:**
   1. The backend lacks `helmet` middleware. Standard security headers—including `Content-Security-Policy`, `Strict-Transport-Security`, `X-Content-Type-Options`, `X-Frame-Options`, and `Referrer-Policy`—are entirely absent from API responses.
@@ -483,6 +489,8 @@ flowchart TD
 - **Category:** Injection (OWASP A03:2021, CWE-1236)
 - **Severity:** **MEDIUM**
 - **Confidence:** High (Confirmed)
+- **Status:** **RESOLVED** (Patched October 29, 2026)
+- **Fix Applied:** Hardened `exportRegistrationsExcel` in `backend/src/modules/sports/sports.controller.js` to detect formula trigger characters (`=`, `+`, `-`, `@`, `|`, `\t`, `\r`, `%`) and prepend a neutralizing single quote (`'`), preventing spreadsheet software (Excel, Calc) from executing malicious DDE commands; verified via automated suite `backend/src/scripts/verifyCsvInjectionFix.js`.
 - **Affected File:** `backend/src/modules/sports/sports.controller.js` (Lines 476–499)
 - **Problematic Pattern:**
   ```javascript
@@ -514,10 +522,14 @@ flowchart TD
 - **Category:** Injection / Denial of Service (OWASP A03:2021, CWE-1333)
 - **Severity:** **MEDIUM**
 - **Confidence:** High (Confirmed)
+- **Status:** **RESOLVED** (Patched October 29, 2026)
+- **Fix Applied:** Implemented centralized `escapeRegex` utility (`backend/src/shared/utils/escapeRegex.js`) escaping all regex metacharacters (`\`, `^`, `$`, `.`, `*`, `+`, `?`, `(`, `)`, `[`, `]`, `{`, `}`, `|`) and enforcing a 200-character ceiling to prevent memory flooding; sanitized user search queries across `getGalleryItems`, `getRegistrationsAdmin`, `getEvents`, and `getEventsAdmin`; hardened dynamic `RegExp` matching for category names in `gallery.controller.js` and `category.controller.js`; verified via automated suite `backend/src/scripts/verifyReDoSFix.js`.
 - **Affected Files:**
-  - `backend/src/modules/gallery/gallery.controller.js` (Line 146)
-  - `backend/src/modules/sports/sports.controller.js` (Lines 376–380)
-  - `backend/src/modules/gallery/gallery.controller.js` (Line 40)
+  - `backend/src/shared/utils/escapeRegex.js` (New Utility)
+  - `backend/src/modules/gallery/gallery.controller.js` (Lines 41, 145–152)
+  - `backend/src/modules/sports/sports.controller.js` (Lines 374–383)
+  - `backend/src/modules/events/events.controller.js` (Lines 131–138, 405–413)
+  - `backend/src/modules/category/category.controller.js` (Line 18)
 - **Problematic Pattern:**
   ```javascript
   // gallery.controller.js (Line 146)
@@ -548,10 +560,12 @@ flowchart TD
 - **Category:** Identification and Authentication Failures / Privacy Violation (OWASP A04:2021)
 - **Severity:** **MEDIUM**
 - **Confidence:** High (Confirmed)
+- **Status:** **RESOLVED** (Patched October 29, 2026)
+- **Fix Applied:** Hardened backend `getLeaderboard` in `backend/src/modules/donation/donation.controller.js` to scrub client-supplied names for anonymous donors before serialization (`name: d.isAnonymous ? "Anonymous Devotee" : d.name`), eliminating data leakage over the wire; hardened `Donation.jsx` to render generic `<User />` icon instead of computing initials from anonymous donor records and adjusted success message; updated `DonationTicker.jsx` marquee ticker to map `isAnonymous` records to `"Anonymous Devotee"` / `"गुप्त देणगीदार"`; verified via automated suite `backend/src/scripts/verifyAnonymousDonationPrivacy.js`.
 - **Affected Files:**
-  - `backend/src/modules/donation/donation.controller.js` (Line 197)
-  - `frontend/src/pages/Donation.jsx` (Lines 526–545)
-  - `frontend/src/components/DonationTicker.jsx` (Lines 86–91)
+  - `backend/src/modules/donation/donation.controller.js` (Lines 272–281)
+  - `frontend/src/pages/Donation.jsx` (Lines 212–214, 528–531)
+  - `frontend/src/components/DonationTicker.jsx` (Lines 87–88)
 - **Problematic Pattern:**
   ```javascript
   // donation.controller.js
@@ -585,7 +599,13 @@ flowchart TD
 - **Category:** Security Misconfiguration / Resource Exhaustion (OWASP A05:2021, A04:2021)
 - **Severity:** **MEDIUM**
 - **Confidence:** High (Confirmed)
-- **Affected File:** `backend/src/shared/middlewares/upload.middleware.js` (Lines 4, 43)
+- **Status:** **RESOLVED** (Patched October 29, 2026)
+- **Fix Applied:** Replaced memory-buffering storage with temporary disk streaming storage (`multer.diskStorage`) in `backend/src/shared/middlewares/upload.middleware.js` to eliminate V8 heap exhaustion during large image/video uploads; added `verifyMagicBytes` to inspect binary file signatures (JPEG, PNG, GIF, WEBP, MP4, MKV/WebM) and block MIME spoofing; updated `backend/src/shared/config/cloudinary.js` to stream directly to Cloudinary CDN with automatic temp file cleanup; completely eliminated local disk storage fallback and removed `/uploads` static file serving from `backend/src/app.js`; verified via automated suite `backend/src/scripts/verifyMediaUploadPipeline.js`.
+- **Affected Files:**
+  - `backend/src/shared/middlewares/upload.middleware.js` (Lines 18–122, 140–210)
+  - `backend/src/shared/config/cloudinary.js` (Lines 22–95, 115–130)
+  - `backend/src/app.js` (Removed `/uploads` static middleware)
+  - `backend/src/modules/*/` (Updated controllers to pass streaming disk paths)
 - **Problematic Pattern:**
   ```javascript
   const storage = multer.memoryStorage();
@@ -608,7 +628,15 @@ flowchart TD
 - **Category:** Cryptographic Failures / Sensitive Data Exposure (OWASP A02:2021)
 - **Severity:** **LOW**
 - **Confidence:** High (Confirmed)
-- **Affected File:** `admin/src/services/axiosClient.js` (Line 19), `admin/src/pages/AdminPage.jsx` (Line 14)
+- **Status:** **RESOLVED** (Patched October 29, 2026)
+- **Fix Applied:** Implemented server-issued `HttpOnly`, `SameSite=Lax` (and `Secure` in production) session cookies (`temple_admin_token`) across login, register, and profile updates (`backend/src/modules/auth/auth.controller.js`); updated `protect` middleware (`auth.middleware.js`) to support transparent cookie authentication alongside standard Bearer tokens; added `POST /api/auth/logout` endpoint to expire session cookies on logout; refactored `admin/src/pages/AdminPage.jsx` and `AuthPage.jsx` to rely on cookie session state via `withCredentials: true` and purged raw JWT tokens from `localStorage`; verified via automated test suite `backend/src/scripts/verifyHttpOnlyCookieAuth.js`.
+- **Affected Files:**
+  - `backend/src/modules/auth/auth.controller.js` (Lines 8–35, 73–80, 114–120)
+  - `backend/src/modules/auth/auth.middleware.js` (Lines 15–24)
+  - `backend/src/modules/auth/auth.routes.js` (Lines 22–24)
+  - `admin/src/pages/AdminPage.jsx` (Lines 11–80)
+  - `admin/src/components/admin/AuthPage.jsx` (Lines 121, 152, 164)
+  - `admin/src/services/api.js` (Line 25)
 - **Explanation:** The admin authentication token is stored in `localStorage` under `temple_admin_token` and attached via request headers. Any Cross-Site Scripting (XSS) vulnerability or rogue third-party script executing within the admin application domain can read the JWT token via `localStorage.getItem()`.
 - **Remediation:** Store session tokens in `HttpOnly`, `Secure`, `SameSite=Strict` cookies issued by the server.
 - **Verification Method:** Inspect browser storage in dev tools after logging in.
@@ -619,7 +647,12 @@ flowchart TD
 - **Category:** Injection / Client-Side Security (OWASP A03:2021)
 - **Severity:** **LOW**
 - **Confidence:** High (Confirmed)
-- **Affected File:** `frontend/src/pages/events/LivePrograms.jsx` (Lines 494–498), `frontend/src/pages/events/Banners.jsx` (Line 109)
+- **Status:** **RESOLVED** (Patched October 29, 2026)
+- **Fix Applied:** Implemented centralized URL security utility `frontend/src/utils/urlSecurity.js` (`isSafeUrl` and `openSafeUrl`); enforced strict `http:` / `https:` protocol validation to block `javascript:`, `data:`, `vbscript:`, and other dangerous pseudo-protocols; refactored social link clicking in `frontend/src/pages/events/LivePrograms.jsx` and banner opening in `frontend/src/pages/events/Banners.jsx` to use `openSafeUrl`; verified via automated test suite `backend/src/scripts/verifyUrlSecurity.js`.
+- **Affected Files:**
+  - `frontend/src/utils/urlSecurity.js` (New Utility)
+  - `frontend/src/pages/events/LivePrograms.jsx` (Lines 26, 495–499)
+  - `frontend/src/pages/events/Banners.jsx` (Lines 14, 110, 138)
 - **Problematic Pattern:**
   ```javascript
   const handleSocialLinkClick = (url) => {

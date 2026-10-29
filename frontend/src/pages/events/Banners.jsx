@@ -11,6 +11,7 @@ import {
 
 import { bannerAPI } from "@/services/api";
 import { getImageUrl } from "@/utils/imageUrl";
+import { openSafeUrl } from "@/utils/urlSecurity";
 
 const Banners = () => {
   const [banners, setBanners] = useState({
@@ -106,7 +107,7 @@ const Banners = () => {
   const handleBannerClick = (banner) => {
     const hasLink = banner.link && banner.link.trim() !== "";
     if (hasLink) {
-      window.open(banner.link, "_blank", "noopener,noreferrer");
+      openSafeUrl(banner.link);
     } else {
       setSelectedBanner(banner);
       setShowModal(true);
@@ -134,7 +135,7 @@ const Banners = () => {
     } catch (error) {
       console.error("Error downloading:", error);
       const imageUrl = getImageUrl(banner.imageUrl);
-      if (imageUrl) window.open(imageUrl, "_blank");
+      if (imageUrl) openSafeUrl(imageUrl);
     }
   };
 
