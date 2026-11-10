@@ -1,12 +1,90 @@
-import React, { useState, useEffect } from "react";
-import { Users, Loader2, User, Award } from "lucide-react";
+import React, { useState, useEffect, useRef, memo } from "react";
+import { Users, Loader2, User, Award, Calendar, Sparkles, MapPin, ChevronDown, Check } from "lucide-react";
 import { committeeAPI } from "../services/api";
 import { useLanguage } from "../context/LanguageContext";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 
-/* ── Sacred Diamond Divider ── */
+/* ── Custom Temple Dropdown for Years ── */
+const CustomYearDropdown = memo(({ activeYear, availableYears, onChange, isMarathi }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setIsOpen(false);
+      }
+    };
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") setIsOpen(false);
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, []);
+
+  return (
+    <div className="relative inline-block text-left" ref={dropdownRef}>
+      <button
+        type="button"
+        onClick={() => setIsOpen((prev) => !prev)}
+        className="flex items-center gap-2.5 h-9 px-4 rounded-md bg-cream-dk/90 border border-gold/45 hover:border-amber-500 hover:bg-cream text-maroon font-heading text-xs font-bold uppercase tracking-wider transition-all duration-200 cursor-pointer shadow-xs select-none"
+      >
+        <Calendar size={14} className="text-saffron shrink-0" />
+        <span className="text-ink-mid font-semibold">{isMarathi ? "कार्यकाळ वर्ष:" : "Tenure Year:"}</span>
+        <span className="text-maroon font-bold text-amber-900">{activeYear}</span>
+        <ChevronDown
+          size={14}
+          className={`text-gold-dk transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
+        />
+      </button>
+
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: -6, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -6, scale: 0.98 }}
+            transition={{ duration: 0.15 }}
+            className="absolute left-1/2 -translate-x-1/2 sm:left-0 sm:translate-x-0 top-full mt-1.5 min-w-[150px] max-h-56 overflow-y-auto bg-gradient-to-b from-[#1c0505]/98 via-[#140303]/98 to-[#0c0202]/98 border border-amber-500/35 rounded-md shadow-xl p-1.5 z-50 backdrop-blur-md"
+          >
+            <div className="flex flex-col gap-0.5">
+              {availableYears.map((year) => {
+                const isSelected = activeYear === year;
+                return (
+                  <button
+                    key={year}
+                    type="button"
+                    onClick={() => {
+                      onChange(year);
+                      setIsOpen(false);
+                    }}
+                    className={`w-full flex items-center justify-between px-3 py-2 rounded-sm text-xs font-heading font-bold uppercase tracking-wider transition-all cursor-pointer ${
+                      isSelected
+                        ? "bg-gradient-to-r from-amber-400 via-amber-300 to-amber-400 text-maroon-dk shadow-xs"
+                        : "text-amber-100/80 hover:text-white hover:bg-white/10"
+                    }`}
+                  >
+                    <span>{year}</span>
+                    {isSelected && <Check size={13} className="text-maroon-dk stroke-[2.5]" />}
+                  </button>
+                );
+              })}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+});
+CustomYearDropdown.displayName = "CustomYearDropdown";
+
+/* ── Sacred Diamond Divider (mirrors Home.jsx & About.jsx) ── */
 const DiamondDivider = () => (
-  <div className="flex items-center gap-3 my-5 justify-center">
+  <div className="flex items-center gap-3 my-4 justify-center">
     <div className="flex-1 max-w-[120px] h-px bg-gradient-to-r from-transparent via-gold to-transparent" />
     <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
       <rect
@@ -34,7 +112,17 @@ const DiamondDivider = () => (
   </div>
 );
 
-const Committee = () => {
+/* Corner accents for cards (mirrors Home.jsx & About.jsx) */
+const CornerAccents = () => (
+  <>
+    <span className="absolute -top-0.5 -left-0.5 w-4 h-4 border-t-3 border-l-3 border-saffron z-10" />
+    <span className="absolute -top-0.5 -right-0.5 w-4 h-4 border-t-3 border-r-3 border-saffron z-10" />
+    <span className="absolute -bottom-0.5 -left-0.5 w-4 h-4 border-b-3 border-l-3 border-saffron z-10" />
+    <span className="absolute -bottom-0.5 -right-0.5 w-4 h-4 border-b-3 border-r-3 border-saffron z-10" />
+  </>
+);
+
+const Committee = memo(() => {
   const { isMarathi } = useLanguage();
   const [data, setData] = useState({ register: [], utsav: [], mahila: [] });
   const [loading, setLoading] = useState(true);
@@ -123,9 +211,9 @@ const Committee = () => {
       title: "Register Committee",
       marathiTitle: "नोंदणी समिती",
       description:
-        "The pillars of our governance, ensuring transparency and operational excellence.",
+        "The pillars of our governance, ensuring transparency, development, and administrative excellence.",
       marathiDescription:
-        "आमच्या शासनाचे आधारस्तंभ, पारदर्शकता आणि परिचालन उत्कृष्टता सुनिश्चित करणारे विश्वस्त मंडळ.",
+        "आमच्या संकुलाचे आधारस्तंभ, पारदर्शकता आणि व्यवस्थापकीय उत्कृष्टता सुनिश्चित करणारे विश्वस्त मंडळ.",
       members: data.register,
     },
     {
@@ -133,9 +221,9 @@ const Committee = () => {
       title: "Utsav Committee",
       marathiTitle: "उत्सव समिती",
       description:
-        "Orchestrating divine celebrations and keeping our vibrant traditions alive.",
+        "Orchestrating divine celebrations, annual festivals, and keeping our sacred traditions alive.",
       marathiDescription:
-        "दिव्य उत्सवांचे नियोजन आणि आपल्या वारकरी परंपरा अखंड चालू ठेवणारी समिती.",
+        "दिव्य उत्सवांचे नियोजन, भजन-कीर्तन व अखंड वारकरी परंपरा यशस्वीपणे चालवणारी समिती.",
       members: data.utsav,
     },
     {
@@ -143,9 +231,9 @@ const Committee = () => {
       title: "Mahila Mandal",
       marathiTitle: "महिला मंडळ",
       description:
-        "The strength of our community, empowering women through spiritual union and seva.",
+        "The spiritual strength of our community, uniting women through sacred seva and festive rituals.",
       marathiDescription:
-        "आमच्या समाजाची ताकद, आध्यात्मिक एकता आणि सेवाभावाने कार्यरत महिला भगिनी.",
+        "आमच्या मंदिराची आध्यात्मिक शक्ती, सेवाभाव आणि भक्तीने कार्यरत असणारे महिला मंडळ.",
       members: data.mahila,
     },
   ];
@@ -154,51 +242,93 @@ const Committee = () => {
     committees.find((c) => c.id === activeTab) || committees[0];
 
   return (
-    <div className="bg-cream font-body text-ink-dark py-24 min-h-screen relative overflow-hidden">
-      {/* Top decorative stripe */}
-      <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-maroon via-gold via-saffron to-maroon" />
+    <div className="w-full bg-cream font-body text-ink-dark min-h-screen relative overflow-hidden">
+      {/* ── 1. CINEMATIC HEADER BANNER (Theme of Home.jsx) ── */}
+      <section className="relative pt-28 pb-16 sm:pt-32 sm:pb-20 bg-gradient-to-b from-[#180303] via-[#100202] to-[#180303] text-cream border-b border-amber-500/25 overflow-hidden">
+        {/* Subtle Top Gold Filament */}
+        <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-amber-400 to-transparent opacity-80" />
 
-      {/* Subtle background motif */}
-      <div
-        className="absolute inset-0 pointer-events-none opacity-[0.03]"
-        style={{
-          backgroundImage:
-            "repeating-linear-gradient(45deg, var(--color-gold) 0, var(--color-gold) 1px, transparent 0, transparent 40px)",
-        }}
-      />
+        {/* Ambient Divine Radiance */}
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(245,158,11,0.12)_0%,_rgba(24,4,4,0.40)_65%,_rgba(12,2,2,0.95)_100%)] pointer-events-none" />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        {/* Header */}
-        <motion.div
-          className="text-center mb-14"
-          initial={{ opacity: 0, y: -20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-        >
-          <span className="block font-heading text-xs tracking-[0.28em] uppercase text-saffron mb-2">
-            Sansthan Mandal
-          </span>
-          <h1 className="font-display text-[clamp(2.2rem,5vw,3.75rem)] font-bold text-maroon mb-2 leading-tight">
-            {isMarathi ? "मंदिर व्यवस्थापन समिती" : "Our Committee"}
-          </h1>
-          <p className="font-marathi text-[clamp(1.3rem,3vw,2rem)] text-ink-mid font-semibold mb-3">
-            {isMarathi ? "श्री विठ्ठल रखुमाई मंदिर ट्रस्ट" : "Shree Vitthal Rakhumai Mandir Trust"}
-          </p>
+        {/* Repeating Sacred Grid Texture */}
+        <div
+          className="absolute inset-0 pointer-events-none opacity-10"
+          style={{
+            backgroundImage:
+              "repeating-linear-gradient(45deg, var(--color-gold) 0, var(--color-gold) 1px, transparent 0, transparent 40px)",
+          }}
+        />
+
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 relative z-10 text-center">
+          {/* Sacred Seva Badge */}
+          <motion.div
+            className="inline-flex items-center gap-2 bg-black/45 border border-amber-400/40 rounded-full px-4 py-1.5 font-heading text-xs sm:text-[0.82rem] font-medium text-amber-200 tracking-wide mb-4 shadow-sm backdrop-blur-xs select-none"
+            initial={{ opacity: 0, y: -14 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-400" />
+            </span>
+            <Sparkles size={13} className="text-amber-300 shrink-0" />
+            <span>{isMarathi ? "सेवेचे अखंड व्रत" : "Dedicated Seva & Governance"}</span>
+          </motion.div>
+
+          {/* Main Page Title */}
+          <motion.h1
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.15 }}
+            className="flex flex-col items-center select-none"
+          >
+            <span className="font-heading text-[clamp(2rem,5.5vw,4rem)] font-black text-white leading-tight tracking-wider drop-shadow-[0_4px_24px_rgba(0,0,0,0.9)]">
+              {isMarathi ? "मंदिर व्यवस्थापन समिती" : "Managing Committee"}
+            </span>
+            <span className="font-heading text-[clamp(1.1rem,3vw,2rem)] font-bold tracking-[0.16em] uppercase text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-amber-300 to-amber-100 drop-shadow-[0_2px_14px_rgba(0,0,0,0.9)] mt-1 block">
+              {isMarathi ? "श्री विठ्ठल रखुमाई मंदिर ट्रस्ट" : "Shree Vitthal Rakhumai Mandir Trust"}
+            </span>
+          </motion.h1>
+
           <DiamondDivider />
-          <p className="max-w-2xl mx-auto text-lg text-ink-light font-body italic">
-            {isMarathi
-              ? "“समर्पित भावनेने मंदिर संकुलाची सेवा आणि वारकरी परंपरेचे जतन करणारे कार्यकर्ते.”"
-              : "“Dedicated souls weaving the fabric of our community through sacred seva, tradition, and devotion.”"}
-          </p>
-        </motion.div>
 
-        {/* Committee Wings Tab Navigation */}
+          <motion.p
+            className="max-w-2xl mx-auto text-base sm:text-lg text-cream/85 font-body leading-relaxed mt-2"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.6, delay: 0.3 }}
+          >
+            {isMarathi
+              ? "“समर्पित भावनेने मंदिर संकुलाची सेवा, पारदर्शक कारभार आणि वारकरी परंपरेचे जतन करणारे कार्यकर्ते.”"
+              : "“Devoted trustees and volunteers dedicated to spiritual seva, transparency, and preserving our living Varkari legacy.”"}
+          </motion.p>
+        </div>
+      </section>
+
+      {/* ── 2. SACRED SHLOKA STRIP (Home.jsx Signature) ── */}
+      <div className="h-[3px] bg-gradient-to-r from-maroon via-gold via-saffron-lt to-maroon" />
+      <div className="relative bg-maroon px-6 py-7 text-center overflow-hidden">
+        <div
+          className="absolute inset-0 z-0"
+          style={{
+            backgroundImage:
+              "repeating-linear-gradient(90deg, rgba(212,175,55,0.15) 0, rgba(212,175,55,0.15) 1px, transparent 0, transparent 60px)",
+          }}
+        />
+        <p className="relative z-10 font-marathi text-[clamp(1.1rem,2.8vw,1.5rem)] text-gold-lt tracking-wide leading-relaxed">
+          || सेवा परमो धर्मः — विठ्ठल चरणी निष्ठा ||
+        </p>
+      </div>
+      <div className="h-[3px] bg-gradient-to-r from-maroon via-gold via-saffron-lt to-maroon" />
+
+      {/* ── 3. MAIN MEMBERS & COMMITTEES SECTION ── */}
+      <section className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto relative z-10">
+        {/* Committee Wings Tab Navigation (Rectangular Theme matching About.jsx) */}
         <motion.div
-          className="flex flex-wrap justify-center gap-3 sm:gap-4 mb-8"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
+          className="flex flex-wrap justify-center gap-2 sm:gap-2.5 mb-8 p-1.5 bg-[#180404]/8 border border-amber-500/25 rounded-md max-w-fit mx-auto"
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
           {committees.map((committee) => (
@@ -206,11 +336,11 @@ const Committee = () => {
               key={committee.id}
               onClick={() => setActiveTab(committee.id)}
               className={`
-                px-6 py-3 rounded-full font-heading text-xs sm:text-sm font-semibold tracking-wider uppercase transition-all duration-300 border
+                px-5 sm:px-6 py-2.5 rounded-md font-heading text-xs sm:text-sm font-bold tracking-wider uppercase transition-all duration-200 border cursor-pointer select-none
                 ${
                   activeTab === committee.id
-                    ? "bg-gradient-to-r from-maroon via-maroon-lt to-maroon text-gold-lt border-gold shadow-lg shadow-maroon/20 scale-105"
-                    : "bg-cream-dk/60 text-ink-mid border-gold/30 hover:border-gold hover:text-maroon hover:bg-cream-dk"
+                    ? "bg-gradient-to-r from-amber-400 via-amber-300 to-amber-400 text-maroon-dk border-amber-400/70 shadow-xs"
+                    : "bg-transparent border-transparent text-maroon hover:border-amber-500/40 hover:bg-cream hover:text-maroon-dk"
                 }
               `}
             >
@@ -219,98 +349,66 @@ const Committee = () => {
           ))}
         </motion.div>
 
-        {/* Year Filter Pill Selector */}
+        {/* Year Filter Selector (Custom Dropdown) */}
         {availableYears.length > 0 && (
-          <motion.div
-            className="flex flex-wrap justify-center items-center gap-2 mb-14"
-            initial={{ opacity: 0, y: 15 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-          >
-            <span className="font-heading text-xs font-bold text-ink-light uppercase tracking-widest mr-2">
-              {isMarathi ? "वर्ष निवडा:" : "Year:"}
-            </span>
-            {availableYears.map((year) => (
-              <button
-                key={year}
-                onClick={() => setActiveYear(year)}
-                className={`
-                  px-4 py-1.5 rounded-full text-xs font-heading font-semibold tracking-widest transition-all duration-200 border
-                  ${
-                    activeYear === year
-                      ? "bg-saffron text-white border-saffron-dk shadow-sm scale-105"
-                      : "bg-cream-dk/80 text-ink-light border-gold/30 hover:border-saffron hover:text-saffron-dk"
-                  }
-                `}
-              >
-                {year}
-              </button>
-            ))}
-          </motion.div>
+          <div className="flex justify-center mb-12">
+            <CustomYearDropdown
+              activeYear={activeYear}
+              availableYears={availableYears}
+              onChange={setActiveYear}
+              isMarathi={isMarathi}
+            />
+          </div>
         )}
 
         {/* Loading State */}
         {loading && (
-          <motion.div
-            className="flex flex-col items-center justify-center py-24 text-ink-light"
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-          >
-            <Loader2 className="w-12 h-12 animate-spin text-saffron mb-4" />
-            <p className="font-heading text-sm tracking-widest uppercase text-maroon">
-              {isMarathi ? "समिती सदस्य लोड होत आहेत..." : "Loading sacred committee…"}
+          <div className="flex flex-col items-center justify-center py-24 text-ink-light">
+            <Loader2 className="w-10 h-10 animate-spin text-saffron mb-3" />
+            <p className="font-heading text-xs sm:text-sm tracking-widest uppercase text-maroon font-bold">
+              {isMarathi ? "समिती सदस्य लोड होत आहेत..." : "Loading committee members…"}
             </p>
-          </motion.div>
+          </div>
         )}
 
         {/* Error State */}
         {error && !loading && (
-          <motion.div
-            className="bg-cream-dk border border-vermillion/30 rounded-xl p-8 text-center max-w-lg mx-auto shadow-sm"
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-          >
+          <div className="bg-cream-dk border border-vermillion/40 rounded-xl p-8 text-center max-w-lg mx-auto shadow-sm">
             <p className="text-vermillion font-medium">{error}</p>
-          </motion.div>
+          </div>
         )}
 
         {/* Committee Wing Content */}
         {!loading && !error && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-          >
+          <div>
             {/* Wing Banner Info */}
-            <div className="text-center mb-12 max-w-2xl mx-auto">
-              <h2 className="font-display text-3xl md:text-4xl font-bold text-maroon mb-2">
+            <div className="text-center mb-10 max-w-2xl mx-auto">
+              <h2 className="font-display text-2xl sm:text-3xl font-bold text-maroon mb-2">
                 {isMarathi ? activeCommittee.marathiTitle : activeCommittee.title}
               </h2>
-              <p className="font-body text-ink-light text-base sm:text-lg leading-relaxed">
+              <p className="font-body text-ink-light text-base leading-relaxed">
                 {isMarathi ? activeCommittee.marathiDescription : activeCommittee.description}
               </p>
             </div>
 
             {/* Empty State */}
             {activeCommittee.members.length === 0 ? (
-              <div className="bg-cream-dk/60 rounded-2xl border border-gold/30 p-16 text-center max-w-lg mx-auto">
-                <div className="bg-white/80 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-5 border border-gold/30 shadow-inner">
-                  <Users className="w-10 h-10 text-gold-dk" />
+              <div className="bg-cream-dk rounded-2xl border border-gold/40 p-12 text-center max-w-md mx-auto shadow-xs">
+                <div className="bg-white w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 border border-gold/30 shadow-inner">
+                  <Users className="w-8 h-8 text-gold-dk" />
                 </div>
-                <h3 className="font-display text-2xl font-bold text-maroon mb-2">
-                  {isMarathi ? "सदस्य माहिती उपलब्ध नाही" : "No Members Found"}
+                <h3 className="font-display text-xl font-bold text-maroon mb-1.5">
+                  {isMarathi ? "सदस्य माहिती उपलब्ध नाही" : "No Members Listed"}
                 </h3>
-                <p className="font-body text-ink-light">
+                <p className="font-body text-sm text-ink-light">
                   {isMarathi
                     ? `या वर्षासाठी ${activeCommittee.marathiTitle}चे सदस्य उपलब्ध नाहीत.`
-                    : `No members available for ${activeCommittee.title} for ${activeYear}.`}
+                    : `No members available for ${activeCommittee.title} for the year ${activeYear}.`}
                 </p>
               </div>
             ) : (
-              /* Members Grid */
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 sm:gap-8">
+              /* Members Grid (Home.jsx Aesthetic Frame) */
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 sm:gap-7">
                 {activeCommittee.members.map((member, idx) => (
                   <MemberCard
                     key={member._id || idx}
@@ -322,60 +420,74 @@ const Committee = () => {
                 ))}
               </div>
             )}
-          </motion.div>
+          </div>
         )}
+      </section>
+
+      {/* ── 4. FOOTER MANTRA STRIP (Exact match to Home.jsx & About.jsx) ── */}
+      <div className="bg-ink-dark border-t-4 border-gold p-6 text-center">
+        <p className="font-marathi text-[1.1rem] text-gold-lt tracking-wide">
+          || पुंडलिका वरदा हरी विठ्ठल — पांडुरंग ||
+        </p>
+        <p className="font-body italic text-cream-dk/50 text-[0.9rem] mt-1.5">
+          Shree Vitthal Rakhumai Temple, Amberkarwadi · Open 24 Hours
+        </p>
       </div>
     </div>
   );
-};
+});
 
-/* ── Refined Member Card matching Website Theme ── */
+/* ── Refined Member Card matching Home.jsx & About.jsx Theme ── */
 const MemberCard = ({ member, getImageUrl, index, isMarathi }) => {
   const [imgError, setImgError] = useState(false);
   const photoUrl = getImageUrl(member.imageUrl);
 
   return (
     <motion.div
-      className="group relative bg-[#FCF8EE] rounded-sm p-3.5 shadow-md border border-gold/40 overflow-hidden transition-all duration-500 hover:-translate-y-2 hover:shadow-xl hover:border-gold flex flex-col"
-      initial={{ opacity: 0, y: 20 }}
+      className="group relative bg-cream-dk rounded-md p-3 shadow-xs border border-gold/45 overflow-hidden transition-colors duration-200 hover:border-gold hover:shadow-md flex flex-col"
+      initial={{ opacity: 0, y: 18 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      transition={{ duration: 0.5, delay: index * 0.04 }}
+      transition={{ duration: 0.45, delay: index * 0.04 }}
     >
-      {/* Outer Dashed Border Accent */}
-      <div className="absolute inset-1 pointer-events-none border border-dashed border-gold/30 rounded-sm group-hover:border-gold/60 transition-colors" />
+      {/* Saffron Corner Accents: Revealed smoothly on hover */}
+      <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
+        <CornerAccents />
+      </div>
 
-      {/* Image Container with Postage Vignette Frame */}
-      <div className="h-64 w-full relative overflow-hidden bg-cream-dk border border-gold/40 rounded-sm">
+      {/* Image Container with Gold Border */}
+      <div className="h-64 w-full relative overflow-hidden bg-stone border border-gold/40 rounded-sm">
         {photoUrl && !imgError ? (
           <img
             src={photoUrl}
             alt={member.name}
             onError={() => setImgError(true)}
-            className="h-full w-full object-cover object-top transition-transform duration-700 ease-out group-hover:scale-105"
+            className="h-full w-full object-cover object-top"
             loading="lazy"
             decoding="async"
           />
         ) : (
-          <div className="h-full w-full flex flex-col items-center justify-center bg-cream-dk text-gold-dk">
-            <User size={56} strokeWidth={1.5} />
+          <div className="h-full w-full flex flex-col items-center justify-center bg-gradient-to-br from-maroon/20 via-cream-dk to-stone text-gold-dk">
+            <User size={52} strokeWidth={1.5} className="text-maroon/60" />
           </div>
         )}
 
-        {/* Warm Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-maroon/40 via-transparent to-transparent opacity-70 group-hover:opacity-40 transition-opacity duration-300" />
+        {/* Warm Golden Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60 group-hover:opacity-30 transition-opacity duration-200" />
 
         {/* Corner Badge */}
-        <div className="absolute bottom-2 left-2 z-10 bg-cream/95 backdrop-blur-sm px-2.5 py-0.5 rounded-sm border border-gold/40 shadow-sm flex items-center gap-1">
-          <Award className="w-3 h-3 text-saffron shrink-0" />
-          <span className="font-heading text-[10px] font-bold text-maroon uppercase tracking-wider">
-            {isMarathi && member.positionMarathi ? member.positionMarathi : (member.role || member.position || "Member")}
+        <div className="absolute bottom-2.5 left-2.5 z-10 bg-cream/95 backdrop-blur-sm px-2.5 py-1 rounded-sm border border-gold/50 shadow-xs flex items-center gap-1.5">
+          <Award className="w-3.5 h-3.5 text-saffron shrink-0" />
+          <span className="font-heading text-[10px] sm:text-[11px] font-bold text-maroon uppercase tracking-wider">
+            {isMarathi && member.positionMarathi
+              ? member.positionMarathi
+              : member.role || member.position || "Sevak"}
           </span>
         </div>
       </div>
 
       {/* Text Info */}
-      <div className="pt-3.5 pb-1 text-center relative z-10 flex-1 flex flex-col justify-between">
+      <div className="pt-3 pb-1 text-center relative z-10 flex-1 flex flex-col justify-between">
         <div>
           <h4 className="font-display text-lg font-bold text-maroon leading-tight group-hover:text-saffron-dk transition-colors line-clamp-1">
             {member.name}
@@ -387,9 +499,11 @@ const MemberCard = ({ member, getImageUrl, index, isMarathi }) => {
           )}
         </div>
 
-        <div className="mt-3 pt-2 border-t border-gold/30">
-          <p className="font-heading text-[10px] font-semibold text-saffron-dk uppercase tracking-[0.2em] line-clamp-1">
-            {isMarathi && member.roleMarathi ? member.roleMarathi : (member.role || member.position || "Member")}
+        <div className="mt-2.5 pt-2 border-t border-gold/30">
+          <p className="font-heading text-[10.5px] font-bold text-saffron-dk uppercase tracking-[0.16em] line-clamp-1">
+            {isMarathi && member.roleMarathi
+              ? member.roleMarathi
+              : member.role || member.position || "Sevak"}
           </p>
         </div>
       </div>
@@ -397,4 +511,5 @@ const MemberCard = ({ member, getImageUrl, index, isMarathi }) => {
   );
 };
 
+Committee.displayName = "Committee";
 export default Committee;

@@ -1,38 +1,144 @@
-import { useState, useEffect } from "react";
-import { Loader2 } from "lucide-react";
+import { useState, useEffect, useRef, memo } from "react";
+import { Loader2, Calendar, ChevronDown, Check, Sparkles, Filter, Image as ImageIcon } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { galleryAPI } from "../services/api";
 import GalleryGrid from "../components/GalleryGrid";
 import GalleryLightbox from "../components/GalleryLightbox";
 import { useLanguage } from "../context/LanguageContext";
 
-/* ── Ornamental Divider (matches Home page) ── */
+/* ── Sacred Diamond Divider (mirrors Home, About & Committee) ── */
 const DiamondDivider = () => (
-  <div className="flex items-center gap-3 my-4 justify-center">
-    <div className="flex-1 h-px bg-gradient-to-r from-transparent via-gold/80 to-transparent" />
+  <div className="flex items-center gap-3 my-3 justify-center">
+    <div className="flex-1 max-w-[120px] h-px bg-gradient-to-r from-transparent via-gold to-transparent" />
     <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
       <rect
-        x="11" y="1" width="13" height="13" rx="1"
+        x="11"
+        y="1"
+        width="13"
+        height="13"
+        rx="1"
         transform="rotate(45 11 1)"
         className="fill-saffron opacity-80"
       />
       <rect
-        x="11" y="4" width="9" height="9" rx="0.5"
+        x="11"
+        y="4"
+        width="9"
+        height="9"
+        rx="0.5"
         transform="rotate(45 11 4)"
         fill="none"
         className="stroke-gold-lt"
         strokeWidth="0.8"
       />
     </svg>
-    <div className="flex-1 h-px bg-gradient-to-r from-transparent via-gold/80 to-transparent" />
+    <div className="flex-1 max-w-[120px] h-px bg-gradient-to-r from-transparent via-gold to-transparent" />
   </div>
 );
+
+/* ── Custom Temple-Themed Dropdown for Years ── */
+const CustomYearDropdown = memo(({ activeYear, availableYears, onChange, isMarathi }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setIsOpen(false);
+      }
+    };
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") setIsOpen(false);
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, []);
+
+  const options = [
+    { value: "all", label: isMarathi ? "सर्व वर्षे" : "All Years" },
+    ...availableYears.map((y) => ({ value: y, label: y.toString() })),
+  ];
+
+  const currentOption = options.find((opt) => opt.value === activeYear) || options[0];
+
+  return (
+    <div className="relative inline-block text-left" ref={dropdownRef}>
+      {/* Dropdown Trigger Button (Rectangular Temple Styling) */}
+      <button
+        type="button"
+        onClick={() => setIsOpen((prev) => !prev)}
+        className="flex items-center gap-2.5 h-9 px-4 rounded-md bg-cream-dk/90 border border-gold/45 hover:border-amber-500 hover:bg-cream text-maroon font-heading text-xs font-bold uppercase tracking-wider transition-all duration-200 cursor-pointer shadow-xs select-none"
+        aria-haspopup="listbox"
+        aria-expanded={isOpen}
+      >
+        <Calendar size={14} className="text-saffron shrink-0" />
+        <span className="text-ink-mid font-semibold">{isMarathi ? "वर्ष:" : "Year:"}</span>
+        <span className="text-maroon font-bold text-amber-900">{currentOption.label}</span>
+        <ChevronDown
+          size={14}
+          className={`text-gold-dk transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
+        />
+      </button>
+
+      {/* Floating Animated Custom Menu */}
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: -6, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -6, scale: 0.98 }}
+            transition={{ duration: 0.15, ease: "easeOut" }}
+            className="absolute right-0 sm:left-0 top-full mt-1.5 min-w-[170px] max-h-60 overflow-y-auto bg-gradient-to-b from-[#1c0505]/98 via-[#140303]/98 to-[#0c0202]/98 border border-amber-500/35 rounded-md shadow-[0_12px_32px_rgba(0,0,0,0.65)] p-1.5 z-50 backdrop-blur-md"
+            role="listbox"
+          >
+            <div className="flex flex-col gap-0.5">
+              {options.map((opt) => {
+                const isSelected =
+                  activeYear === opt.value ||
+                  (opt.value === "all" && (!activeYear || activeYear === "all"));
+
+                return (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    role="option"
+                    aria-selected={isSelected}
+                    onClick={() => {
+                      onChange(opt.value);
+                      setIsOpen(false);
+                    }}
+                    className={`w-full flex items-center justify-between px-3 py-2 rounded-sm text-xs font-heading font-bold uppercase tracking-wider transition-all cursor-pointer select-none ${
+                      isSelected
+                        ? "bg-gradient-to-r from-amber-400 via-amber-300 to-amber-400 text-maroon-dk shadow-xs"
+                        : "text-amber-100/80 hover:text-white hover:bg-white/10"
+                    }`}
+                  >
+                    <span>{opt.label}</span>
+                    {isSelected && (
+                      <Check size={13} className="text-maroon-dk stroke-[2.5]" />
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+});
+CustomYearDropdown.displayName = "CustomYearDropdown";
 
 const Gallery = () => {
   const { isMarathi } = useLanguage();
   const [images, setImages] = useState([]);
   const [categories, setCategories] = useState([]);
   const [activeCategory, setActiveCategory] = useState("all");
-  const [activeYear, setActiveYear] = useState(new Date().getFullYear());
+  const [activeYear, setActiveYear] = useState("all");
   const [availableYears, setAvailableYears] = useState([]);
   const [selectedImageIndex, setSelectedImageIndex] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -49,21 +155,29 @@ const Gallery = () => {
           galleryAPI.getImages(),
         ]);
 
-        const catList = categoriesResponse?.data || (Array.isArray(categoriesResponse) ? categoriesResponse : []);
+        const catList =
+          categoriesResponse?.data ||
+          (Array.isArray(categoriesResponse) ? categoriesResponse : []);
         setCategories(Array.isArray(catList) ? catList : []);
 
-        const imagesList = imagesResponse?.data || (Array.isArray(imagesResponse) ? imagesResponse : []);
+        const imagesList =
+          imagesResponse?.data ||
+          (Array.isArray(imagesResponse) ? imagesResponse : []);
         setImages(Array.isArray(imagesList) ? imagesList : []);
 
         const currentYear = new Date().getFullYear();
-        const years = [...new Set(imagesList.map((img) => img.year ? parseInt(img.year, 10) : currentYear).filter(Boolean))].sort((a, b) => b - a);
+        const years = [
+          ...new Set(
+            imagesList
+              .map((img) => (img.year ? parseInt(img.year, 10) : currentYear))
+              .filter(Boolean)
+          ),
+        ].sort((a, b) => b - a);
+
         if (!years.includes(currentYear)) {
           years.unshift(currentYear);
         }
         setAvailableYears(years);
-        if (years.length > 0 && !years.includes(parseInt(activeYear, 10))) {
-          setActiveYear(years[0]);
-        }
       } catch (err) {
         console.error("Error fetching gallery data:", err);
         setError(err.message || "Failed to load gallery images");
@@ -81,12 +195,14 @@ const Gallery = () => {
       img.category?._id === activeCategory ||
       img.category?.slug === activeCategory ||
       img.category?.name?.toLowerCase() === activeCategory.toLowerCase();
+
     const currentYear = new Date().getFullYear();
     const imgYear = img.year ? parseInt(img.year, 10) : currentYear;
     const yearMatch =
       !activeYear ||
       activeYear === "all" ||
       imgYear === parseInt(activeYear, 10);
+
     return categoryMatch && yearMatch;
   });
 
@@ -96,12 +212,17 @@ const Gallery = () => {
     if (selectedImageIndex === null) return;
     setSelectedImageIndex((prev) => (prev + 1) % filteredImages.length);
   };
+
   const handlePrev = (e) => {
     if (e) e.stopPropagation();
     if (selectedImageIndex === null) return;
-    setSelectedImageIndex((prev) => (prev - 1 + filteredImages.length) % filteredImages.length);
+    setSelectedImageIndex(
+      (prev) => (prev - 1 + filteredImages.length) % filteredImages.length
+    );
   };
-  const selectedImage = selectedImageIndex !== null ? filteredImages[selectedImageIndex] : null;
+
+  const selectedImage =
+    selectedImageIndex !== null ? filteredImages[selectedImageIndex] : null;
 
   useEffect(() => {
     if (selectedImageIndex === null) return;
@@ -114,170 +235,195 @@ const Gallery = () => {
     return () => window.removeEventListener("keydown", handleKeyPress);
   }, [selectedImageIndex, filteredImages.length]);
 
-  /* ── Loading State ── */
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-cream flex items-center justify-center font-body text-ink-dark">
-        <div className="text-center">
-          <Loader2 className="w-12 h-12 animate-spin text-saffron mx-auto mb-4" />
-          <p className="text-ink-mid italic text-lg">
-            {isMarathi ? "पवित्र गॅलरी लोड होत आहे..." : "Loading sacred gallery..."}
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  /* ── Error State ── */
-  if (error) {
-    return (
-      <div className="min-h-screen bg-cream flex items-center justify-center font-body text-ink-dark">
-        <div className="text-center p-8 border border-gold/40 rounded bg-cream-dk max-w-md mx-4">
-          <p className="text-maroon text-xl font-bold mb-2">
-            {isMarathi ? "गॅलरी लोड करताना त्रुटी आली" : "Error loading gallery"}
-          </p>
-          <p className="text-ink-mid">{error}</p>
-        </div>
-      </div>
-    );
-  }
-
-  /* ── Main Render ── */
   return (
     <>
-      <div className="min-h-screen bg-cream text-ink-dark font-body selection:bg-saffron/20 selection:text-ink-dark overflow-x-hidden">
+      <div className="w-full bg-cream font-body text-ink-dark min-h-screen relative overflow-hidden">
+        {/* ═══════════ 1. CINEMATIC HERO BANNER (Home.jsx Signature) ═══════════ */}
+        <section className="relative pt-28 pb-16 sm:pt-32 sm:pb-20 bg-gradient-to-b from-[#180303] via-[#100202] to-[#180303] text-cream border-b border-amber-500/25 overflow-hidden">
+          {/* Subtle Top Gold Filament */}
+          <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-amber-400 to-transparent opacity-80" />
 
-        {/* ═══════════ HERO HEADER ═══════════ */}
-        <header className="relative pt-32 pb-20 flex items-center justify-center overflow-hidden">
-          {/* Top gradient border strip */}
-          <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-maroon via-gold via-saffron to-maroon z-20" />
+          {/* Ambient Divine Radiance */}
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(245,158,11,0.12)_0%,_rgba(24,4,4,0.40)_65%,_rgba(12,2,2,0.95)_100%)] pointer-events-none" />
 
-          {/* Background image + overlays */}
-          <div className="absolute inset-0 z-0">
-            <img
-              src="/gallery/Temple3D.png"
-              className="w-full h-full object-cover opacity-30 scale-105 saturate-50 brightness-60"
-              alt="Gallery Background"
-              onError={(e) => { e.target.style.display = "none"; }}
-            />
-            {/* Solid dark overlay — no gradient, no fade */}
-            <div className="absolute inset-0 bg-maroon-dk" />
-            {/* Subtle gold grid pattern */}
-            <div
-              className="absolute inset-0 opacity-[0.04]"
-              style={{
-                backgroundImage: "repeating-linear-gradient(45deg, var(--color-gold) 0, var(--color-gold) 1px, transparent 0, transparent 50%)",
-                backgroundSize: "20px 20px",
-              }}
-            />
-          </div>
+          {/* Repeating Sacred Grid Texture */}
+          <div
+            className="absolute inset-0 pointer-events-none opacity-10"
+            style={{
+              backgroundImage:
+                "repeating-linear-gradient(45deg, var(--color-gold) 0, var(--color-gold) 1px, transparent 0, transparent 40px)",
+            }}
+          />
 
-          {/* Heading content */}
-          <div className="relative z-10 text-center px-6 max-w-4xl mx-auto">
-            <span className="block font-heading text-[0.65rem] tracking-[0.35em] uppercase text-saffron mb-3 opacity-90">
-              {isMarathi ? "|| दर्शन गॅलरी ||" : "|| Darshan Gallery ||"}
-            </span>
-            <h1 className="font-display text-[clamp(2.8rem,7vw,5rem)] font-bold text-white leading-tight drop-shadow-2xl mb-1">
-              {isMarathi ? "दर्शन सोहळा" : "Sacred Glimpses"}
-            </h1>
-            <span className="font-heading text-[clamp(1rem,2.5vw,1.5rem)] font-semibold text-transparent bg-clip-text bg-gradient-to-r from-gold-lt via-saffron-lt to-gold tracking-wider block mb-2">
-              {isMarathi ? "पवित्र क्षण" : "Divine Moments"}
-            </span>
+          <div className="max-w-5xl mx-auto px-4 sm:px-6 relative z-10 text-center">
+            {/* Sacred Darshan Badge */}
+            <motion.div
+              className="inline-flex items-center gap-2 bg-black/45 border border-amber-400/40 rounded-full px-4 py-1.5 font-heading text-xs sm:text-[0.82rem] font-medium text-amber-200 tracking-wide mb-4 shadow-sm backdrop-blur-xs select-none"
+              initial={{ opacity: 0, y: -14 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+            >
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-400" />
+              </span>
+              <Sparkles size={13} className="text-amber-300 shrink-0" />
+              <span>{isMarathi ? "दिव्य दर्शन संग्रह" : "Sacred Darshan & Celebrations"}</span>
+            </motion.div>
+
+            {/* Main Page Title */}
+            <motion.h1
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.15 }}
+              className="flex flex-col items-center select-none"
+            >
+              <span className="font-heading text-[clamp(2rem,5.5vw,4rem)] font-black text-white leading-tight tracking-wider drop-shadow-[0_4px_24px_rgba(0,0,0,0.9)]">
+                {isMarathi ? "छायाचित्र दालन" : "Temple Gallery"}
+              </span>
+              <span className="font-heading text-[clamp(1.1rem,3vw,2rem)] font-bold tracking-[0.16em] uppercase text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-amber-300 to-amber-100 drop-shadow-[0_2px_14px_rgba(0,0,0,0.9)] mt-1 block">
+                {isMarathi ? "श्री विठ्ठल रखुमाई मंदिर ट्रस्ट" : "Shree Vitthal Rakhumai Mandir Trust"}
+              </span>
+            </motion.h1>
+
             <DiamondDivider />
+
+            {/* Subtitle with minimal padding */}
+            <motion.p
+              className="max-w-2xl mx-auto text-base sm:text-lg text-cream/85 font-body leading-relaxed mt-2"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+            >
+              {isMarathi
+                ? "“उत्सव, सोहळे, महापूजा आणि भक्तीच्या अलौकिक क्षणांचे मनोहारी दर्शन.”"
+                : "“Capturing divine celebrations, sacred aartis, festive joy, and timeless devotion in Amberkarwadi.”"}
+            </motion.p>
           </div>
+        </section>
 
+        {/* ═══════════ 2. SACRED SHLOKA STRIP (Home.jsx Signature) ═══════════ */}
+        <div className="h-[3px] bg-gradient-to-r from-maroon via-gold via-saffron-lt to-maroon" />
+        <div className="relative bg-maroon px-6 py-7 sm:py-8 text-center overflow-hidden">
+          <div
+            className="absolute inset-0 z-0"
+            style={{
+              backgroundImage:
+                "repeating-linear-gradient(90deg, rgba(212,175,55,0.15) 0, rgba(212,175,55,0.15) 1px, transparent 0, transparent 60px)",
+            }}
+          />
+          <p className="relative z-10 font-marathi text-[clamp(1.1rem,2.8vw,1.5rem)] text-gold-lt tracking-wide leading-relaxed">
+            || रूप पाहता लोचनी । सुख झाले वो साजणी ||
+          </p>
+        </div>
+        <div className="h-[3px] bg-gradient-to-r from-maroon via-gold via-saffron-lt to-maroon" />
 
-        </header>
-
-        {/* ═══════════ FILTER BAR ═══════════ */}
-        {/* Solid cream background — fully readable, no fading effect */}
-        <div className="bg-cream border-b border-gold/20 shadow-sm">
-          <div className="max-w-6xl mx-auto px-6 py-6">
-
-            {/* Category filter buttons */}
-            <div className="flex flex-wrap justify-center gap-3 mb-4">
-              <button
-                onClick={() => setActiveCategory("all")}
-                className={`px-5 py-2 rounded-full text-xs font-heading font-semibold tracking-widest uppercase transition-all duration-300 border-2 shadow-sm ${activeCategory === "all"
-                  ? "bg-gradient-to-br from-vermillion to-saffron-dk border-transparent text-white shadow-[0_4px_14px_rgba(192,57,43,0.40)] scale-105"
-                  : "bg-cream-dk border-gold/50 text-ink-mid hover:bg-gold/10 hover:border-gold hover:text-maroon hover:scale-105"
-                  }`}
-              >
-                {isMarathi ? "सर्व" : "All"}
-              </button>
-              {categories.map((cat) => (
+        {/* ═══════════ 3. FILTER BAR WITH RECTANGULAR TABS & CUSTOM YEAR DROPDOWN ═══════════ */}
+        <section className="bg-cream border-b border-gold/30 shadow-xs relative z-20">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <div className="flex flex-col lg:flex-row items-center justify-between gap-4">
+              {/* Category Filter Tabs (Rectangular Styling) */}
+              <div className="flex flex-wrap items-center justify-center gap-2 p-1.5 bg-[#180404]/8 border border-amber-500/25 rounded-md">
                 <button
-                  key={cat._id}
-                  onClick={() => setActiveCategory(cat._id)}
-                  className={`px-5 py-2 rounded-full text-xs font-heading font-semibold tracking-widest uppercase transition-all duration-300 border-2 shadow-sm ${activeCategory === cat._id
-                    ? "bg-gradient-to-br from-vermillion to-saffron-dk border-transparent text-white shadow-[0_4px_14px_rgba(192,57,43,0.40)] scale-105"
-                    : "bg-cream-dk border-gold/50 text-ink-mid hover:bg-gold/10 hover:border-gold hover:text-maroon hover:scale-105"
-                    }`}
+                  onClick={() => setActiveCategory("all")}
+                  className={`px-4 sm:px-5 py-2 rounded-md font-heading text-xs sm:text-sm font-bold tracking-wider uppercase transition-all duration-200 border cursor-pointer select-none ${
+                    activeCategory === "all"
+                      ? "bg-gradient-to-r from-amber-400 via-amber-300 to-amber-400 text-maroon-dk border-amber-400/70 shadow-xs"
+                      : "bg-transparent border-transparent text-maroon hover:border-amber-500/40 hover:bg-cream hover:text-maroon-dk"
+                  }`}
                 >
-                  {cat.name}
+                  {isMarathi ? "सर्व चित्रे" : "All Photos"}
                 </button>
-              ))}
-            </div>
 
-            {/* Year filter buttons */}
-            {availableYears.length > 0 && (
-              <div className="flex flex-wrap justify-center gap-2">
-                {availableYears.map((year) => (
+                {categories.map((cat) => (
                   <button
-                    key={year}
-                    onClick={() => setActiveYear(year)}
-                    className={`px-4 py-1.5 rounded-md text-[0.7rem] font-heading font-bold tracking-widest uppercase transition-all duration-300 border ${activeYear === year
-                      ? "bg-maroon text-gold-lt border-maroon shadow-[0_3px_10px_rgba(107,26,26,0.25)] scale-105"
-                      : "bg-transparent border-gold/30 text-ink-light hover:text-maroon hover:border-gold/60 hover:bg-cream-dk"
-                      }`}
+                    key={cat._id}
+                    onClick={() => setActiveCategory(cat._id)}
+                    className={`px-4 sm:px-5 py-2 rounded-md font-heading text-xs sm:text-sm font-bold tracking-wider uppercase transition-all duration-200 border cursor-pointer select-none ${
+                      activeCategory === cat._id
+                        ? "bg-gradient-to-r from-amber-400 via-amber-300 to-amber-400 text-maroon-dk border-amber-400/70 shadow-xs"
+                        : "bg-transparent border-transparent text-maroon hover:border-amber-500/40 hover:bg-cream hover:text-maroon-dk"
+                    }`}
                   >
-                    {year}
+                    {isMarathi && cat.nameMarathi ? cat.nameMarathi : cat.name}
                   </button>
                 ))}
               </div>
-            )}
 
+              {/* Custom Dropdown for Years */}
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-1.5 text-xs font-heading font-bold text-maroon uppercase tracking-wider hidden sm:flex">
+                  <Filter size={13} className="text-saffron shrink-0" />
+                  <span>{isMarathi ? "वर्ष निवडा:" : "Filter:"}</span>
+                </div>
+                <CustomYearDropdown
+                  activeYear={activeYear}
+                  availableYears={availableYears}
+                  onChange={setActiveYear}
+                  isMarathi={isMarathi}
+                />
+              </div>
+            </div>
           </div>
-        </div>
+        </section>
 
-        {/* ═══════════ GALLERY GRID ═══════════ */}
-        <main className="max-w-7xl mx-auto px-6 py-14 relative">
-          {/* Subtle ambient blobs */}
-          <div className="absolute top-0 left-0 w-72 h-72 bg-saffron/5 rounded-full blur-3xl pointer-events-none" />
-          <div className="absolute bottom-0 right-0 w-96 h-96 bg-gold/5 rounded-full blur-3xl pointer-events-none" />
-
-          {/* Section label */}
-          <div className="text-center mb-10">
-            <span className="block font-heading text-[0.65rem] tracking-[0.3em] uppercase text-saffron mb-1">
-              {isMarathi ? "दर्शन क्षण" : "Captured Moments"}
-            </span>
-            <h2 className="font-display text-[clamp(1.6rem,3.5vw,2.4rem)] font-bold text-maroon leading-tight">
-              {isMarathi ? "गॅलरी" : "Gallery"}
-            </h2>
-            <DiamondDivider />
-          </div>
-
-          <GalleryGrid images={filteredImages} onImageClick={setSelectedImageIndex} />
-
-          {filteredImages.length === 0 && (
-            <div className="text-center py-24 border-2 border-dashed border-gold/25 rounded-xl bg-cream-dk/40">
-              <p className="text-ink-light text-lg font-heading italic">
-                {isMarathi ? "या श्रेणीत चित्रे आढळली नाहीत." : "No images found in this category."}
+        {/* ═══════════ 4. GALLERY GRID SECTION ═══════════ */}
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 relative z-10">
+          {/* Loading State */}
+          {loading && (
+            <div className="flex flex-col items-center justify-center py-24 text-ink-light">
+              <Loader2 className="w-10 h-10 animate-spin text-saffron mb-3" />
+              <p className="font-heading text-xs sm:text-sm tracking-widest uppercase text-maroon font-bold">
+                {isMarathi ? "पवित्र गॅलरी लोड होत आहे..." : "Loading sacred gallery…"}
               </p>
             </div>
           )}
+
+          {/* Error State */}
+          {error && !loading && (
+            <div className="bg-cream-dk border border-vermillion/40 rounded-md p-8 text-center max-w-lg mx-auto shadow-sm">
+              <p className="text-vermillion font-medium">{error}</p>
+            </div>
+          )}
+
+          {/* Gallery Content */}
+          {!loading && !error && (
+            <>
+              {/* Image Grid */}
+              <GalleryGrid
+                images={filteredImages}
+                onImageClick={setSelectedImageIndex}
+              />
+
+              {/* Empty State */}
+              {filteredImages.length === 0 && (
+                <div className="bg-cream-dk rounded-md border border-gold/40 p-12 text-center max-w-md mx-auto shadow-xs my-8">
+                  <div className="bg-white w-16 h-16 rounded-md flex items-center justify-center mx-auto mb-4 border border-gold/30 shadow-xs">
+                    <ImageIcon className="w-8 h-8 text-gold-dk" />
+                  </div>
+                  <h3 className="font-display text-xl font-bold text-maroon mb-1.5">
+                    {isMarathi ? "छायाचित्रे आढळली नाहीत" : "No Images Found"}
+                  </h3>
+                  <p className="font-body text-sm text-ink-light">
+                    {isMarathi
+                      ? "या श्रेणी किंवा वर्षासाठी छायाचित्रे उपलब्ध नाहीत."
+                      : "No images match the selected category or year."}
+                  </p>
+                </div>
+              )}
+            </>
+          )}
         </main>
 
-        {/* ═══════════ FOOTER STRIP ═══════════ */}
-        <div className="bg-ink-dark border-t-4 border-gold py-5 text-center">
-          <p className="font-marathi text-[1rem] text-gold-lt tracking-wide">
-            || पुंडलिका वरदा हरी विठ्ठल ||
+        {/* ═══════════ 5. FOOTER STRIP (Home.jsx Signature) ═══════════ */}
+        <div className="bg-ink-dark border-t-4 border-gold py-6 text-center">
+          <p className="font-marathi text-[1.1rem] text-gold-lt tracking-wide">
+            || पुंडलिका वरदा हरी विठ्ठल — श्री ज्ञानदेव तुकाराम ||
           </p>
-          <p className="font-body italic text-cream-dk/40 text-[0.85rem] mt-1">
-            Shree Vitthal Rakhumai Temple · Amberkarwadi
+          <p className="font-body italic text-cream/45 text-[0.85rem] mt-1 tracking-wider">
+            Shree Vitthal Rakhumai Temple · Amberkarwadi, Ratnagiri
           </p>
         </div>
-
       </div>
 
       {/* ═══════════ LIGHTBOX ═══════════ */}

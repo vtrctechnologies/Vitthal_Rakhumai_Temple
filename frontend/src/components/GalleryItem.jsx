@@ -1,14 +1,16 @@
-import { memo } from "react";
-import React from "react";
+import { memo, useState } from "react";
 import { Sparkles } from "lucide-react";
 import { getImageUrl } from "@/utils/imageUrl";
 
-const getShapeClass = (index, size) => {
-  if (size === "tall") return "rounded-t-[8rem] rounded-b-xl";
-  if (size === "wide")
-    return "rounded-tl-[4rem] rounded-br-[4rem] rounded-tr-xl rounded-bl-xl";
-  return index % 2 === 0 ? "rounded-xl" : "rounded-[2rem]";
-};
+/* Corner accents for sacred temple artwork framing */
+const CornerAccents = () => (
+  <>
+    <span className="absolute -top-0.5 -left-0.5 w-3.5 h-3.5 border-t-2 border-l-2 border-saffron z-30" />
+    <span className="absolute -top-0.5 -right-0.5 w-3.5 h-3.5 border-t-2 border-r-2 border-saffron z-30" />
+    <span className="absolute -bottom-0.5 -left-0.5 w-3.5 h-3.5 border-b-2 border-l-2 border-saffron z-30" />
+    <span className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 border-b-2 border-r-2 border-saffron z-30" />
+  </>
+);
 
 const GalleryItem = memo(({ image, index, onClick }) => {
   const isTall = image.size === "tall";
@@ -19,7 +21,7 @@ const GalleryItem = memo(({ image, index, onClick }) => {
       ? "col-span-1 sm:col-span-2"
       : "col-span-1";
 
-  const [isHovered, setIsHovered] = React.useState(false);
+  const [isHovered, setIsHovered] = useState(false);
 
   const rawUrl = image.imageUrl || image.mediaUrl || "";
   // Use utility function for image URL
@@ -41,21 +43,15 @@ const GalleryItem = memo(({ image, index, onClick }) => {
 
   return (
     <div
-      className={`group relative ${spanClass} ${getShapeClass(
-        index,
-        image.size
-      )} overflow-hidden bg-black shadow-xl cursor-pointer transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl hover:shadow-gold-dk/10`}
+      className={`group relative ${spanClass} rounded-md border border-gold/40 hover:border-gold overflow-hidden bg-black shadow-sm hover:shadow-xl cursor-pointer transition-colors duration-300`}
       onClick={onClick}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {/* Inner Border Frame (The "Gold" Reveal) */}
-      <div
-        className={`absolute inset-3 border border-gold/0 group-hover:border-gold/80 z-20 transition-all duration-700 ${getShapeClass(
-          index,
-          image.size
-        )} pointer-events-none scale-95 group-hover:scale-100`}
-      ></div>
+      {/* Saffron Corner Accents: Revealed on hover without card movement */}
+      <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+        <CornerAccents />
+      </div>
 
       {/* Media Content */}
       <div className="w-full h-full overflow-hidden relative">
@@ -86,7 +82,7 @@ const GalleryItem = memo(({ image, index, onClick }) => {
             <img
               src={imageUrl}
               alt={image.title}
-              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+              className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
               style={{ transform: "translateZ(0)" }}
               loading="lazy"
               decoding="async"
@@ -101,25 +97,24 @@ const GalleryItem = memo(({ image, index, onClick }) => {
           <Sparkles className="w-12 h-12 text-gold" />
         </div>
         {/* Gradient Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-ink-dark/95 via-ink-dark/30 to-transparent opacity-70 group-hover:opacity-90 transition-opacity duration-500"></div>
+        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/35 to-transparent opacity-75 group-hover:opacity-85 transition-opacity duration-300"></div>
       </div>
 
-      {/* Content - Always visible but moves */}
+      {/* Content */}
       <div
-        className="absolute bottom-0 left-0 right-0 p-6 z-30 transform translate-y-2 group-hover:translate-y-0 transition-transform duration-300 ease-out"
+        className="absolute bottom-0 left-0 right-0 p-4 sm:p-5 z-20"
         style={{ transform: "translateZ(0)" }}
       >
         <div className="flex flex-col items-start">
-          <div className="flex items-center gap-2 mb-2 transition-opacity duration-300">
-            <Sparkles size={12} className="text-saffron-lt" />
-            <span className="text-saffron-lt text-xs font-heading font-bold uppercase tracking-widest">
+          <div className="flex items-center gap-1.5 mb-1.5">
+            <Sparkles size={11} className="text-amber-400 shrink-0" />
+            <span className="text-amber-300 text-[10.5px] font-heading font-bold uppercase tracking-wider">
               {image.category?.name || "Uncategorized"}
             </span>
           </div>
-          <h3 className="text-white font-heading text-2xl leading-none mb-2 drop-shadow-md group-hover:text-gold-lt transition-colors">
+          <h3 className="text-white font-heading text-base sm:text-lg font-bold leading-snug drop-shadow-md group-hover:text-amber-200 transition-colors line-clamp-2">
             {image.title}
           </h3>
-          <div className="h-0.5 w-0 group-hover:w-12 bg-saffron transition-all duration-500"></div>
         </div>
       </div>
     </div>

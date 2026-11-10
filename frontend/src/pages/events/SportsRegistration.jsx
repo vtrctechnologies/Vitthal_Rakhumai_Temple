@@ -1,14 +1,55 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, memo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { sportsRegistrationAPI } from "../../services/api";
 import {
   Trophy, Clock, Users, ChevronRight, CheckCircle,
   AlertCircle, Loader2, Calendar, MapPin, Phone,
-  User, Mail, Info, X, Lock, Hourglass,
+  User, Mail, Info, X, Lock, Hourglass, Sparkles,
 } from "lucide-react";
+import { useLanguage } from "../../context/LanguageContext";
+
+/* ── Sacred Diamond Divider ── */
+const DiamondDivider = () => (
+  <div className="flex items-center gap-3 my-3 justify-center">
+    <div className="flex-1 max-w-[120px] h-px bg-gradient-to-r from-transparent via-gold to-transparent" />
+    <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+      <rect
+        x="11"
+        y="1"
+        width="13"
+        height="13"
+        rx="1"
+        transform="rotate(45 11 1)"
+        className="fill-saffron opacity-80"
+      />
+      <rect
+        x="11"
+        y="4"
+        width="9"
+        height="9"
+        rx="0.5"
+        transform="rotate(45 11 4)"
+        fill="none"
+        className="stroke-gold-lt"
+        strokeWidth="0.8"
+      />
+    </svg>
+    <div className="flex-1 max-w-[120px] h-px bg-gradient-to-r from-transparent via-gold to-transparent" />
+  </div>
+);
+
+/* ── Corner Accents for Cards ── */
+const CornerAccents = () => (
+  <>
+    <span className="absolute -top-0.5 -left-0.5 w-3.5 h-3.5 border-t-2 border-l-2 border-saffron z-20" />
+    <span className="absolute -top-0.5 -right-0.5 w-3.5 h-3.5 border-t-2 border-r-2 border-saffron z-20" />
+    <span className="absolute -bottom-0.5 -left-0.5 w-3.5 h-3.5 border-b-2 border-l-2 border-saffron z-20" />
+    <span className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 border-b-2 border-r-2 border-saffron z-20" />
+  </>
+);
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Countdown hook — calls onExpire once when timer reaches zero
+// Countdown hook
 // ─────────────────────────────────────────────────────────────────────────────
 const useCountdown = (targetDate, onExpire) => {
   const firedRef = useRef(false);
@@ -46,21 +87,14 @@ const useCountdown = (targetDate, onExpire) => {
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Timer display blocks (D:H:M:S)
+// Timer display blocks
 // ─────────────────────────────────────────────────────────────────────────────
 const TimerUnit = ({ value, label }) => (
-  <div className="flex flex-col items-center min-w-[3rem]">
-    <div
-      className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl flex items-center justify-center text-lg sm:text-xl font-bold font-mono"
-      style={{
-        background: "rgba(212,175,55,0.15)",
-        color: "#d4af37",
-        border: "1px solid rgba(212,175,55,0.3)",
-      }}
-    >
+  <div className="flex flex-col items-center min-w-[2.8rem]">
+    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-md bg-white border border-gold/45 shadow-xs flex items-center justify-center text-sm sm:text-base font-bold font-heading text-maroon">
       {String(value).padStart(2, "0")}
     </div>
-    <span className="text-[10px] mt-1 uppercase tracking-wider" style={{ color: "rgba(212,175,55,0.55)" }}>
+    <span className="text-[10px] mt-1 uppercase tracking-wider font-heading font-semibold text-saffron-dk">
       {label}
     </span>
   </div>
@@ -72,24 +106,21 @@ const TimerDisplay = ({ date, onExpire }) => {
   return (
     <div className="flex items-center gap-1.5 sm:gap-2">
       <TimerUnit value={t.d} label="Days" />
-      <span className="text-lg pb-4" style={{ color: "rgba(212,175,55,0.5)" }}>:</span>
+      <span className="text-base pb-3 text-gold-dk font-bold">:</span>
       <TimerUnit value={t.h} label="Hrs" />
-      <span className="text-lg pb-4" style={{ color: "rgba(212,175,55,0.5)" }}>:</span>
+      <span className="text-base pb-3 text-gold-dk font-bold">:</span>
       <TimerUnit value={t.m} label="Min" />
-      <span className="text-lg pb-4" style={{ color: "rgba(212,175,55,0.5)" }}>:</span>
+      <span className="text-base pb-3 text-gold-dk font-bold">:</span>
       <TimerUnit value={t.s} label="Sec" />
     </div>
   );
 };
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Compute the real-time status of a competition (mirrors backend logic)
-// ─────────────────────────────────────────────────────────────────────────────
 const getStatus = (comp) => {
   const now = Date.now();
   if (!comp.isRegistrationOpen) return "closed";
   if (comp.registrationStartDate && new Date(comp.registrationStartDate) > now) return "scheduled";
-  if (comp.registrationEndDate   && new Date(comp.registrationEndDate)   < now) return "expired";
+  if (comp.registrationEndDate && new Date(comp.registrationEndDate) < now) return "expired";
   if (comp.maxParticipants > 0 && (comp.registrationCount || 0) >= comp.maxParticipants) return "full";
   return "open";
 };
@@ -98,272 +129,240 @@ const getStatus = (comp) => {
 // Registration form modal
 // ─────────────────────────────────────────────────────────────────────────────
 const RegistrationModal = ({ competition, onClose, onSuccess }) => {
-  const isTeam = competition?.registrationType === "team";
-
-  const [form, setForm] = useState({
-    playerName: "",
-    teamName: "",
-    phone: "",
-    email: "",
-    address: "",
-    notes: "",
-  });
+  const isTeam = competition.registrationType === "team";
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const change = (e) => setForm((p) => ({ ...p, [e.target.name]: e.target.value }));
+  const [form, setForm] = useState({
+    participantName: "",
+    teamName: "",
+    email: "",
+    phone: "",
+    age: "",
+    gender: "male",
+    address: "",
+    teamMembers: "",
+    emergencyContact: "",
+  });
+
+  const handleChange = (e) => {
+    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
 
-    if (isTeam) {
-      if (!form.teamName.trim()) { setError("Team name is required."); return; }
-    } else {
-      if (!form.playerName.trim()) { setError("Player name is required."); return; }
+    if (!isTeam && !form.participantName.trim()) {
+      setError("Please enter participant name");
+      return;
     }
-    if (!form.phone.trim()) { setError("Contact phone number is required."); return; }
+    if (isTeam && !form.teamName.trim()) {
+      setError("Please enter team name");
+      return;
+    }
+    if (!form.phone.trim() || !/^\d{10}$/.test(form.phone.trim())) {
+      setError("Please enter a valid 10-digit mobile number");
+      return;
+    }
+    if (!form.email.trim()) {
+      setError("Please enter email address");
+      return;
+    }
 
-    setLoading(true);
     try {
-      const payload = isTeam
-        ? {
-            teamName: form.teamName.trim(),
-            participantName: form.teamName.trim(),
-            mobile: form.phone.trim(),
-            email: form.email.trim(),
-            villageOrCity: form.address.trim(),
-            notes: form.notes.trim(),
-          }
-        : {
-            participantName: form.playerName.trim(),
-            teamName: "",
-            mobile: form.phone.trim(),
-            email: form.email.trim(),
-            villageOrCity: form.address.trim(),
-            notes: form.notes.trim(),
-          };
-
-      const res = await sportsRegistrationAPI.register(competition._id, payload);
-      if (res?.status === "success") {
-        onSuccess(res.data);
-      } else {
-        setError(res?.message || "Registration failed. Please try again.");
-      }
+      setLoading(true);
+      const payload = {
+        competitionId: competition._id,
+        ...form,
+        age: form.age ? Number(form.age) : undefined,
+        teamMembers: isTeam
+          ? form.teamMembers.split("\n").map((m) => m.trim()).filter(Boolean)
+          : undefined,
+      };
+      const res = await sportsRegistrationAPI.registerParticipant(payload);
+      onSuccess(res?.data || { ...payload, _id: "success" });
     } catch (err) {
-      setError(err?.response?.data?.message || "Registration failed. Please try again.");
+      setError(err?.response?.data?.message || err?.message || "Registration failed. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
-  const inputStyle = {
-    background: "rgba(255,255,255,0.05)",
-    border: "1px solid rgba(212,175,55,0.2)",
-    color: "#fff",
-  };
-  const focusStyle = (e) => (e.target.style.borderColor = "rgba(212,175,55,0.6)");
-  const blurStyle  = (e) => (e.target.style.borderColor = "rgba(212,175,55,0.2)");
-
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      style={{ background: "rgba(20,5,5,0.88)", backdropFilter: "blur(6px)" }}
-      onClick={(e) => e.target === e.currentTarget && onClose()}
-    >
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.95 }}
-        className="w-full max-w-lg rounded-2xl overflow-hidden shadow-2xl"
-        style={{ background: "#1a0505", border: "1px solid rgba(212,175,55,0.3)" }}
+        className="relative w-full max-w-xl max-h-[90vh] bg-cream rounded-md border border-gold/50 shadow-2xl flex flex-col overflow-hidden text-ink-dark"
       >
-        {/* Header */}
-        <div
-          className="px-6 py-4 flex justify-between items-center"
-          style={{ background: "linear-gradient(135deg,#3d0f0f,#5a1515)", borderBottom: "1px solid rgba(212,175,55,0.2)" }}
-        >
+        <div className="flex items-center justify-between p-4 sm:p-5 bg-gradient-to-r from-[#1c0505] to-[#120202] text-cream border-b border-amber-500/30">
           <div>
-            <div className="flex items-center gap-2 mb-1">
-              <span
-                className="text-[11px] px-2 py-0.5 rounded font-bold uppercase tracking-wider flex items-center gap-1"
-                style={{
-                  background: isTeam ? "rgba(168,85,247,0.25)" : "rgba(59,130,246,0.25)",
-                  color: isTeam ? "#d8b4fe" : "#93c5fd",
-                  border: `1px solid ${isTeam ? "rgba(168,85,247,0.35)" : "rgba(59,130,246,0.35)"}`,
-                }}
-              >
-                {isTeam ? <Users size={12} /> : <User size={12} />}
-                {isTeam ? "Team Registration" : "Individual Registration"}
-              </span>
-            </div>
-            <h2 className="font-bold text-lg" style={{ color: "#f0d060", fontFamily: '"Cinzel",serif' }}>
-              {isTeam ? "Team Entry Form" : "Player Entry Form"}
+            <span className="text-[10px] font-heading font-bold text-amber-300 uppercase tracking-widest block">
+              Sports Registration
+            </span>
+            <h2 className="text-lg sm:text-xl font-display font-bold text-white">
+              {competition.name}
             </h2>
-            <p className="text-xs" style={{ color: "rgba(212,175,55,0.6)" }}>{competition.name}</p>
           </div>
           <button
             onClick={onClose}
-            className="p-1 rounded-lg hover:bg-white/10 transition-colors"
-            style={{ color: "rgba(212,175,55,0.6)" }}
+            className="p-1 rounded-md text-amber-200/70 hover:text-white transition-colors"
           >
             <X size={20} />
           </button>
         </div>
 
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-4 max-h-[72vh] overflow-y-auto">
+        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-4">
           {error && (
-            <div
-              className="flex items-center gap-2 text-sm px-4 py-3 rounded-lg"
-              style={{ background: "rgba(220,38,38,0.1)", color: "#f87171", border: "1px solid rgba(220,38,38,0.3)" }}
-            >
-              <AlertCircle size={16} className="flex-shrink-0" />
+            <div className="p-3 rounded-md bg-vermillion/10 border border-vermillion/30 text-vermillion text-xs flex items-center gap-2">
+              <AlertCircle size={15} className="shrink-0" />
               <span>{error}</span>
             </div>
           )}
 
-          {/* Conditional Primary Name: Team Name vs Player Name */}
           {isTeam ? (
             <div>
-              <label className="text-xs font-semibold mb-1 block" style={{ color: "rgba(212,175,55,0.8)" }}>
-                Team Name <span className="text-red-400">*</span>
+              <label className="block text-xs font-heading font-bold uppercase tracking-wider text-maroon mb-1">
+                Team Name *
               </label>
-              <div className="relative">
-                <Users size={14} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: "rgba(212,175,55,0.4)" }} />
-                <input
-                  type="text"
-                  name="teamName"
-                  value={form.teamName}
-                  onChange={change}
-                  placeholder="e.g. Thunder Strikers XI"
-                  className="w-full pl-9 pr-3 py-2.5 rounded-lg text-sm outline-none"
-                  style={inputStyle}
-                  onFocus={focusStyle}
-                  onBlur={blurStyle}
-                  required
-                />
-              </div>
+              <input
+                type="text"
+                name="teamName"
+                value={form.teamName}
+                onChange={handleChange}
+                placeholder="e.g. Amberkarwadi Warriors"
+                className="w-full px-3 py-2 rounded-md bg-white border border-gold/40 text-sm focus:outline-none focus:border-amber-500"
+                required
+              />
             </div>
           ) : (
             <div>
-              <label className="text-xs font-semibold mb-1 block" style={{ color: "rgba(212,175,55,0.8)" }}>
-                Player Name <span className="text-red-400">*</span>
+              <label className="block text-xs font-heading font-bold uppercase tracking-wider text-maroon mb-1">
+                Participant Name *
               </label>
-              <div className="relative">
-                <User size={14} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: "rgba(212,175,55,0.4)" }} />
-                <input
-                  type="text"
-                  name="playerName"
-                  value={form.playerName}
-                  onChange={change}
-                  placeholder="Enter your full name"
-                  className="w-full pl-9 pr-3 py-2.5 rounded-lg text-sm outline-none"
-                  style={inputStyle}
-                  onFocus={focusStyle}
-                  onBlur={blurStyle}
-                  required
-                />
-              </div>
+              <input
+                type="text"
+                name="participantName"
+                value={form.participantName}
+                onChange={handleChange}
+                placeholder="Full Name"
+                className="w-full px-3 py-2 rounded-md bg-white border border-gold/40 text-sm focus:outline-none focus:border-amber-500"
+                required
+              />
             </div>
           )}
 
-          {/* Contact No + Email */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="text-xs font-semibold mb-1 block" style={{ color: "rgba(212,175,55,0.8)" }}>
-                Contact No <span className="text-red-400">*</span>
+              <label className="block text-xs font-heading font-bold uppercase tracking-wider text-maroon mb-1">
+                Mobile Number *
               </label>
-              <div className="relative">
-                <Phone size={14} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: "rgba(212,175,55,0.4)" }} />
-                <input
-                  type="tel"
-                  name="phone"
-                  value={form.phone}
-                  onChange={change}
-                  placeholder="10-digit mobile number"
-                  className="w-full pl-9 pr-3 py-2.5 rounded-lg text-sm outline-none"
-                  style={inputStyle}
-                  onFocus={focusStyle}
-                  onBlur={blurStyle}
-                  required
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="text-xs font-semibold mb-1 block" style={{ color: "rgba(212,175,55,0.8)" }}>
-                Email Address
-              </label>
-              <div className="relative">
-                <Mail size={14} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: "rgba(212,175,55,0.4)" }} />
-                <input
-                  type="email"
-                  name="email"
-                  value={form.email}
-                  onChange={change}
-                  placeholder={isTeam ? "team@example.com (optional)" : "player@example.com (optional)"}
-                  className="w-full pl-9 pr-3 py-2.5 rounded-lg text-sm outline-none"
-                  style={inputStyle}
-                  onFocus={focusStyle}
-                  onBlur={blurStyle}
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Address / Team Address */}
-          <div>
-            <label className="text-xs font-semibold mb-1 block" style={{ color: "rgba(212,175,55,0.8)" }}>
-              {isTeam ? "Team Address" : "Address"}
-            </label>
-            <div className="relative">
-              <MapPin size={14} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: "rgba(212,175,55,0.4)" }} />
               <input
-                type="text"
-                name="address"
-                value={form.address}
-                onChange={change}
-                placeholder={isTeam ? "Village, City or Club address (optional)" : "Your village or city address (optional)"}
-                className="w-full pl-9 pr-3 py-2.5 rounded-lg text-sm outline-none"
-                style={inputStyle}
-                onFocus={focusStyle}
-                onBlur={blurStyle}
+                type="tel"
+                name="phone"
+                value={form.phone}
+                onChange={handleChange}
+                placeholder="10-digit number"
+                className="w-full px-3 py-2 rounded-md bg-white border border-gold/40 text-sm focus:outline-none focus:border-amber-500"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-heading font-bold uppercase tracking-wider text-maroon mb-1">
+                Email Address *
+              </label>
+              <input
+                type="email"
+                name="email"
+                value={form.email}
+                onChange={handleChange}
+                placeholder="name@example.com"
+                className="w-full px-3 py-2 rounded-md bg-white border border-gold/40 text-sm focus:outline-none focus:border-amber-500"
+                required
               />
             </div>
           </div>
 
-          {/* Notes (optional) */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-heading font-bold uppercase tracking-wider text-maroon mb-1">
+                Age
+              </label>
+              <input
+                type="number"
+                name="age"
+                value={form.age}
+                onChange={handleChange}
+                placeholder="Age in years"
+                className="w-full px-3 py-2 rounded-md bg-white border border-gold/40 text-sm focus:outline-none focus:border-amber-500"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-heading font-bold uppercase tracking-wider text-maroon mb-1">
+                Gender
+              </label>
+              <select
+                name="gender"
+                value={form.gender}
+                onChange={handleChange}
+                className="w-full px-3 py-2 rounded-md bg-white border border-gold/40 text-sm focus:outline-none focus:border-amber-500"
+              >
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+          </div>
+
+          {isTeam && (
+            <div>
+              <label className="block text-xs font-heading font-bold uppercase tracking-wider text-maroon mb-1">
+                Squad Members (One per line)
+              </label>
+              <textarea
+                name="teamMembers"
+                value={form.teamMembers}
+                onChange={handleChange}
+                rows={3}
+                placeholder="Player 1 (Captain)&#10;Player 2&#10;Player 3"
+                className="w-full px-3 py-2 rounded-md bg-white border border-gold/40 text-sm focus:outline-none focus:border-amber-500"
+              />
+            </div>
+          )}
+
           <div>
-            <label className="text-xs font-semibold mb-1 block" style={{ color: "rgba(212,175,55,0.8)" }}>
-              Notes <span className="opacity-60 font-normal">(optional)</span>
+            <label className="block text-xs font-heading font-bold uppercase tracking-wider text-maroon mb-1">
+              Residential Address
             </label>
-            <textarea
-              name="notes"
-              value={form.notes}
-              onChange={change}
-              rows={2}
-              placeholder={isTeam ? "Any team details, roster or special notes (optional)" : "Any additional notes or preferences (optional)"}
-              className="w-full px-3 py-2.5 rounded-lg text-sm outline-none resize-none"
-              style={inputStyle}
-              onFocus={focusStyle}
-              onBlur={blurStyle}
+            <input
+              type="text"
+              name="address"
+              value={form.address}
+              onChange={handleChange}
+              placeholder="Village / City"
+              className="w-full px-3 py-2 rounded-md bg-white border border-gold/40 text-sm focus:outline-none focus:border-amber-500"
             />
           </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all mt-2"
-            style={{
-              background: loading ? "rgba(212,175,55,0.3)" : "linear-gradient(135deg,#d4af37,#f0c040)",
-              color: "#3d0f0f",
-              cursor: loading ? "not-allowed" : "pointer",
-            }}
-          >
-            {loading ? <Loader2 size={16} className="animate-spin" /> : <CheckCircle size={16} />}
-            {loading ? "Submitting Registration…" : isTeam ? "Register Team" : "Register Player"}
-          </button>
+          <div className="pt-3 border-t border-gold/30 flex items-center justify-end gap-3">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-2 rounded-md text-xs font-heading font-bold text-ink-mid hover:text-maroon border border-gold/30 hover:bg-cream-dk transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={loading}
+              className="px-5 py-2 rounded-md text-xs font-heading font-bold uppercase tracking-wider bg-gradient-to-r from-amber-400 via-amber-300 to-amber-400 text-maroon-dk shadow-xs hover:shadow-md transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+            >
+              {loading ? <Loader2 size={14} className="animate-spin" /> : null}
+              <span>Submit Registration</span>
+            </button>
+          </div>
         </form>
       </motion.div>
     </div>
@@ -371,43 +370,32 @@ const RegistrationModal = ({ competition, onClose, onSuccess }) => {
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Success modal
+// Success Modal
 // ─────────────────────────────────────────────────────────────────────────────
 const SuccessModal = ({ data, onClose }) => (
-  <div
-    className="fixed inset-0 z-50 flex items-center justify-center p-4"
-    style={{ background: "rgba(20,5,5,0.88)", backdropFilter: "blur(6px)" }}
-  >
+  <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
     <motion.div
       initial={{ opacity: 0, scale: 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
-      className="w-full max-w-sm rounded-2xl p-8 text-center shadow-2xl"
-      style={{ background: "#1a0505", border: "1px solid rgba(212,175,55,0.4)" }}
+      className="w-full max-w-sm rounded-md p-6 text-center shadow-2xl bg-gradient-to-b from-[#1c0505] to-[#0c0202] border border-amber-500/40 text-cream"
     >
-      <div
-        className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4"
-        style={{ background: "rgba(212,175,55,0.15)", border: "2px solid rgba(212,175,55,0.5)" }}
-      >
-        <CheckCircle size={40} style={{ color: "#d4af37" }} />
+      <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3 bg-amber-400/20 border-2 border-amber-400 text-amber-300">
+        <CheckCircle size={32} />
       </div>
-      <h2 className="text-xl font-bold mb-2" style={{ color: "#f0d060", fontFamily: '"Cinzel",serif' }}>
-        Registration Successful!
+      <h2 className="text-xl font-display font-bold text-white mb-1">
+        Registration Recorded!
       </h2>
-      <p className="text-sm mb-1" style={{ color: "rgba(212,175,55,0.7)" }}>
-        Welcome, <span className="font-semibold text-yellow-300">{data?.teamName || data?.participantName}</span>!
+      <p className="text-xs text-cream/80 mb-3">
+        Welcome, <span className="font-bold text-amber-300">{data?.teamName || data?.participantName}</span>!
       </p>
       {data?._id && (
-        <p className="text-xs mt-2 mb-4 px-3 py-2 rounded-lg" style={{ background: "rgba(212,175,55,0.08)", color: "rgba(255,235,200,0.6)" }}>
-          Registration ID: <span className="font-mono font-bold text-yellow-300">{String(data._id).slice(-8).toUpperCase()}</span>
+        <p className="text-[11px] mb-4 p-2 rounded-md bg-black/50 border border-amber-500/30 font-mono text-amber-200">
+          ID: {String(data._id).slice(-8).toUpperCase()}
         </p>
       )}
-      <p className="text-xs mb-6" style={{ color: "rgba(255,200,100,0.5)" }}>
-        Your slot has been recorded successfully. You may be contacted for further details.
-      </p>
       <button
         onClick={onClose}
-        className="px-6 py-2.5 rounded-xl font-bold text-sm"
-        style={{ background: "linear-gradient(135deg,#d4af37,#f0c040)", color: "#3d0f0f" }}
+        className="w-full py-2.5 rounded-md font-heading font-bold text-xs uppercase tracking-wider bg-gradient-to-r from-amber-400 via-amber-300 to-amber-400 text-maroon-dk shadow-xs cursor-pointer"
       >
         Done
       </button>
@@ -416,12 +404,10 @@ const SuccessModal = ({ data, onClose }) => (
 );
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Competition card — handles all 5 states
+// Competition Card Component (Rectangular Theme)
 // ─────────────────────────────────────────────────────────────────────────────
 const CompetitionCard = ({ comp, onRegister, onRefresh }) => {
   const [status, setStatus] = useState(() => getStatus(comp));
-
-  // Re-derive status from props (in case parent refreshed)
   useEffect(() => { setStatus(getStatus(comp)); }, [comp]);
 
   const isTeam = comp.registrationType === "team";
@@ -430,251 +416,146 @@ const CompetitionCard = ({ comp, onRegister, onRefresh }) => {
   const spotsLeft = max > 0 ? Math.max(0, max - currentCount) : null;
   const fillPct = max > 0 ? Math.min(100, Math.round((currentCount / max) * 100)) : 0;
 
-  // When "opening" timer expires → refresh so backend confirms the new status
-  const onOpenExpire  = useCallback(() => { setStatus("open");   onRefresh?.(); }, [onRefresh]);
-  // When "closing" timer expires → mark locally then refresh
+  const onOpenExpire = useCallback(() => { setStatus("open"); onRefresh?.(); }, [onRefresh]);
   const onCloseExpire = useCallback(() => { setStatus("expired"); onRefresh?.(); }, [onRefresh]);
 
-  const isOpen   = status === "open";
-  const isSched  = status === "scheduled";
-  const isFull   = max > 0 && currentCount >= max;
-  const canReg   = isOpen && !isFull;
+  const isOpen = status === "open";
+  const isSched = status === "scheduled";
+  const isFull = max > 0 && currentCount >= max;
+  const canReg = isOpen && !isFull;
 
-  // Badge
   const BADGE = {
-    open:      { bg: "rgba(34,197,94,0.15)",   color: "#4ade80",  border: "rgba(34,197,94,0.3)",   label: "Registration Open" },
-    scheduled: { bg: "rgba(59,130,246,0.15)",  color: "#60a5fa",  border: "rgba(59,130,246,0.3)",   label: "Opening Soon" },
-    closed:    { bg: "rgba(239,68,68,0.12)",   color: "#f87171",  border: "rgba(239,68,68,0.3)",    label: "Closed" },
-    expired:   { bg: "rgba(249,115,22,0.12)",  color: "#fb923c",  border: "rgba(249,115,22,0.3)",   label: "Registration Ended" },
-    full:      { bg: "rgba(168,85,247,0.12)",  color: "#c084fc",  border: "rgba(168,85,247,0.3)",   label: "Registrations Full" },
+    open: { bg: "bg-emerald-100 text-emerald-800 border-emerald-300", label: "Registration Open" },
+    scheduled: { bg: "bg-sky-100 text-sky-800 border-sky-300", label: "Opening Soon" },
+    closed: { bg: "bg-red-100 text-red-800 border-red-300", label: "Closed" },
+    expired: { bg: "bg-amber-100 text-amber-800 border-amber-300", label: "Ended" },
+    full: { bg: "bg-purple-100 text-purple-800 border-purple-300", label: "Full" },
   };
   const badge = BADGE[status] || BADGE.closed;
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="rounded-2xl overflow-hidden flex flex-col"
-      style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(212,175,55,0.2)" }}
-    >
-      {/* Card Header */}
-      <div className="px-6 pt-6 pb-4" style={{ borderBottom: "1px solid rgba(212,175,55,0.1)" }}>
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div
-              className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0"
-              style={{ background: "rgba(212,175,55,0.12)", border: "1px solid rgba(212,175,55,0.25)" }}
-            >
-              <Trophy size={20} style={{ color: "#d4af37" }} />
+    <div className="group relative bg-cream-dk rounded-md border border-gold/45 p-6 flex flex-col justify-between shadow-xs hover:border-gold hover:shadow-md transition-colors duration-200 overflow-hidden">
+      {/* Saffron Corner Accents */}
+      <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
+        <CornerAccents />
+      </div>
+
+      <div>
+        <div className="flex items-start justify-between gap-3 mb-3">
+          <div className="flex items-center gap-2.5">
+            <div className="w-10 h-10 rounded-md bg-white border border-gold/40 flex items-center justify-center text-maroon shadow-xs shrink-0">
+              <Trophy size={18} className="text-saffron" />
             </div>
             <div>
-              <h3
-                className="font-bold text-base leading-tight"
-                style={{ color: "#f0d060", fontFamily: '"Cinzel",serif' }}
-              >
+              <h3 className="font-display font-bold text-lg text-maroon leading-tight">
                 {comp.name}
               </h3>
-              <div className="flex items-center gap-1.5 flex-wrap mt-1">
+              <div className="flex items-center gap-1.5 mt-0.5">
                 {comp.category && (
-                  <span
-                    className="text-xs px-2 py-0.5 rounded-full"
-                    style={{ background: "rgba(212,175,55,0.12)", color: "rgba(212,175,55,0.8)" }}
-                  >
+                  <span className="text-[10px] font-heading font-semibold px-2 py-0.5 rounded-sm bg-cream border border-gold/30 text-ink-mid">
                     {comp.category}
                   </span>
                 )}
-                <span
-                  className="text-xs px-2 py-0.5 rounded-full flex items-center gap-1 font-semibold"
-                  style={{
-                    background: isTeam ? "rgba(168,85,247,0.18)" : "rgba(59,130,246,0.18)",
-                    color: isTeam ? "#d8b4fe" : "#93c5fd",
-                    border: `1px solid ${isTeam ? "rgba(168,85,247,0.35)" : "rgba(59,130,246,0.35)"}`,
-                  }}
-                >
-                  {isTeam ? <Users size={11} /> : <User size={11} />}
+                <span className="text-[10px] font-heading font-bold px-2 py-0.5 rounded-sm bg-maroon/10 text-maroon border border-maroon/20">
                   {isTeam ? "Team Event" : "Individual"}
                 </span>
               </div>
             </div>
           </div>
 
-          {/* Status Badge */}
-          <div
-            className="text-xs font-bold px-3 py-1 rounded-full flex-shrink-0 whitespace-nowrap"
-            style={{ background: badge.bg, color: badge.color, border: `1px solid ${badge.border}` }}
-          >
+          <span className={`text-[10px] font-heading font-bold px-2.5 py-0.5 rounded-sm border uppercase tracking-wider ${badge.bg}`}>
             {badge.label}
-          </div>
+          </span>
         </div>
-      </div>
 
-      {/* Card Body */}
-      <div className="px-6 py-4 space-y-4 flex-1 flex flex-col">
         {comp.description && (
-          <p className="text-sm leading-relaxed" style={{ color: "rgba(255,235,200,0.5)" }}>
+          <p className="text-xs text-ink-light font-body line-clamp-2 mb-3">
             {comp.description}
           </p>
         )}
 
-        {/* Live Slot Capacity Box */}
-        <div
-          className="rounded-xl p-3 space-y-2"
-          style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(212,175,55,0.15)" }}
-        >
+        {/* Capacity Indicator */}
+        <div className="bg-white rounded-md p-3 border border-gold/30 mb-3 space-y-1.5">
           <div className="flex items-center justify-between text-xs">
-            <span className="flex items-center gap-1.5" style={{ color: "rgba(255,235,200,0.7)" }}>
-              <Users size={13} style={{ color: "#d4af37" }} />
-              <span>
-                {max > 0 ? (
-                  <>Slots: <strong className="text-yellow-300 font-mono text-sm">{currentCount}</strong> / {max}</>
-                ) : (
-                  <>Registered: <strong className="text-yellow-300 font-mono text-sm">{currentCount}</strong></>
-                )}
-              </span>
+            <span className="text-ink-mid font-medium flex items-center gap-1">
+              <Users size={12} className="text-saffron" />
+              <span>Slots: <strong>{currentCount}</strong> {max > 0 ? `/ ${max}` : ""}</span>
             </span>
-
-            {max > 0 ? (
-              <span
-                className="font-bold px-2 py-0.5 rounded text-xs"
-                style={{
-                  background: spotsLeft <= 0 ? "rgba(239,68,68,0.2)" : spotsLeft <= 5 ? "rgba(249,115,22,0.2)" : "rgba(34,197,94,0.2)",
-                  color: spotsLeft <= 0 ? "#f87171" : spotsLeft <= 5 ? "#fb923c" : "#4ade80",
-                  border: `1px solid ${spotsLeft <= 0 ? "rgba(239,68,68,0.35)" : spotsLeft <= 5 ? "rgba(249,115,22,0.35)" : "rgba(34,197,94,0.35)"}`,
-                }}
-              >
-                {spotsLeft <= 0 ? "0 slots left (Full)" : `${spotsLeft} slots left`}
+            {max > 0 && (
+              <span className="text-[10px] font-heading font-bold text-saffron-dk">
+                {spotsLeft <= 0 ? "0 Left (Full)" : `${spotsLeft} Slots Left`}
               </span>
-            ) : (
-              <span className="text-emerald-400 font-medium text-xs">Unlimited slots</span>
             )}
           </div>
-
           {max > 0 && (
-            <div className="w-full h-1.5 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.08)" }}>
+            <div className="w-full h-1.5 bg-cream-dk rounded-full overflow-hidden">
               <div
-                className="h-full rounded-full transition-all duration-500"
-                style={{
-                  width: `${fillPct}%`,
-                  background: fillPct >= 100 ? "#ef4444" : fillPct >= 80 ? "#f97316" : "#eab308",
-                }}
+                className="h-full bg-gradient-to-r from-amber-400 to-amber-500 rounded-full transition-all duration-300"
+                style={{ width: `${fillPct}%` }}
               />
             </div>
           )}
         </div>
 
-        {/* Meta (Fee & End Date) */}
-        <div className="grid grid-cols-2 gap-2 text-xs">
-          {comp.registrationEndDate && (
-            <div className="flex items-center gap-2">
-              <Calendar size={12} style={{ color: "rgba(212,175,55,0.5)" }} />
-              <span style={{ color: "rgba(255,235,200,0.45)" }}>
-                {isOpen ? "Closes" : "Closed"}{" "}
-                {new Date(comp.registrationEndDate).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}
-              </span>
+        {/* Timers */}
+        {isSched && comp.registrationStartDate && (
+          <div className="mb-3 p-3 bg-white rounded-md border border-sky-300/60 text-center">
+            <span className="text-[10px] font-heading font-bold uppercase tracking-wider text-sky-800 block mb-2">
+              Registration Opening In
+            </span>
+            <div className="flex justify-center">
+              <TimerDisplay date={comp.registrationStartDate} onExpire={onOpenExpire} />
             </div>
-          )}
-          {comp.entryFee && (
-            <div className="flex items-center gap-2">
-              <span style={{ color: "rgba(212,175,55,0.5)" }}>Fee:</span>
-              <span style={{ color: "rgba(255,235,200,0.65)" }}>{comp.entryFee}</span>
-            </div>
-          )}
-        </div>
-
-        {/* Rules */}
-        {comp.rules && (
-          <div
-            className="text-xs px-3 py-2 rounded-lg"
-            style={{
-              background: "rgba(212,175,55,0.06)",
-              color: "rgba(255,235,200,0.4)",
-              borderLeft: "3px solid rgba(212,175,55,0.2)",
-            }}
-          >
-            <span className="font-semibold block mb-0.5" style={{ color: "rgba(212,175,55,0.6)" }}>Rules</span>
-            {comp.rules}
           </div>
         )}
 
-        {/* ── Timer Section ── */}
-        <div className="space-y-3 flex-1 flex flex-col justify-end">
-          {/* OPENING SOON timer */}
-          {isSched && comp.registrationStartDate && (
-            <div
-              className="rounded-xl p-4 text-center"
-              style={{ background: "rgba(59,130,246,0.08)", border: "1px solid rgba(59,130,246,0.2)" }}
-            >
-              <div className="flex items-center justify-center gap-1.5 mb-3">
-                <Hourglass size={14} style={{ color: "#60a5fa" }} />
-                <span className="text-xs font-bold uppercase tracking-wider" style={{ color: "#60a5fa" }}>
-                  Registration Opening In
-                </span>
-              </div>
-              <div className="flex justify-center">
-                <TimerDisplay date={comp.registrationStartDate} onExpire={onOpenExpire} />
-              </div>
+        {isOpen && comp.registrationEndDate && (
+          <div className="mb-3 p-3 bg-white rounded-md border border-gold/45 text-center">
+            <span className="text-[10px] font-heading font-bold uppercase tracking-wider text-saffron-dk block mb-2">
+              Registration Closing In
+            </span>
+            <div className="flex justify-center">
+              <TimerDisplay date={comp.registrationEndDate} onExpire={onCloseExpire} />
             </div>
-          )}
-
-          {/* CLOSING SOON timer */}
-          {isOpen && comp.registrationEndDate && (
-            <div
-              className="rounded-xl p-4 text-center"
-              style={{ background: "rgba(212,175,55,0.06)", border: "1px solid rgba(212,175,55,0.15)" }}
-            >
-              <div className="flex items-center justify-center gap-1.5 mb-3">
-                <Clock size={14} style={{ color: "#d4af37" }} />
-                <span className="text-xs font-bold uppercase tracking-wider" style={{ color: "rgba(212,175,55,0.7)" }}>
-                  Registration Closing In
-                </span>
-              </div>
-              <div className="flex justify-center">
-                <TimerDisplay date={comp.registrationEndDate} onExpire={onCloseExpire} />
-              </div>
-            </div>
-          )}
-
-          {/* Register / Disabled button */}
-          <button
-            onClick={() => canReg && onRegister(comp)}
-            disabled={!canReg}
-            className="w-full py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all duration-200 group"
-            style={{
-              background: canReg
-                ? "linear-gradient(135deg,#d4af37,#f0c040)"
-                : "rgba(255,255,255,0.04)",
-              color:  canReg ? "#3d0f0f" : "rgba(255,255,255,0.25)",
-              cursor: canReg ? "pointer"  : "not-allowed",
-              border: canReg ? "none"     : "1px solid rgba(255,255,255,0.08)",
-            }}
-          >
-            {canReg ? (
-              <>Register <ChevronRight size={16} className="group-hover:translate-x-1 transition-transform" /></>
-            ) : status === "full" ? (
-              <><Users size={15} /> Registrations Full</>
-            ) : status === "scheduled" ? (
-              <><Hourglass size={15} /> Opens Soon</>
-            ) : status === "expired" ? (
-              <><Lock size={15} /> Registration Ended</>
-            ) : (
-              <><Lock size={15} /> Registration Closed</>
-            )}
-          </button>
-        </div>
+          </div>
+        )}
       </div>
-    </motion.div>
+
+      <div className="pt-3 border-t border-gold/30 mt-auto">
+        <button
+          onClick={() => canReg && onRegister(comp)}
+          disabled={!canReg}
+          className={`w-full py-2.5 rounded-md text-xs font-heading font-bold uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+            canReg
+              ? "bg-gradient-to-r from-amber-400 via-amber-300 to-amber-400 text-maroon-dk shadow-xs hover:shadow-md"
+              : "bg-cream border border-gold/30 text-ink-light cursor-not-allowed"
+          }`}
+        >
+          {canReg ? (
+            <>Register Now <ChevronRight size={14} /></>
+          ) : status === "full" ? (
+            "Registrations Full"
+          ) : status === "scheduled" ? (
+            "Opening Soon"
+          ) : (
+            "Registration Closed"
+          )}
+        </button>
+      </div>
+    </div>
   );
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Main Page
+// Main Component
 // ─────────────────────────────────────────────────────────────────────────────
 export default function SportsRegistration() {
+  const { isMarathi } = useLanguage();
   const [competitions, setCompetitions] = useState([]);
-  const [loading, setLoading]           = useState(true);
-  const [error, setError]               = useState("");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [selectedComp, setSelectedComp] = useState(null);
-  const [successData, setSuccessData]   = useState(null);
+  const [successData, setSuccessData] = useState(null);
 
   const load = useCallback(async () => {
     try {
@@ -689,17 +570,15 @@ export default function SportsRegistration() {
 
   useEffect(() => { load(); }, [load]);
 
-  // Filter — show all except permanently closed (no open flag and no schedule)
   const visible = competitions.filter((c) => {
     const s = c.computedStatus || getStatus(c);
-    return s !== "closed"; // hide competitions that are off entirely
+    return s !== "closed";
   });
 
   const handleSuccess = (data) => {
     const regCompId = selectedComp?._id;
     setSelectedComp(null);
     setSuccessData(data);
-    // Live slot update immediately without delay
     if (regCompId) {
       setCompetitions((prev) =>
         prev.map((c) => {
@@ -716,72 +595,113 @@ export default function SportsRegistration() {
         })
       );
     }
-    // Refresh to synchronize with backend database
     load();
   };
 
   return (
-    <div className="min-h-screen" style={{ background: "linear-gradient(180deg,#1a0505 0%,#0d0202 100%)" }}>
-      {/* Page Header */}
-      <div
-        className="relative py-20 px-4 text-center overflow-hidden"
-        style={{ borderBottom: "1px solid rgba(212,175,55,0.15)" }}
-      >
+    <div className="w-full bg-cream font-body text-ink-dark min-h-screen relative overflow-hidden">
+      {/* ═══════════ 1. CINEMATIC HERO BANNER ═══════════ */}
+      <section className="relative pt-28 pb-16 sm:pt-32 sm:pb-20 bg-gradient-to-b from-[#180303] via-[#100202] to-[#180303] text-cream border-b border-amber-500/25 overflow-hidden">
+        <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-amber-400 to-transparent opacity-80" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(245,158,11,0.12)_0%,_rgba(24,4,4,0.40)_65%,_rgba(12,2,2,0.95)_100%)] pointer-events-none" />
         <div
-          className="absolute inset-0 pointer-events-none"
-          style={{ background: "radial-gradient(ellipse at 50% 0%,rgba(212,175,55,0.08) 0%,transparent 65%)" }}
+          className="absolute inset-0 pointer-events-none opacity-10"
+          style={{
+            backgroundImage:
+              "repeating-linear-gradient(45deg, var(--color-gold) 0, var(--color-gold) 1px, transparent 0, transparent 40px)",
+          }}
         />
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
-          <div className="flex items-center justify-center gap-3 mb-4">
-            <Trophy size={32} style={{ color: "#d4af37" }} />
-            <h1
-              className="text-3xl sm:text-4xl md:text-5xl font-bold"
-              style={{ color: "#f0d060", fontFamily: '"Cinzel",serif', letterSpacing: "0.04em" }}
-            >
-              Sports Registrations
-            </h1>
-          </div>
-          <p className="max-w-lg mx-auto text-sm sm:text-base" style={{ color: "rgba(255,235,200,0.5)" }}>
-            Register for upcoming competitions and sports events organised by Vitthal Rakhumai Seva Mandal.
-          </p>
-        </motion.div>
-      </div>
 
-      {/* Content */}
-      <div className="max-w-5xl mx-auto px-4 py-12">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 relative z-10 text-center">
+          <motion.div
+            className="inline-flex items-center gap-2 bg-black/45 border border-amber-400/40 rounded-full px-4 py-1.5 font-heading text-xs sm:text-[0.82rem] font-medium text-amber-200 tracking-wide mb-4 shadow-sm backdrop-blur-xs select-none"
+            initial={{ opacity: 0, y: -14 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-400" />
+            </span>
+            <Trophy size={13} className="text-amber-300 shrink-0" />
+            <span>{isMarathi ? "स्पर्धा प्रवेश व नोंदणी" : "Participant Entry Portal"}</span>
+          </motion.div>
+
+          <motion.h1
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.15 }}
+            className="flex flex-col items-center select-none"
+          >
+            <span className="font-heading text-[clamp(2rem,5.5vw,4rem)] font-black text-white leading-tight tracking-wider drop-shadow-[0_4px_24px_rgba(0,0,0,0.9)]">
+              {isMarathi ? "क्रीडा स्पर्धा नोंदणी" : "Sports Registration"}
+            </span>
+            <span className="font-heading text-[clamp(1.1rem,3vw,2rem)] font-bold tracking-[0.16em] uppercase text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-amber-300 to-amber-100 drop-shadow-[0_2px_14px_rgba(0,0,0,0.9)] mt-1 block">
+              {isMarathi ? "श्री विठ्ठल रखुमाई मंदिर ट्रस्ट" : "Shree Vitthal Rakhumai Mandir Trust"}
+            </span>
+          </motion.h1>
+
+          <DiamondDivider />
+
+          <motion.p
+            className="max-w-2xl mx-auto text-base sm:text-lg text-cream/85 font-body leading-relaxed mt-2"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.6, delay: 0.3 }}
+          >
+            {isMarathi
+              ? "“वार्षिक क्रीडा महोत्सवात सहभागी होण्यासाठी आपला संघ किंवा वैयक्तिक नोंदणी करा.”"
+              : "“Register your team or individual entry for the annual village tournaments and sports festivals.”"}
+          </motion.p>
+        </div>
+      </section>
+
+      {/* ═══════════ 2. SACRED SHLOKA STRIP ═══════════ */}
+      <div className="h-[3px] bg-gradient-to-r from-maroon via-gold via-saffron-lt to-maroon" />
+      <div className="relative bg-maroon px-6 py-7 sm:py-8 text-center overflow-hidden">
+        <div
+          className="absolute inset-0 z-0"
+          style={{
+            backgroundImage:
+              "repeating-linear-gradient(90deg, rgba(212,175,55,0.15) 0, rgba(212,175,55,0.15) 1px, transparent 0, transparent 60px)",
+          }}
+        />
+        <p className="relative z-10 font-marathi text-[clamp(1.1rem,2.8vw,1.5rem)] text-gold-lt tracking-wide leading-relaxed">
+          || क्रीडा सेवा — युवक सहभाग व नोंदणी ||
+        </p>
+      </div>
+      <div className="h-[3px] bg-gradient-to-r from-maroon via-gold via-saffron-lt to-maroon" />
+
+      {/* ═══════════ 3. MAIN REGISTRATIONS GRID ═══════════ */}
+      <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 relative z-10">
         {loading ? (
-          <div className="flex flex-col items-center gap-4 py-24">
-            <Loader2 size={40} className="animate-spin" style={{ color: "#d4af37" }} />
-            <p className="text-sm" style={{ color: "rgba(212,175,55,0.5)" }}>Loading competitions…</p>
+          <div className="flex flex-col items-center justify-center py-20 text-ink-light">
+            <Loader2 className="w-10 h-10 animate-spin text-saffron mb-3" />
+            <p className="font-heading text-xs sm:text-sm tracking-widest uppercase text-maroon font-bold">
+              {isMarathi ? "नोंदणी माहिती लोड होत आहे..." : "Loading competitions…"}
+            </p>
           </div>
         ) : error ? (
-          <div className="flex flex-col items-center gap-3 py-24 text-center">
-            <AlertCircle size={40} style={{ color: "#f87171" }} />
-            <p className="text-sm" style={{ color: "rgba(248,113,113,0.8)" }}>{error}</p>
+          <div className="bg-cream-dk border border-vermillion/40 rounded-md p-8 text-center max-w-lg mx-auto shadow-sm">
+            <AlertCircle size={32} className="text-vermillion mx-auto mb-2" />
+            <p className="text-vermillion font-medium">{error}</p>
             <button
               onClick={load}
-              className="mt-2 px-5 py-2 rounded-lg text-sm font-semibold"
-              style={{ background: "rgba(212,175,55,0.15)", color: "#d4af37", border: "1px solid rgba(212,175,55,0.3)" }}
+              className="mt-3 px-4 py-1.5 rounded-md text-xs font-heading font-bold bg-maroon text-gold-lt cursor-pointer"
             >
               Try Again
             </button>
           </div>
         ) : visible.length === 0 ? (
-          <div className="flex flex-col items-center gap-4 py-24 text-center">
-            <div
-              className="w-20 h-20 rounded-full flex items-center justify-center"
-              style={{ background: "rgba(212,175,55,0.08)" }}
-            >
-              <Trophy size={36} style={{ color: "rgba(212,175,55,0.3)" }} />
-            </div>
-            <h3
-              className="font-bold text-lg"
-              style={{ color: "rgba(240,208,96,0.6)", fontFamily: '"Cinzel",serif' }}
-            >
-              No Open Registrations
+          <div className="bg-cream-dk rounded-md border border-gold/40 p-12 text-center max-w-md mx-auto shadow-xs">
+            <Trophy className="w-10 h-10 text-gold-dk mx-auto mb-3" />
+            <h3 className="font-display text-xl font-bold text-maroon mb-1.5">
+              {isMarathi ? "नोंदणी उपलब्ध नाही" : "No Open Registrations"}
             </h3>
-            <p className="text-sm max-w-xs" style={{ color: "rgba(255,235,200,0.35)" }}>
-              There are no competitions open or scheduled at the moment. Please check back later.
+            <p className="font-body text-sm text-ink-light">
+              {isMarathi
+                ? "सध्या कोणत्याही क्रीडा स्पर्धेची नोंदणी खुली नाही. कृपया नंतर पहा."
+                : "There are no competitions open or scheduled at the moment. Please check back later."}
             </p>
           </div>
         ) : (
@@ -796,7 +716,7 @@ export default function SportsRegistration() {
             ))}
           </div>
         )}
-      </div>
+      </main>
 
       {/* Modals */}
       <AnimatePresence>
@@ -816,6 +736,16 @@ export default function SportsRegistration() {
           />
         )}
       </AnimatePresence>
+
+      {/* ═══════════ 4. FOOTER STRIP ═══════════ */}
+      <div className="bg-ink-dark border-t-4 border-gold py-6 text-center">
+        <p className="font-marathi text-[1.1rem] text-gold-lt tracking-wide">
+          || पुंडलिका वरदा हरी विठ्ठल — श्री ज्ञानदेव तुकाराम ||
+        </p>
+        <p className="font-body italic text-cream/45 text-[0.85rem] mt-1 tracking-wider">
+          Shree Vitthal Rakhumai Temple · Amberkarwadi, Ratnagiri
+        </p>
+      </div>
     </div>
   );
 }

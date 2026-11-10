@@ -1,32 +1,48 @@
 import { memo } from "react";
+import { motion } from "framer-motion";
 import { useLanguage } from "../context/LanguageContext";
 
 /**
  * Switch - High-performance bilingual language toggle (Marathi / English)
- * Optimized with light gradients, crisp typography, and zero heavy raster filters.
+ * Styled with temple aesthetic tones (sacred gold gradient, deep obsidian maroon background).
+ * Clean rectangular segmented switch with smooth Framer Motion spring physics.
  */
 const Switch = memo(({ className = "" }) => {
   const { isMarathi, toggleLanguage } = useLanguage();
 
   return (
-    <div className={`relative inline-flex items-center ${className}`}>
-      {/* Light Gradient Language Switch Pill */}
+    <div className={`relative inline-flex items-center justify-center ${className}`}>
       <button
         type="button"
         role="switch"
         aria-checked={isMarathi}
         onClick={toggleLanguage}
-        className="relative inline-flex items-center h-7 sm:h-8 px-1 rounded-full bg-[#1e0404]/90 border border-gold/35 hover:border-gold/70 shadow-sm transition-colors duration-200 cursor-pointer select-none focus:outline-none focus:ring-1 focus:ring-gold/50"
+        className="relative inline-flex items-center justify-center p-0.5 rounded-md bg-[#160404]/95 border border-amber-500/35 hover:border-amber-400/60 shadow-[inset_0_1px_3px_rgba(0,0,0,0.6)] transition-colors duration-200 cursor-pointer select-none focus:outline-none focus:ring-1 focus:ring-amber-400/50"
         aria-label={isMarathi ? "Switch to English" : "मराठी भाषेत बदला"}
         title={isMarathi ? "Switch to English" : "मराठी भाषेत बदला"}
       >
-        <div className="relative flex items-center justify-between w-[64px] sm:w-[68px] text-[10px] sm:text-[10.5px] font-heading font-bold uppercase tracking-wider px-1">
+        <div className="relative grid grid-cols-2 items-center w-[74px] sm:w-[80px] h-7 sm:h-7.5">
+          {/* Smooth Sliding Sacred Gold Pill Indicator */}
+          <motion.div
+            className="absolute inset-y-0 left-0 w-1/2 rounded-[4px] bg-gradient-to-r from-amber-400 via-amber-300 to-amber-500 shadow-[0_1px_8px_rgba(245,158,11,0.35)] pointer-events-none"
+            initial={false}
+            animate={{
+              x: isMarathi ? "100%" : "0%",
+            }}
+            transition={{
+              type: "spring",
+              stiffness: 450,
+              damping: 32,
+              mass: 0.8,
+            }}
+          />
+
           {/* English label */}
           <span
-            className={`z-10 transition-colors duration-200 flex items-center justify-center w-6 text-center ${
+            className={`relative z-10 flex items-center justify-center font-heading text-[10px] sm:text-[11px] font-bold tracking-wider leading-none transition-colors duration-200 select-none ${
               !isMarathi
-                ? "text-maroon-dk font-extrabold"
-                : "text-cream/55 hover:text-cream"
+                ? "text-[#2b0808] font-black"
+                : "text-amber-100/70 hover:text-amber-100"
             }`}
           >
             EN
@@ -34,23 +50,14 @@ const Switch = memo(({ className = "" }) => {
 
           {/* Marathi label */}
           <span
-            className={`z-10 font-marathi text-[11px] sm:text-xs transition-colors duration-200 flex items-center justify-center w-7 text-center ${
+            className={`relative z-10 flex items-center justify-center font-marathi text-[11px] sm:text-[12px] font-bold leading-none transition-colors duration-200 select-none ${
               isMarathi
-                ? "text-maroon-dk font-black"
-                : "text-cream/55 hover:text-cream"
+                ? "text-[#2b0808] font-black"
+                : "text-amber-100/70 hover:text-amber-100"
             }`}
           >
             मराठी
           </span>
-
-          {/* Sliding Light Gold Pill Indicator */}
-          <span
-            className={`absolute top-[2px] bottom-[2px] w-[30px] sm:w-[32px] rounded-full bg-gradient-to-r from-amber-300 to-amber-500 shadow-sm transition-transform duration-250 ease-out ${
-              isMarathi
-                ? "translate-x-[30px] sm:translate-x-[32px]"
-                : "translate-x-0"
-            }`}
-          />
         </div>
       </button>
     </div>
@@ -59,5 +66,3 @@ const Switch = memo(({ className = "" }) => {
 
 Switch.displayName = "Switch";
 export default Switch;
-
-

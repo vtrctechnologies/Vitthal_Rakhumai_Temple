@@ -1,11 +1,52 @@
-import React, { useState, useEffect } from "react";
-import { Trophy, ChevronDown, Medal, Users, Loader2, X } from "lucide-react";
+import React, { useState, useEffect, memo } from "react";
+import { Trophy, ChevronDown, Medal, Users, Loader2, X, Sparkles, Calendar } from "lucide-react";
 import { sportsAPI } from "../../services/api";
 import Modal from "@/components/base/Modal";
-
 import { motion } from "framer-motion";
+import { useLanguage } from "../../context/LanguageContext";
+
+/* ── Sacred Diamond Divider ── */
+const DiamondDivider = () => (
+  <div className="flex items-center gap-3 my-3 justify-center">
+    <div className="flex-1 max-w-[120px] h-px bg-gradient-to-r from-transparent via-gold to-transparent" />
+    <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+      <rect
+        x="11"
+        y="1"
+        width="13"
+        height="13"
+        rx="1"
+        transform="rotate(45 11 1)"
+        className="fill-saffron opacity-80"
+      />
+      <rect
+        x="11"
+        y="4"
+        width="9"
+        height="9"
+        rx="0.5"
+        transform="rotate(45 11 4)"
+        fill="none"
+        className="stroke-gold-lt"
+        strokeWidth="0.8"
+      />
+    </svg>
+    <div className="flex-1 max-w-[120px] h-px bg-gradient-to-r from-transparent via-gold to-transparent" />
+  </div>
+);
+
+/* ── Corner Accents for Cards ── */
+const CornerAccents = () => (
+  <>
+    <span className="absolute -top-0.5 -left-0.5 w-3.5 h-3.5 border-t-2 border-l-2 border-saffron z-20" />
+    <span className="absolute -top-0.5 -right-0.5 w-3.5 h-3.5 border-t-2 border-r-2 border-saffron z-20" />
+    <span className="absolute -bottom-0.5 -left-0.5 w-3.5 h-3.5 border-b-2 border-l-2 border-saffron z-20" />
+    <span className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 border-b-2 border-r-2 border-saffron z-20" />
+  </>
+);
 
 const Sports = () => {
+  const { isMarathi } = useLanguage();
   const [sports, setSports] = useState([]);
   const [activeTab, setActiveTab] = useState(null);
   const [currentSport, setCurrentSport] = useState(null);
@@ -21,7 +62,6 @@ const Sports = () => {
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [availableYears, setAvailableYears] = useState([]);
 
-  // --- SCROLL LOCK EFFECT (For Modals) ---
   useEffect(() => {
     if (showMembersModal || showImageModal) {
       document.body.style.overflow = "hidden";
@@ -149,99 +189,108 @@ const Sports = () => {
   };
 
   return (
-    <div className="bg-stone-50 font-sans py-20 text-stone-800 overflow-x-hidden">
-      <main className="max-w-6xl mx-auto p-4 md:p-8 space-y-8">
-        {/* Filter & Controls */}
-        <motion.div
-          className="flex flex-col md:flex-row justify-between items-center gap-4 bg-white p-4 rounded-xl shadow-sm border border-stone-200"
-          initial={{ opacity: 0, y: -20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-        >
-          <div className="flex items-center gap-3 w-full md:w-auto">
-            <span className="text-sm font-bold text-red-900 uppercase tracking-wider">
-              Select Year:
-            </span>
-            <div className="relative">
-              <select
-                value={selectedYear}
-                onChange={(e) => setSelectedYear(parseInt(e.target.value))}
-                className="pl-4 pr-10 py-2 border-2 border-red-100 rounded-lg bg-red-50 text-red-900 font-bold focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 appearance-none cursor-pointer hover:bg-red-100 transition-colors"
-              >
-                {availableYears.length > 0 ? (
-                  availableYears.map((year) => (
-                    <option key={year} value={year}>
-                      {year}
-                    </option>
-                  ))
-                ) : (
-                  <option value={new Date().getFullYear()}>
-                    {new Date().getFullYear()}
-                  </option>
-                )}
-              </select>
-              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-red-800 w-4 h-4 pointer-events-none" />
-            </div>
-          </div>
+    <div className="w-full bg-cream font-body text-ink-dark min-h-screen relative overflow-hidden">
+      {/* ═══════════ 1. CINEMATIC HERO BANNER ═══════════ */}
+      <section className="relative pt-28 pb-16 sm:pt-32 sm:pb-20 bg-gradient-to-b from-[#180303] via-[#100202] to-[#180303] text-cream border-b border-amber-500/25 overflow-hidden">
+        <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-amber-400 to-transparent opacity-80" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(245,158,11,0.12)_0%,_rgba(24,4,4,0.40)_65%,_rgba(12,2,2,0.95)_100%)] pointer-events-none" />
+        <div
+          className="absolute inset-0 pointer-events-none opacity-10"
+          style={{
+            backgroundImage:
+              "repeating-linear-gradient(45deg, var(--color-gold) 0, var(--color-gold) 1px, transparent 0, transparent 40px)",
+          }}
+        />
 
-          <div className="flex items-center gap-4">
-            {loading ? (
-              <span className="text-sm text-stone-500 flex items-center gap-2 bg-stone-100 px-3 py-1 rounded-full">
-                <Loader2 className="w-4 h-4 animate-spin" />
-                Loading Data...
-              </span>
-            ) : sports.length > 0 ? (
-              <span className="text-sm font-medium text-stone-600">
-                Showing{" "}
-                <strong className="text-red-900">{sports.length}</strong> Events
-              </span>
-            ) : null}
-          </div>
-        </motion.div>
-
-        {/* Loading State */}
-        {loading && (
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 relative z-10 text-center">
           <motion.div
-            className="flex flex-col items-center justify-center py-24 text-stone-400"
+            className="inline-flex items-center gap-2 bg-black/45 border border-amber-400/40 rounded-full px-4 py-1.5 font-heading text-xs sm:text-[0.82rem] font-medium text-amber-200 tracking-wide mb-4 shadow-sm backdrop-blur-xs select-none"
+            initial={{ opacity: 0, y: -14 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-400" />
+            </span>
+            <Trophy size={13} className="text-amber-300 shrink-0" />
+            <span>{isMarathi ? "युवा क्रीडा महोत्सव" : "Youth Sports & Athletics"}</span>
+          </motion.div>
+
+          <motion.h1
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.15 }}
+            className="flex flex-col items-center select-none"
+          >
+            <span className="font-heading text-[clamp(2rem,5.5vw,4rem)] font-black text-white leading-tight tracking-wider drop-shadow-[0_4px_24px_rgba(0,0,0,0.9)]">
+              {isMarathi ? "क्रीडा स्पर्धा व निकाल" : "Sports Tournaments"}
+            </span>
+            <span className="font-heading text-[clamp(1.1rem,3vw,2rem)] font-bold tracking-[0.16em] uppercase text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-amber-300 to-amber-100 drop-shadow-[0_2px_14px_rgba(0,0,0,0.9)] mt-1 block">
+              {isMarathi ? "श्री विठ्ठल रखुमाई मंदिर ट्रस्ट" : "Shree Vitthal Rakhumai Mandir Trust"}
+            </span>
+          </motion.h1>
+
+          <DiamondDivider />
+
+          <motion.p
+            className="max-w-2xl mx-auto text-base sm:text-lg text-cream/85 font-body leading-relaxed mt-2"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
+            transition={{ duration: 0.6, delay: 0.3 }}
           >
-            <Loader2 className="w-12 h-12 animate-spin text-amber-500 mb-4" />
-            <p className="font-medium">Retrieving tournament data...</p>
-          </motion.div>
-        )}
+            {isMarathi
+              ? "“गावच्या तरुणाईची एकजूट, खिलाडूवृत्ती आणि उत्साहाचा वार्षिक क्रीडा सोहळा.”"
+              : "“Celebrating youth sportsmanship, unity, and athletic excellence in the temple village.”"}
+          </motion.p>
+        </div>
+      </section>
 
-        {/* No Sports State */}
-        {!loading && sports.length === 0 && (
-          <motion.div
-            className="bg-white rounded-xl shadow-sm border border-stone-200 p-16 text-center"
-            initial={{ opacity: 0, scale: 0.9 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true }}
-          >
-            <div className="bg-stone-50 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
-              <Trophy className="w-10 h-10 text-stone-300" />
+      {/* ═══════════ 2. SACRED SHLOKA STRIP ═══════════ */}
+      <div className="h-[3px] bg-gradient-to-r from-maroon via-gold via-saffron-lt to-maroon" />
+      <div className="relative bg-maroon px-6 py-7 sm:py-8 text-center overflow-hidden">
+        <div
+          className="absolute inset-0 z-0"
+          style={{
+            backgroundImage:
+              "repeating-linear-gradient(90deg, rgba(212,175,55,0.15) 0, rgba(212,175,55,0.15) 1px, transparent 0, transparent 60px)",
+          }}
+        />
+        <p className="relative z-10 font-marathi text-[clamp(1.1rem,2.8vw,1.5rem)] text-gold-lt tracking-wide leading-relaxed">
+          || शरीरमाद्यं खलु धर्मसाधनम् — युवा क्रीडा महोत्सव ||
+        </p>
+      </div>
+      <div className="h-[3px] bg-gradient-to-r from-maroon via-gold via-saffron-lt to-maroon" />
+
+      {/* ═══════════ 3. YEAR & SPORT SELECTOR BAR ═══════════ */}
+      <section className="bg-cream border-b border-gold/30 shadow-xs relative z-20 py-6">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4">
+          {/* Year Filter */}
+          {availableYears.length > 0 && (
+            <div className="flex flex-wrap items-center justify-center gap-2 p-1.5 bg-[#180404]/8 border border-amber-500/25 rounded-md max-w-fit mx-auto">
+              <span className="text-xs font-heading font-bold text-maroon uppercase tracking-wider px-2 flex items-center gap-1.5">
+                <Calendar size={13} className="text-saffron shrink-0" />
+                <span>{isMarathi ? "वर्ष:" : "Year:"}</span>
+              </span>
+              {availableYears.map((year) => (
+                <button
+                  key={year}
+                  onClick={() => setSelectedYear(year)}
+                  className={`px-3.5 py-1.5 rounded-md text-xs font-heading font-bold uppercase tracking-wider transition-all duration-200 border cursor-pointer ${
+                    selectedYear === year
+                      ? "bg-gradient-to-r from-amber-400 via-amber-300 to-amber-400 text-maroon-dk border-amber-400/70 shadow-xs"
+                      : "bg-white/80 text-ink-mid border-gold/30 hover:border-gold hover:text-maroon"
+                  }`}
+                >
+                  {year}
+                </button>
+              ))}
             </div>
-            <h3 className="text-xl font-bold text-stone-800 mb-2">
-              No Events Found
-            </h3>
-            <p className="text-stone-500">
-              No sports data available for {selectedYear}.
-            </p>
-          </motion.div>
-        )}
+          )}
 
-        {/* Navigation Tabs */}
-        {!loading && sports.length > 0 && (
-          <motion.div
-            className="border-b border-stone-200"
-            initial={{ opacity: 0, x: -20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-          >
-            <div className="flex overflow-x-auto pb-1 gap-2 no-scrollbar scroll-smooth">
+          {/* Sports Navigation Tabs (Rectangular Theme) */}
+          {!loading && sports.length > 0 && (
+            <div className="flex flex-wrap items-center justify-center gap-2 pt-2">
               {sports.map((sport) => (
                 <button
                   key={sport._id}
@@ -249,81 +298,72 @@ const Sports = () => {
                     setActiveTab(sport._id);
                     setExpandedList(null);
                   }}
-                  className={`
-                    whitespace-nowrap px-5 py-3 rounded-t-lg text-sm md:text-base font-bold transition-all duration-200 border-t-2 border-x-2
-                    ${
-                      activeTab === sport._id
-                        ? "bg-red-900 text-amber-400 border-red-900 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]"
-                        : "bg-white text-stone-500 border-transparent hover:bg-red-50 hover:text-red-800"
-                    }
-                  `}
+                  className={`px-4 sm:px-5 py-2 rounded-md font-heading text-xs sm:text-sm font-bold tracking-wider uppercase transition-all duration-200 border cursor-pointer select-none ${
+                    activeTab === sport._id
+                      ? "bg-maroon text-gold-lt border-maroon shadow-xs"
+                      : "bg-cream-dk border-gold/40 text-maroon hover:border-gold hover:bg-cream"
+                  }`}
                 >
                   {sport.name}
                 </button>
               ))}
             </div>
-          </motion.div>
+          )}
+        </div>
+      </section>
+
+      {/* ═══════════ 4. MAIN TOURNAMENT CONTENT ═══════════ */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 relative z-10">
+        {loading && (
+          <div className="flex flex-col items-center justify-center py-20 text-ink-light">
+            <Loader2 className="w-10 h-10 animate-spin text-saffron mb-3" />
+            <p className="font-heading text-xs sm:text-sm tracking-widest uppercase text-maroon font-bold">
+              {isMarathi ? "माहिती लोड होत आहे..." : "Retrieving tournament data…"}
+            </p>
+          </div>
+        )}
+
+        {!loading && sports.length === 0 && (
+          <div className="bg-cream-dk rounded-md border border-gold/40 p-12 text-center max-w-md mx-auto shadow-xs">
+            <Trophy className="w-10 h-10 text-gold-dk mx-auto mb-3" />
+            <h3 className="font-display text-xl font-bold text-maroon mb-1.5">
+              {isMarathi ? "क्रीडा माहिती उपलब्ध नाही" : "No Events Found"}
+            </h3>
+            <p className="font-body text-sm text-ink-light">
+              {isMarathi
+                ? `${selectedYear} या वर्षासाठी क्रीडा निकाल उपलब्ध नाहीत.`
+                : `No sports data available for the year ${selectedYear}.`}
+            </p>
+          </div>
         )}
 
         {currentSport && (
-          <div className="space-y-10">
-            {/* Hero Section */}
-            <motion.div
-              className="relative rounded-2xl overflow-hidden shadow-xl bg-gradient-to-br from-red-900 via-red-800 to-red-950 text-white"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.8 }}
-            >
-              {currentSport.imageUrl && (
-                <div className="absolute inset-0">
-                  <img
-                    src={getImageUrl(currentSport.imageUrl)}
-                    alt={currentSport.name}
-                    className="w-full h-full object-cover opacity-20 mix-blend-overlay"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-red-950/90 to-transparent"></div>
-                </div>
+          <div className="space-y-12">
+            {/* Sport Banner Overview */}
+            <div className="text-center max-w-3xl mx-auto">
+              <span className="font-heading text-xs text-saffron font-bold uppercase tracking-widest block mb-1">
+                {selectedYear} {isMarathi ? "क्रीडा स्पर्धा" : "Championship"}
+              </span>
+              <h2 className="font-display text-2xl sm:text-3xl font-bold text-maroon mb-2">
+                {currentSport.name}
+              </h2>
+              {currentSport.description && (
+                <p className="font-body text-ink-light text-sm sm:text-base leading-relaxed">
+                  {currentSport.description}
+                </p>
               )}
+            </div>
 
-              <div className="relative p-8 md:p-14 flex flex-col items-center text-center">
-                <div className="flex items-center gap-2 text-amber-400 mb-4 font-bold tracking-widest text-xs uppercase">
-                  <span className="w-8 h-[1px] bg-amber-400"></span>
-                  Tournament Event
-                  <span className="w-8 h-[1px] bg-amber-400"></span>
-                </div>
-
-                <h2 className="text-4xl md:text-5xl font-serif font-bold text-white mb-4 drop-shadow-md">
-                  {currentSport.title}
-                </h2>
-
-                {currentSport.description && (
-                  <p className="text-red-100/80 max-w-2xl text-lg leading-relaxed">
-                    {currentSport.description}
-                  </p>
-                )}
+            {/* Victory Podium Section */}
+            <div>
+              <div className="text-center mb-10">
+                <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-md bg-amber-400/20 border border-amber-500/40 text-maroon font-heading text-xs font-bold uppercase tracking-wider">
+                  <Medal className="text-saffron" size={14} />
+                  <span>{isMarathi ? "विजेते संघ / खेळाडू" : "Victory Podium"}</span>
+                </span>
               </div>
-            </motion.div>
 
-            {/* Podium Section */}
-            <div className="relative">
-              {/* Section Title */}
-              <motion.div
-                className="text-center mb-16 space-y-4"
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6 }}
-              >
-                <div className="inline-block p-1 px-4 rounded-full bg-linear-to-br from-red-600/20 to-amber-600/20 border border-red-200/50 backdrop-blur-md mb-4 group hover:scale-105 transition-transform duration-300">
-                  <Medal className="text-[#FFB700] animate-pulse" size={24} />
-                  <span className="font-serif font-bold text-xl text-white">
-                    Victory Podium
-                  </span>
-                </div>
-              </motion.div>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-end max-w-5xl mx-auto px-4">
-                {/* 2nd Place */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-7 items-stretch max-w-5xl mx-auto">
                 <WinnerCard
                   winner={winners.second}
                   position="second"
@@ -331,12 +371,11 @@ const Sports = () => {
                   onToggle={() => toggleList("second")}
                   onViewMembers={() => setShowMembersModal(winners.second)}
                   onViewImage={() =>
-                    winners.second?.imageUrl &&
-                    setShowImageModal(winners.second)
+                    winners.second?.imageUrl && setShowImageModal(winners.second)
                   }
+                  isMarathi={isMarathi}
                 />
 
-                {/* 1st Place */}
                 <WinnerCard
                   winner={winners.first}
                   position="first"
@@ -346,9 +385,9 @@ const Sports = () => {
                   onViewImage={() =>
                     winners.first?.imageUrl && setShowImageModal(winners.first)
                   }
+                  isMarathi={isMarathi}
                 />
 
-                {/* 3rd Place */}
                 <WinnerCard
                   winner={winners.third}
                   position="third"
@@ -358,6 +397,7 @@ const Sports = () => {
                   onViewImage={() =>
                     winners.third?.imageUrl && setShowImageModal(winners.third)
                   }
+                  isMarathi={isMarathi}
                 />
               </div>
             </div>
@@ -370,6 +410,7 @@ const Sports = () => {
         <TeamMembersModal
           winner={showMembersModal}
           onClose={() => setShowMembersModal(null)}
+          isMarathi={isMarathi}
         />
       )}
 
@@ -378,13 +419,24 @@ const Sports = () => {
         <WinnerImageModal
           winner={showImageModal}
           onClose={() => setShowImageModal(null)}
+          isMarathi={isMarathi}
         />
       )}
+
+      {/* ═══════════ 5. FOOTER STRIP ═══════════ */}
+      <div className="bg-ink-dark border-t-4 border-gold py-6 text-center">
+        <p className="font-marathi text-[1.1rem] text-gold-lt tracking-wide">
+          || पुंडलिका वरदा हरी विठ्ठल — श्री ज्ञानदेव तुकाराम ||
+        </p>
+        <p className="font-body italic text-cream/45 text-[0.85rem] mt-1 tracking-wider">
+          Shree Vitthal Rakhumai Temple · Amberkarwadi, Ratnagiri
+        </p>
+      </div>
     </div>
   );
 };
 
-// Winner Card Component
+// Winner Card Component (Rectangular Temple Styling)
 const WinnerCard = ({
   winner,
   position,
@@ -392,6 +444,7 @@ const WinnerCard = ({
   onToggle,
   onViewMembers,
   onViewImage,
+  isMarathi,
 }) => {
   const getImageUrl = (imageUrl) => {
     if (!imageUrl) return null;
@@ -404,41 +457,19 @@ const WinnerCard = ({
 
   const positionConfig = {
     first: {
-      label: "Champion",
-      containerClass:
-        "bg-gradient-to-b from-amber-50 to-white border-amber-400 ring-4 ring-amber-400/20 z-10",
-      height: "min-h-[340px]",
-      badge: "bg-amber-500 text-white border-amber-600 shadow-amber-200",
-      trophyColor: "text-amber-500 drop-shadow-sm",
-      order: "order-1 md:order-2 md:-mt-12 mb-8 md:mb-0",
-      imageSize: "w-28 h-28 ring-4 ring-amber-200",
-      initial: { opacity: 0, scale: 0.9 },
-      whileInView: { opacity: 1, scale: 1 },
-      transition: { duration: 0.5, delay: 0 },
+      label: isMarathi ? "प्रथम क्रमांक (विजेता)" : "Champion",
+      badge: "bg-gradient-to-r from-amber-400 via-amber-300 to-amber-400 text-maroon-dk border-amber-400/80",
+      order: "order-1 md:order-2 md:-mt-6",
     },
     second: {
-      label: "Runner Up",
-      containerClass: "bg-white border-stone-200",
-      height: "min-h-[280px]",
-      badge: "bg-stone-600 text-white border-stone-700",
-      trophyColor: "text-stone-400",
+      label: isMarathi ? "द्वितीय क्रमांक" : "Runner Up",
+      badge: "bg-slate-200 text-slate-800 border-slate-300",
       order: "order-2 md:order-1",
-      imageSize: "w-20 h-20 ring-4 ring-stone-100",
-      initial: { opacity: 0, y: 20 },
-      whileInView: { opacity: 1, y: 0 },
-      transition: { duration: 0.5, delay: 0.1 },
     },
     third: {
-      label: "Third Place",
-      containerClass: "bg-white border-orange-200",
-      height: "min-h-[280px]",
-      badge: "bg-orange-700 text-white border-orange-800",
-      trophyColor: "text-orange-600",
+      label: isMarathi ? "तृतीय क्रमांक" : "Third Place",
+      badge: "bg-amber-700 text-cream border-amber-800",
       order: "order-3 md:order-3",
-      imageSize: "w-20 h-20 ring-4 ring-orange-100",
-      initial: { opacity: 0, y: 20 },
-      whileInView: { opacity: 1, y: 0 },
-      transition: { duration: 0.5, delay: 0.2 },
     },
   };
 
@@ -446,24 +477,16 @@ const WinnerCard = ({
 
   if (!winner) {
     return (
-      <motion.div
-        className={`${config.order} flex flex-col`}
-        initial={config.initial}
-        whileInView={config.whileInView}
-        viewport={{ once: true }}
-        transition={config.transition}
-      >
-        <div
-          className={`relative rounded-xl border-2 border-dashed border-stone-300 bg-stone-50/50 p-6 flex flex-col items-center justify-center ${config.height}`}
-        >
-          <div className="w-16 h-16 bg-stone-200 rounded-full mb-3 flex items-center justify-center text-stone-400">
-            <Users size={24} />
+      <div className={`${config.order} flex flex-col`}>
+        <div className="relative rounded-md border border-dashed border-gold/40 bg-cream-dk/50 p-6 flex flex-col items-center justify-center min-h-[260px]">
+          <div className="w-12 h-12 bg-white rounded-md mb-3 flex items-center justify-center text-gold-dk border border-gold/30">
+            <Users size={20} />
           </div>
-          <span className="text-stone-400 font-medium text-sm">
-            Position Vacant
+          <span className="text-ink-light font-heading text-xs font-bold uppercase tracking-wider">
+            {isMarathi ? "माहिती उपलब्ध नाही" : "Position Vacant"}
           </span>
         </div>
-      </motion.div>
+      </div>
     );
   }
 
@@ -472,66 +495,53 @@ const WinnerCard = ({
     : [];
 
   return (
-    <motion.div
-      className={`${config.order} flex flex-col group h-full`}
-      initial={config.initial}
-      whileInView={config.whileInView}
-      viewport={{ once: true }}
-      transition={config.transition}
-    >
-      <div
-        className={`
-        relative rounded-xl shadow-lg border ${config.containerClass} 
-        p-6 flex flex-col items-center justify-between transition-transform duration-300 hover:-translate-y-1 h-full
-        ${position === "first" ? "shadow-amber-900/10" : "shadow-stone-900/5"}
-      `}
-      >
-        {/* Badge */}
+    <div className={`${config.order} flex flex-col group h-full`}>
+      <div className="relative bg-cream-dk rounded-md border border-gold/45 p-6 flex flex-col items-center justify-between shadow-xs hover:border-gold hover:shadow-md transition-colors duration-200 h-full overflow-hidden">
+        {/* Saffron Corner Accents */}
+        <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
+          <CornerAccents />
+        </div>
+
+        {/* Position Badge */}
         <div
-          className={`absolute -top-4 ${config.badge} px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider shadow-sm border`}
+          className={`absolute top-2.5 right-2.5 ${config.badge} px-2.5 py-0.5 rounded-sm text-[10px] font-heading font-bold uppercase tracking-wider border shadow-xs`}
         >
           {config.label}
         </div>
 
-        {/* Content Wrapper */}
-        <div className="w-full flex flex-col items-center pt-6">
-          {/* Image */}
+        <div className="w-full flex flex-col items-center pt-4">
+          {/* Winner Image Frame */}
           <div
-            className={`relative mb-4 rounded-full overflow-hidden bg-stone-100 shrink-0 cursor-pointer ${config.imageSize}`}
+            className="relative mb-3 rounded-md overflow-hidden bg-stone w-24 h-24 border border-gold/40 shrink-0 cursor-pointer shadow-xs"
             onClick={onViewImage}
           >
             {winner.imageUrl ? (
               <img
                 src={getImageUrl(winner.imageUrl)}
                 alt={winner.teamName}
-                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                className="w-full h-full object-cover"
                 onError={(e) => {
                   e.target.style.display = "none";
                   e.target.nextSibling.style.display = "flex";
                 }}
               />
             ) : null}
-
-            {/* Fallback Icon */}
             <div
-              className={`absolute inset-0 flex items-center justify-center bg-stone-100 ${
+              className={`absolute inset-0 flex items-center justify-center bg-stone text-gold-dk ${
                 winner.imageUrl ? "hidden" : "flex"
               }`}
             >
-              <Trophy
-                className={config.trophyColor}
-                size={position === "first" ? 40 : 32}
-              />
+              <Trophy size={32} className="text-maroon/70" />
             </div>
           </div>
 
-          <h3 className="font-serif font-bold text-xl text-stone-800 text-center leading-tight mb-2">
+          <h3 className="font-display font-bold text-lg text-maroon text-center leading-tight mb-1">
             {winner.teamName}
           </h3>
 
-          <p className="text-sm text-stone-500 font-medium mb-6">
-            <span className="text-stone-400 mr-1">Captain:</span>
-            <span className="text-red-900">{winner.captain}</span>
+          <p className="text-xs text-ink-mid font-body mb-4">
+            <span className="text-ink-light mr-1">{isMarathi ? "कर्णधार:" : "Captain:"}</span>
+            <span className="text-maroon font-bold">{winner.captain}</span>
           </p>
         </div>
 
@@ -539,30 +549,23 @@ const WinnerCard = ({
         <div className="w-full mt-auto">
           <button
             onClick={members.length > 0 ? onViewMembers : onToggle}
-            className={`
-                w-full py-2.5 px-4 rounded-lg flex items-center justify-between text-sm font-medium transition-colors
-                ${
-                  position === "first"
-                    ? "bg-amber-100 text-amber-900 hover:bg-amber-200 border border-amber-200"
-                    : "bg-stone-100 text-stone-600 hover:bg-stone-200 border border-stone-200"
-                }
-            `}
+            className="w-full py-2 px-3 rounded-md bg-white border border-gold/40 hover:border-gold text-maroon hover:bg-cream flex items-center justify-between text-xs font-heading font-bold uppercase tracking-wider transition-colors cursor-pointer"
           >
-            <span>{members.length > 0 ? "View Squad" : "No Members"}</span>
+            <span>{members.length > 0 ? (isMarathi ? "खेळाडू यादी" : "View Squad") : (isMarathi ? "खेळाडू नाहीत" : "No Members")}</span>
             {members.length > 0 && (
-              <span className="bg-white/50 px-2 py-0.5 rounded text-xs">
+              <span className="bg-amber-100 text-maroon px-2 py-0.5 rounded-sm text-[10px]">
                 {members.length}
               </span>
             )}
           </button>
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 };
 
-// Team Members Modal Component
-const TeamMembersModal = ({ winner, onClose }) => {
+// Team Members Modal
+const TeamMembersModal = ({ winner, onClose, isMarathi }) => {
   if (!winner) return null;
 
   const members = winner.members
@@ -570,72 +573,42 @@ const TeamMembersModal = ({ winner, onClose }) => {
     : [];
 
   return (
-    <Modal
-      isOpen={!!winner}
-      onClose={onClose}
-      title={winner.teamName}
-    >
-      <div className="flex-1 overflow-y-auto p-6 bg-stone-50/50">
-        {/* Captain Highlight */}
+    <Modal isOpen={!!winner} onClose={onClose} title={winner.teamName}>
+      <div className="flex-1 overflow-y-auto p-6 bg-cream">
         {winner.captain && (
-          <div className="mb-6 p-4 bg-linear-to-r from-[#5D0000] to-[#8B0000] rounded-xl shadow-md border border-[#FFB700]/30 text-white relative overflow-hidden group">
-            <div className="absolute top-0 right-0 w-16 h-16 bg-[#FFB700] opacity-10 rounded-bl-full group-hover:scale-110 transition-transform" />
-            <div className="relative z-10 flex items-center gap-4">
-              <div className="w-12 h-12 bg-[#FFB700] rounded-full flex items-center justify-center text-[#5D0000] shadow-lg">
-                <Trophy size={20} />
-              </div>
-              <div>
-                <p className="text-[#FFB700] text-xs font-bold uppercase tracking-widest mb-0.5">Team Captain</p>
-                <h4 className="text-xl font-display font-bold">{winner.captain}</h4>
-              </div>
+          <div className="mb-4 p-3.5 bg-maroon rounded-md border border-gold/40 text-gold-lt flex items-center gap-3">
+            <Trophy size={20} className="text-gold" />
+            <div>
+              <p className="text-[10px] text-gold-lt uppercase tracking-widest font-heading font-bold">
+                {isMarathi ? "कर्णधार" : "Team Captain"}
+              </p>
+              <h4 className="text-base font-display font-bold text-white">{winner.captain}</h4>
             </div>
           </div>
         )}
 
-        {/* Members List */}
-        <div className="space-y-3">
-          <p className="text-stone-400 text-xs font-bold uppercase tracking-widest pl-1 mb-2">Squad Members</p>
-          {members.length === 0 ? (
-            <div className="text-center py-8 text-stone-400 bg-white rounded-lg border border-dashed border-stone-200">
-              <Users size={32} className="mx-auto mb-2 opacity-20" />
-              <p className="text-sm italic">No other members listed</p>
+        <div className="space-y-2">
+          <p className="text-xs font-heading font-bold uppercase tracking-wider text-ink-light mb-2">
+            {isMarathi ? "खेळाडूंची नावे" : "Squad Members"}
+          </p>
+          {members.map((member, index) => (
+            <div
+              key={index}
+              className="flex items-center gap-3 p-2.5 bg-white border border-gold/30 rounded-md text-xs font-body text-ink-dark"
+            >
+              <span className="w-5 h-5 rounded-full bg-cream-dk border border-gold/30 flex items-center justify-center font-bold text-maroon text-[10px]">
+                {index + 1}
+              </span>
+              <span className="font-medium">{member}</span>
             </div>
-          ) : (
-            members.map((member, index) => (
-              <div
-                key={index}
-                className={`flex items-center gap-4 p-3 bg-white border rounded-lg transition-all group ${
-                  member === winner.captain 
-                    ? "border-amber-200 bg-amber-50/30" 
-                    : "border-stone-200 hover:border-red-200 hover:shadow-sm"
-                }`}
-              >
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold border transition-colors ${
-                  member === winner.captain
-                    ? "bg-amber-100 text-amber-900 border-amber-200"
-                    : "bg-stone-50 text-stone-500 border-stone-100 group-hover:bg-red-50 group-hover:text-red-900 group-hover:border-red-100"
-                }`}>
-                  {index + 1}
-                </div>
-                <div className={`flex-1 font-medium transition-colors ${
-                  member === winner.captain ? "text-amber-950" : "text-stone-700"
-                }`}>
-                  {member}
-                  {member === winner.captain && (
-                    <span className="ml-2 text-[10px] font-bold text-amber-600 bg-amber-100 px-1.5 py-0.5 rounded uppercase tracking-tighter">
-                      Captain
-                    </span>
-                  )}
-                </div>
-              </div>
-            ))
-          )}
+          ))}
         </div>
       </div>
     </Modal>
   );
 };
 
+// Winner Image Modal
 const WinnerImageModal = ({ winner, onClose }) => {
   if (!winner || !winner.imageUrl) return null;
 
@@ -649,52 +622,20 @@ const WinnerImageModal = ({ winner, onClose }) => {
   };
 
   return (
-    <Modal
-      isOpen={!!winner}
-      onClose={onClose}
-      title={winner.teamName}
-    >
-        <div className="relative flex flex-col h-full max-h-[90vh]">
-          {/* Image Container */}
-          <div className="flex-1 flex items-center justify-center min-h-[400px] overflow-hidden relative">
-            <img
-              src={getImageUrl(winner.imageUrl)}
-              alt={winner.teamName}
-              className="max-w-full max-h-[80vh] object-contain"
-              onError={(e) => {
-                e.target.style.display = "none";
-                const errorDiv = e.target.nextSibling;
-                if (errorDiv) errorDiv.style.display = "flex";
-              }}
-            />
-            <div className="hidden absolute inset-0 flex items-center justify-center text-white/50">
-              <p>Image load failed</p>
-            </div>
-          </div>
-
-          {/* Footer */}
-          <div className="bg-white p-4 shrink-0 flex items-center justify-between">
-            <div>
-              <h3 className="text-lg font-bold text-red-950 font-serif">
-                {winner.teamName}
-              </h3>
-              <p className="text-sm text-stone-500">
-                Captain: {winner.captain}
-              </p>
-            </div>
-            <div className="flex gap-2">
-              {winner.position === "first" && (
-                <Medal className="text-amber-500" />
-              )}
-              {winner.position === "second" && (
-                <Medal className="text-stone-400" />
-              )}
-              {winner.position === "third" && (
-                <Medal className="text-orange-600" />
-              )}
-            </div>
-          </div>
+    <Modal isOpen={!!winner} onClose={onClose} title={winner.teamName}>
+      <div className="relative flex flex-col bg-cream p-4">
+        <div className="flex items-center justify-center min-h-[300px] overflow-hidden rounded-md border border-gold/30 bg-black">
+          <img
+            src={getImageUrl(winner.imageUrl)}
+            alt={winner.teamName}
+            className="max-w-full max-h-[70vh] object-contain rounded-md"
+          />
         </div>
+        <div className="pt-3 text-center">
+          <h3 className="font-display font-bold text-lg text-maroon">{winner.teamName}</h3>
+          <p className="text-xs text-ink-mid">Captain: {winner.captain}</p>
+        </div>
+      </div>
     </Modal>
   );
 };
