@@ -104,7 +104,7 @@ const DonationTicker = () => {
 
   // Duplicate items array to ensure a 100% gapless continuous marquee loop
   const marqueeList = useMemo(() => {
-    return [...donors, ...donors, ...donors];
+    return donors.length <= 8 ? [...donors, ...donors] : donors;
   }, [donors]);
 
   return (

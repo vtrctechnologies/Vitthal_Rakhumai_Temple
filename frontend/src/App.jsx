@@ -1,9 +1,8 @@
-import { useEffect, useState, Suspense, lazy, memo } from "react";
-import { AnimatePresence } from "framer-motion";
+import { useCallback, useEffect, useState, Suspense, lazy, memo } from "react";
 // Removed Shadcn UI components
 // Lazy load Lenis to reduce initial bundle size
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Outlet } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Outlet, useLocation } from "react-router-dom";
 import Events from "./pages/Events.jsx";
 
 
@@ -32,11 +31,12 @@ const EventDetail = lazy(() => import("./pages/EventDetail.jsx"));
 const Committee = lazy(() => import("./pages/Committee"));
 const SportsRegistration = lazy(() => import("./pages/events/SportsRegistration"));
 
-// Loading fallback component
+// Fast, lightweight loading fallback for seamless route transitions
 const PageLoader = () => (
-  <Suspense fallback={<div className="bg-maroon min-h-screen" />}>
-    <CinematicLoader />
-  </Suspense>
+  <div className="min-h-[50vh] flex flex-col items-center justify-center bg-cream text-maroon gap-3">
+    <div className="w-9 h-9 rounded-full border-2 border-amber-400 border-t-amber-700 animate-spin" />
+    <span className="font-marathi text-xs text-amber-800 font-bold">|| राम कृष्ण हरी ||</span>
+  </div>
 );
 
 // Optimized QueryClient configuration
@@ -55,15 +55,25 @@ const queryClient = new QueryClient({
 // 1. Create a Layout Component for the Public Website
 // This includes elements you ONLY want on the main site (Nav, Footer, etc.)
 const PublicLayout = memo(() => {
+  const { pathname } = useLocation();
+
   return (
     <>
+      {/* Subtle Golden Micro-Progress Bar on Route Redirect */}
+      <div
+        key={`route-bar-${pathname}`}
+        aria-hidden="true"
+        className="fixed top-0 left-0 right-0 h-[2.5px] z-[9999] bg-gradient-to-r from-saffron via-gold-lt to-amber-300 vr-route-bar pointer-events-none"
+      />
       <Suspense fallback={null}>
         <ScrollToTop />
         <Navbar />
       </Suspense>
-      {/* Outlet renders the child route (e.g., Home, About) */}
+      {/* Outlet renders the child route with smooth GPU micro-transition */}
       <main>
-        <Outlet />
+        <div key={pathname} className="vr-page-enter">
+          <Outlet />
+        </div>
       </main>
       <Suspense fallback={null}>
         <Footer />
@@ -76,28 +86,95 @@ PublicLayout.displayName = "PublicLayout";
 
 const App = () => {
   const [isLoading, setIsLoading] = useState(true);
+  const handleLoaderComplete = useCallback(() => setIsLoading(false), []);
 
+  // Safety timeout ensuring loader cleanly completes
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsLoading(false);
-    }, 2500); // 2.5 seconds – matches CSS animation timing
+    }, 3200);
 
     return () => clearTimeout(timer);
   }, []);
 
-  // Defer Lenis initialization
+  // Eagerly prefetch lazy route chunks during idle time for instant zero-lag navigation
+  useEffect(() => {
+    const prefetchRoutes = () => {
+      import("./pages/About.jsx");
+      import("./pages/Gallery.jsx");
+      import("./pages/Committee");
+      import("./pages/events/Sports");
+      import("./pages/events/Banners");
+      import("./pages/events/LivePrograms");
+      import("./pages/EventDetail.jsx");
+      import("./pages/events/SportsRegistration");
+      import("./pages/TermsAndConditions");
+    };
+
+    if ("requestIdleCallback" in window) {
+      const id = requestIdleCallback(prefetchRoutes, { timeout: 2500 });
+      return () => cancelIdleCallback(id);
+    } else {
+      const id = setTimeout(prefetchRoutes, 1200);
+      return () => clearTimeout(id);
+    }
+  }, []);
+
+  // Strictly lock any scrolling/movement while the loading animation is active
+  useEffect(() => {
+    if (isLoading) {
+      window.scrollTo(0, 0);
+      document.documentElement.style.overflow = "hidden";
+      document.documentElement.style.height = "100%";
+      document.body.style.overflow = "hidden";
+      document.body.style.height = "100%";
+      document.body.style.position = "fixed";
+      document.body.style.width = "100%";
+      document.body.style.top = "0";
+      document.body.style.left = "0";
+      document.body.style.touchAction = "none";
+    } else {
+      document.documentElement.style.overflow = "";
+      document.documentElement.style.height = "";
+      document.body.style.overflow = "";
+      document.body.style.height = "";
+      document.body.style.position = "";
+      document.body.style.width = "";
+      document.body.style.top = "";
+      document.body.style.left = "";
+      document.body.style.touchAction = "";
+      window.scrollTo(0, 0);
+    }
+    return () => {
+      document.documentElement.style.overflow = "";
+      document.documentElement.style.height = "";
+      document.body.style.overflow = "";
+      document.body.style.height = "";
+      document.body.style.position = "";
+      document.body.style.width = "";
+      document.body.style.top = "";
+      document.body.style.left = "";
+      document.body.style.touchAction = "";
+    };
+  }, [isLoading]);
+
+  // Defer and optimize Lenis initialization for silky smooth performance
   useEffect(() => {
     let rafId = null;
     let lenisInstance = null;
 
     const initLenis = () => {
-      // Check if device can handle smooth scrolling
-      const isLowEndDevice =
+      // Never run Lenis on mobile/tablet or touch devices.
+      // Native touch momentum scrolling at 60-120Hz is completely smooth on phones/tablets.
+      // Running Lenis on touch devices intercepts events and causes noticeable stutter, lag, and scroll delay.
+      const isTouchOrMobile =
+        window.innerWidth < 1024 ||
+        "ontouchstart" in window ||
+        navigator.maxTouchPoints > 0 ||
         navigator.hardwareConcurrency <= 2 ||
         (navigator.deviceMemory && navigator.deviceMemory <= 2);
 
-      // Skip Lenis on low-end devices to reduce TBT
-      if (isLowEndDevice) {
+      if (isTouchOrMobile) {
         return;
       }
 
@@ -108,13 +185,14 @@ const App = () => {
             "(prefers-reduced-motion: reduce)",
           ).matches;
 
+          if (prefersReducedMotion) return;
+
           lenisInstance = new Lenis({
-            duration: prefersReducedMotion ? 0 : 1.2, // Slightly longer duration for smoother feel
+            duration: 0.35,
             easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-            smoothWheel: !prefersReducedMotion,
+            smoothWheel: true,
             smoothTouch: false,
-            wheelMultiplier: 1.0, // Increased for better responsiveness
-            touchMultiplier: 1.5,
+            wheelMultiplier: 1.15,
             infinite: false,
             orientation: "vertical",
             gestureOrientation: "vertical",
@@ -124,7 +202,6 @@ const App = () => {
 
           window.lenis = lenisInstance;
 
-          // Use standard RAF for maximum smoothness (usually 60fps+)
           const raf = (time) => {
             lenisInstance.raf(time);
             rafId = requestAnimationFrame(raf);
@@ -137,11 +214,10 @@ const App = () => {
         });
     };
 
-    // Defer Lenis initialization even more to reduce initial TBT
     if ("requestIdleCallback" in window) {
-      requestIdleCallback(initLenis, { timeout: 3000 });
+      requestIdleCallback(initLenis, { timeout: 2000 });
     } else {
-      setTimeout(initLenis, 500);
+      setTimeout(initLenis, 300);
     }
 
     return () => {
@@ -158,143 +234,161 @@ const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <LanguageProvider>
-        <AnimatePresence mode="wait">
-          {isLoading && <CinematicLoader key="loader" />}
-        </AnimatePresence>
+        {isLoading && (
+          <CinematicLoader
+            key="loader"
+            onComplete={handleLoaderComplete}
+          />
+        )}
 
-        <BrowserRouter
-          future={{
-            v7_startTransition: true,
-            v7_relativeSplatPath: true,
-          }}
+        <div
+          style={
+            isLoading
+              ? {
+                  position: "fixed",
+                  top: 0,
+                  left: 0,
+                  width: "100%",
+                  height: "100%",
+                  overflow: "hidden",
+                  pointerEvents: "none",
+                }
+              : undefined
+          }
         >
-          <Routes>
-            <Route element={<PublicLayout />}>
-              <Route
-                path="/"
-                element={
-                  <Suspense fallback={<PageLoader />}>
-                    <Home />
-                  </Suspense>
-                }
-              />
-              <Route
-                path="/about"
-                element={
-                  <Suspense fallback={<PageLoader />}>
-                    <About />
-                  </Suspense>
-                }
-              />
-              <Route
-                path="/gallery"
-                element={
-                  <Suspense fallback={<PageLoader />}>
-                    <Gallery />
-                  </Suspense>
-                }
-              />
-              <Route
-                path="/events"
-                element={
-                  <Suspense fallback={<PageLoader />}>
-                    <Events />
-                  </Suspense>
-                }
-              />
-              <Route
-                path="/events/:id"
-                element={
-                  <Suspense fallback={<PageLoader />}>
-                    <EventDetail />
-                  </Suspense>
-                }
-              />
-              <Route
-                path="/donation"
-                element={
-                  <Suspense fallback={<PageLoader />}>
-                    <Donation />
-                  </Suspense>
-                }
-              />
-              <Route
-                path="/contact"
-                element={
-                  <Suspense fallback={<PageLoader />}>
-                    <Contact />
-                  </Suspense>
-                }
-              />
-              <Route
-                path="/privacy"
-                element={
-                  <Suspense fallback={<PageLoader />}>
-                    <PrivacyPolicy />
-                  </Suspense>
-                }
-              />
-              <Route
-                path="/terms"
-                element={
-                  <Suspense fallback={<PageLoader />}>
-                    <TermsAndConditions />
-                  </Suspense>
-                }
-              />
-              <Route
-                path="/events/sports"
-                element={
-                  <Suspense fallback={<PageLoader />}>
-                    <Sports />
-                  </Suspense>
-                }
-              />
-              <Route
-                path="/events/banners"
-                element={
-                  <Suspense fallback={<PageLoader />}>
-                    <Banners />
-                  </Suspense>
-                }
-              />
-              <Route
-                path="/events/live-programs"
-                element={
-                  <Suspense fallback={<PageLoader />}>
-                    <LivePrograms />
-                  </Suspense>
-                }
-              />
-              <Route
-                path="/about/committee"
-                element={
-                  <Suspense fallback={<PageLoader />}>
-                    <Committee />
-                  </Suspense>
-                }
-              />
-              <Route
-                path="/events/sports-registration"
-                element={
-                  <Suspense fallback={<PageLoader />}>
-                    <SportsRegistration />
-                  </Suspense>
-                }
-              />
+          <BrowserRouter
+            future={{
+              v7_relativeSplatPath: true,
+            }}
+          >
+            <Routes>
+              <Route element={<PublicLayout />}>
+                <Route
+                  path="/"
+                  element={
+                    <Suspense fallback={<PageLoader />}>
+                      <Home />
+                    </Suspense>
+                  }
+                />
+                <Route
+                  path="/about"
+                  element={
+                    <Suspense fallback={<PageLoader />}>
+                      <About />
+                    </Suspense>
+                  }
+                />
+                <Route
+                  path="/gallery"
+                  element={
+                    <Suspense fallback={<PageLoader />}>
+                      <Gallery />
+                    </Suspense>
+                  }
+                />
+                <Route
+                  path="/events"
+                  element={
+                    <Suspense fallback={<PageLoader />}>
+                      <Events />
+                    </Suspense>
+                  }
+                />
+                <Route
+                  path="/events/:id"
+                  element={
+                    <Suspense fallback={<PageLoader />}>
+                      <EventDetail />
+                    </Suspense>
+                  }
+                />
+                <Route
+                  path="/donation"
+                  element={
+                    <Suspense fallback={<PageLoader />}>
+                      <Donation />
+                    </Suspense>
+                  }
+                />
+                <Route
+                  path="/contact"
+                  element={
+                    <Suspense fallback={<PageLoader />}>
+                      <Contact />
+                    </Suspense>
+                  }
+                />
+                <Route
+                  path="/privacy"
+                  element={
+                    <Suspense fallback={<PageLoader />}>
+                      <PrivacyPolicy />
+                    </Suspense>
+                  }
+                />
+                <Route
+                  path="/terms"
+                  element={
+                    <Suspense fallback={<PageLoader />}>
+                      <TermsAndConditions />
+                    </Suspense>
+                  }
+                />
+                <Route
+                  path="/events/sports"
+                  element={
+                    <Suspense fallback={<PageLoader />}>
+                      <Sports />
+                    </Suspense>
+                  }
+                />
+                <Route
+                  path="/events/banners"
+                  element={
+                    <Suspense fallback={<PageLoader />}>
+                      <Banners />
+                    </Suspense>
+                  }
+                />
+                <Route
+                  path="/events/live-programs"
+                  element={
+                    <Suspense fallback={<PageLoader />}>
+                      <LivePrograms />
+                    </Suspense>
+                  }
+                />
+                <Route
+                  path="/about/committee"
+                  element={
+                    <Suspense fallback={<PageLoader />}>
+                      <Committee />
+                    </Suspense>
+                  }
+                />
+                <Route
+                  path="/events/sports-registration"
+                  element={
+                    <Suspense fallback={<PageLoader />}>
+                      <SportsRegistration />
+                    </Suspense>
+                  }
+                />
 
-              {/* 404 handling for public site */}
-              <Route
-                path="*"
-                element={
-                  <Suspense fallback={<PageLoader />}>
-                    <NotFound />
-                  </Suspense>
-                }
-              />
-            </Route>
-          </Routes>
-        </BrowserRouter>
+                {/* 404 handling for public site */}
+                <Route
+                  path="*"
+                  element={
+                    <Suspense fallback={<PageLoader />}>
+                      <NotFound />
+                    </Suspense>
+                  }
+                />
+              </Route>
+            </Routes>
+          </BrowserRouter>
+        </div>
       </LanguageProvider>
     </QueryClientProvider>
   );

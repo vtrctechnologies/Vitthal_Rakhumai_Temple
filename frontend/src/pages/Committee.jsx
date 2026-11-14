@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef, memo } from "react";
-import { Users, Loader2, User, Award, Calendar, Sparkles, MapPin, ChevronDown, Check } from "lucide-react";
+import { useState, useEffect, useRef, memo } from "react";
+import { Users, Loader2, User, Award, Calendar, Sparkles, ChevronDown, Check } from "lucide-react";
 import { committeeAPI } from "../services/api";
 import { useLanguage } from "../context/LanguageContext";
 import { motion, AnimatePresence } from "framer-motion";
@@ -31,7 +31,7 @@ const CustomYearDropdown = memo(({ activeYear, availableYears, onChange, isMarat
       <button
         type="button"
         onClick={() => setIsOpen((prev) => !prev)}
-        className="flex items-center gap-2.5 h-9 px-4 rounded-md bg-cream-dk/90 border border-gold/45 hover:border-amber-500 hover:bg-cream text-maroon font-heading text-xs font-bold uppercase tracking-wider transition-all duration-200 cursor-pointer shadow-xs select-none"
+        className="flex items-center gap-2.5 h-10 sm:h-11 px-4 sm:px-5 rounded-md bg-cream-dk/90 border border-gold/45 hover:border-amber-500 hover:bg-cream text-maroon font-heading text-xs sm:text-sm font-bold uppercase tracking-wider transition-all duration-200 cursor-pointer shadow-xs select-none"
       >
         <Calendar size={14} className="text-saffron shrink-0" />
         <span className="text-ink-mid font-semibold">{isMarathi ? "कार्यकाळ वर्ष:" : "Tenure Year:"}</span>
@@ -82,6 +82,92 @@ const CustomYearDropdown = memo(({ activeYear, availableYears, onChange, isMarat
 });
 CustomYearDropdown.displayName = "CustomYearDropdown";
 
+/* ── Custom Mobile-Only Dropdown for Committee Wings ── */
+const CustomCommitteeDropdown = memo(({ activeTab, committees, onChange, isMarathi }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setIsOpen(false);
+      }
+    };
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") setIsOpen(false);
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, []);
+
+  const activeItem = committees.find((c) => c.id === activeTab) || committees[0];
+
+  return (
+    <div className="relative w-full max-w-xs mx-auto mb-5 sm:hidden z-[60]" ref={dropdownRef}>
+      <button
+        type="button"
+        onClick={() => setIsOpen((prev) => !prev)}
+        className="w-full flex items-center justify-between gap-2.5 h-11 px-4 rounded-md bg-gradient-to-r from-amber-400 via-amber-300 to-amber-400 border border-amber-500/70 text-maroon-dk font-heading text-xs font-bold uppercase tracking-wider shadow-sm transition-all duration-200 cursor-pointer select-none"
+        aria-expanded={isOpen}
+      >
+        <span className="flex items-center gap-2 min-w-0">
+          <Users size={15} className="text-maroon-dk shrink-0" />
+          <span className="truncate">
+            {isMarathi ? activeItem.marathiTitle : activeItem.title}
+          </span>
+        </span>
+        <ChevronDown
+          size={16}
+          className={`text-maroon-dk shrink-0 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
+        />
+      </button>
+
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: -6, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -6, scale: 0.98 }}
+            transition={{ duration: 0.15 }}
+            className="absolute left-0 right-0 top-full mt-1.5 bg-gradient-to-b from-[#1c0505]/98 via-[#140303]/98 to-[#0c0202]/98 border border-amber-500/35 rounded-md shadow-xl p-1.5 z-[60] backdrop-blur-md"
+          >
+            <div className="flex flex-col gap-1">
+              {committees.map((committee) => {
+                const isSelected = activeTab === committee.id;
+                return (
+                  <button
+                    key={committee.id}
+                    type="button"
+                    onClick={() => {
+                      onChange(committee.id);
+                      setIsOpen(false);
+                    }}
+                    className={`w-full flex items-center justify-between px-3 py-2.5 rounded-sm text-xs font-heading font-bold uppercase tracking-wider transition-all cursor-pointer ${
+                      isSelected
+                        ? "bg-gradient-to-r from-amber-400 via-amber-300 to-amber-400 text-maroon-dk shadow-xs"
+                        : "text-amber-100/85 hover:text-white hover:bg-white/10"
+                    }`}
+                  >
+                    <span className="truncate">
+                      {isMarathi ? committee.marathiTitle : committee.title}
+                    </span>
+                    {isSelected && <Check size={14} className="text-maroon-dk stroke-[2.5] shrink-0" />}
+                  </button>
+                );
+              })}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+});
+CustomCommitteeDropdown.displayName = "CustomCommitteeDropdown";
+
 /* ── Sacred Diamond Divider (mirrors Home.jsx & About.jsx) ── */
 const DiamondDivider = () => (
   <div className="flex items-center gap-3 my-4 justify-center">
@@ -115,10 +201,10 @@ const DiamondDivider = () => (
 /* Corner accents for cards (mirrors Home.jsx & About.jsx) */
 const CornerAccents = () => (
   <>
-    <span className="absolute -top-0.5 -left-0.5 w-4 h-4 border-t-3 border-l-3 border-saffron z-10" />
-    <span className="absolute -top-0.5 -right-0.5 w-4 h-4 border-t-3 border-r-3 border-saffron z-10" />
-    <span className="absolute -bottom-0.5 -left-0.5 w-4 h-4 border-b-3 border-l-3 border-saffron z-10" />
-    <span className="absolute -bottom-0.5 -right-0.5 w-4 h-4 border-b-3 border-r-3 border-saffron z-10" />
+    <span className="absolute -top-0.5 -left-0.5 w-4 h-4 border-t-3 border-l-3 border-saffron z-20 pointer-events-none" />
+    <span className="absolute -top-0.5 -right-0.5 w-4 h-4 border-t-3 border-r-3 border-saffron z-20 pointer-events-none" />
+    <span className="absolute -bottom-0.5 -left-0.5 w-4 h-4 border-b-3 border-l-3 border-saffron z-20 pointer-events-none" />
+    <span className="absolute -bottom-0.5 -right-0.5 w-4 h-4 border-b-3 border-r-3 border-saffron z-20 pointer-events-none" />
   </>
 );
 
@@ -138,8 +224,8 @@ const Committee = memo(() => {
         const response = await committeeAPI.getCommitteeYears();
         if (response?.status === "success" && Array.isArray(response.data)) {
           setAvailableYears(response.data);
-          if (response.data.length > 0 && !response.data.includes(activeYear)) {
-            setActiveYear(response.data[0]);
+          if (response.data.length > 0) {
+            setActiveYear((prev) => (response.data.includes(prev) ? prev : response.data[0]));
           }
         }
       } catch (err) {
@@ -244,7 +330,7 @@ const Committee = memo(() => {
   return (
     <div className="w-full bg-cream font-body text-ink-dark min-h-screen relative overflow-hidden">
       {/* ── 1. CINEMATIC HEADER BANNER (Theme of Home.jsx) ── */}
-      <section className="relative pt-28 pb-16 sm:pt-32 sm:pb-20 bg-gradient-to-b from-[#180303] via-[#100202] to-[#180303] text-cream border-b border-amber-500/25 overflow-hidden">
+      <section className="relative pt-24 pb-12 sm:pt-32 sm:pb-20 bg-gradient-to-b from-[#180303] via-[#100202] to-[#180303] text-cream border-b border-amber-500/25 overflow-hidden">
         {/* Subtle Top Gold Filament */}
         <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-amber-400 to-transparent opacity-80" />
 
@@ -323,10 +409,18 @@ const Committee = memo(() => {
       <div className="h-[3px] bg-gradient-to-r from-maroon via-gold via-saffron-lt to-maroon" />
 
       {/* ── 3. MAIN MEMBERS & COMMITTEES SECTION ── */}
-      <section className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto relative z-10">
-        {/* Committee Wings Tab Navigation (Rectangular Theme matching About.jsx) */}
+      <section className="py-10 sm:py-16 md:py-20 px-3 sm:px-6 lg:px-8 max-w-7xl mx-auto relative z-10">
+        {/* Mobile-Only Custom Committee Dropdown */}
+        <CustomCommitteeDropdown
+          activeTab={activeTab}
+          committees={committees}
+          onChange={setActiveTab}
+          isMarathi={isMarathi}
+        />
+
+        {/* Tablet & Desktop Committee Wings Tab Navigation */}
         <motion.div
-          className="flex flex-wrap justify-center gap-2 sm:gap-2.5 mb-8 p-1.5 bg-[#180404]/8 border border-amber-500/25 rounded-md max-w-fit mx-auto"
+          className="hidden sm:flex flex-wrap justify-center gap-2 mb-8 p-1.5 bg-[#180404]/8 border border-amber-500/25 rounded-md max-w-fit mx-auto"
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
@@ -351,7 +445,7 @@ const Committee = memo(() => {
 
         {/* Year Filter Selector (Custom Dropdown) */}
         {availableYears.length > 0 && (
-          <div className="flex justify-center mb-12">
+          <div className="flex justify-center mb-8 sm:mb-12">
             <CustomYearDropdown
               activeYear={activeYear}
               availableYears={availableYears}
@@ -407,8 +501,8 @@ const Committee = memo(() => {
                 </p>
               </div>
             ) : (
-              /* Members Grid (Home.jsx Aesthetic Frame) */
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 sm:gap-7">
+              /* Members Grid (2-col Mobile, 3-col Tablet, 4-col Desktop) */
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-5 md:gap-6 lg:gap-7">
                 {activeCommittee.members.map((member, idx) => (
                   <MemberCard
                     key={member._id || idx}
@@ -423,88 +517,72 @@ const Committee = memo(() => {
           </div>
         )}
       </section>
-
-      {/* ── 4. FOOTER MANTRA STRIP (Exact match to Home.jsx & About.jsx) ── */}
-      <div className="bg-ink-dark border-t-4 border-gold p-6 text-center">
-        <p className="font-marathi text-[1.1rem] text-gold-lt tracking-wide">
-          || पुंडलिका वरदा हरी विठ्ठल — पांडुरंग ||
-        </p>
-        <p className="font-body italic text-cream-dk/50 text-[0.9rem] mt-1.5">
-          Shree Vitthal Rakhumai Temple, Amberkarwadi · Open 24 Hours
-        </p>
-      </div>
     </div>
   );
 });
 
-/* ── Refined Member Card matching Home.jsx & About.jsx Theme ── */
+/* ── Refined Member Card matching Home.jsx Sacred Temple Frame ── */
 const MemberCard = ({ member, getImageUrl, index, isMarathi }) => {
   const [imgError, setImgError] = useState(false);
   const photoUrl = getImageUrl(member.imageUrl);
+  const roleLabel =
+    isMarathi && (member.positionMarathi || member.roleMarathi)
+      ? member.positionMarathi || member.roleMarathi
+      : member.role || member.position || "Sevak";
 
   return (
     <motion.div
-      className="group relative bg-cream-dk rounded-md p-3 shadow-xs border border-gold/45 overflow-hidden transition-colors duration-200 hover:border-gold hover:shadow-md flex flex-col"
+      className="group relative bg-cream-dk rounded-sm p-1.5 sm:p-2 border-2 border-gold shadow-sm hover:shadow-xl transition-shadow duration-300 flex flex-col"
       initial={{ opacity: 0, y: 18 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.45, delay: index * 0.04 }}
     >
-      {/* Saffron Corner Accents: Revealed smoothly on hover */}
-      <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
-        <CornerAccents />
-      </div>
+      {/* Sacred 4-Corner Saffron Brackets */}
+      <CornerAccents />
 
-      {/* Image Container with Gold Border */}
-      <div className="h-64 w-full relative overflow-hidden bg-stone border border-gold/40 rounded-sm">
-        {photoUrl && !imgError ? (
-          <img
-            src={photoUrl}
-            alt={member.name}
-            onError={() => setImgError(true)}
-            className="h-full w-full object-cover object-top"
-            loading="lazy"
-            decoding="async"
-          />
-        ) : (
-          <div className="h-full w-full flex flex-col items-center justify-center bg-gradient-to-br from-maroon/20 via-cream-dk to-stone text-gold-dk">
-            <User size={52} strokeWidth={1.5} className="text-maroon/60" />
-          </div>
-        )}
-
-        {/* Warm Golden Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60 group-hover:opacity-30 transition-opacity duration-200" />
-
-        {/* Corner Badge */}
-        <div className="absolute bottom-2.5 left-2.5 z-10 bg-cream/95 backdrop-blur-sm px-2.5 py-1 rounded-sm border border-gold/50 shadow-xs flex items-center gap-1.5">
-          <Award className="w-3.5 h-3.5 text-saffron shrink-0" />
-          <span className="font-heading text-[10px] sm:text-[11px] font-bold text-maroon uppercase tracking-wider">
-            {isMarathi && member.positionMarathi
-              ? member.positionMarathi
-              : member.role || member.position || "Sevak"}
-          </span>
-        </div>
-      </div>
-
-      {/* Text Info */}
-      <div className="pt-3 pb-1 text-center relative z-10 flex-1 flex flex-col justify-between">
-        <div>
-          <h4 className="font-display text-lg font-bold text-maroon leading-tight group-hover:text-saffron-dk transition-colors line-clamp-1">
-            {member.name}
-          </h4>
-          {member.nameMarathi && (
-            <p className="font-marathi text-base font-semibold text-ink-mid mt-0.5 line-clamp-1">
-              {member.nameMarathi}
-            </p>
+      {/* Inner Framed Card */}
+      <div className="border border-saffron-lt/60 rounded-sm overflow-hidden bg-white flex flex-col flex-1">
+        {/* Portrait Image Container (aspect-[4/5] + object-top ensures faces & pheta are never cropped) */}
+        <div className="aspect-[4/5] w-full relative overflow-hidden bg-stone">
+          {photoUrl && !imgError ? (
+            <img
+              src={photoUrl}
+              alt={member.name}
+              onError={() => setImgError(true)}
+              className="h-full w-full object-cover object-[center_15%] transition-transform duration-500 group-hover:scale-105"
+              loading="lazy"
+              decoding="async"
+            />
+          ) : (
+            <div className="h-full w-full flex flex-col items-center justify-center bg-gradient-to-br from-maroon/15 via-cream-dk to-stone text-gold-dk">
+              <User size={48} strokeWidth={1.5} className="text-maroon/55" />
+            </div>
           )}
+
+          {/* Subtle Bottom Vignette */}
+          <div className="absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-black/35 to-transparent pointer-events-none" />
         </div>
 
-        <div className="mt-2.5 pt-2 border-t border-gold/30">
-          <p className="font-heading text-[10.5px] font-bold text-saffron-dk uppercase tracking-[0.16em] line-clamp-1">
-            {isMarathi && member.roleMarathi
-              ? member.roleMarathi
-              : member.role || member.position || "Sevak"}
-          </p>
+        {/* Text Info */}
+        <div className="p-2.5 sm:p-3.5 text-center relative z-10 flex-1 flex flex-col justify-between bg-cream/60">
+          <div>
+            <h4 className="font-display text-sm sm:text-base md:text-lg font-bold text-maroon leading-snug group-hover:text-saffron-dk transition-colors line-clamp-2 break-words">
+              {member.name}
+            </h4>
+            {member.nameMarathi && (
+              <p className="font-marathi text-xs sm:text-sm md:text-base font-semibold text-ink-mid mt-0.5 line-clamp-1">
+                {member.nameMarathi}
+              </p>
+            )}
+          </div>
+
+          <div className="mt-2 pt-2 border-t border-gold/30 flex items-center justify-center gap-1">
+            <Award className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-saffron shrink-0" />
+            <p className="font-heading text-[9.5px] sm:text-[11px] font-bold text-saffron-dk uppercase tracking-[0.12em] sm:tracking-[0.16em] truncate">
+              {roleLabel}
+            </p>
+          </div>
         </div>
       </div>
     </motion.div>

@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { bannerAPI } from "@/services/api";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronLeft, ChevronRight, Calendar, Video, Image as ImageIcon } from "lucide-react";
+import { ChevronLeft, ChevronRight, Calendar, Image as ImageIcon } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
 
 const BannerSection = () => {
@@ -12,20 +12,23 @@ const BannerSection = () => {
   const [loading, setLoading] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  const fetchYears = async () => {
-    try {
-      const response = await bannerAPI.getBannerYears();
-      const yearsData = response?.data || (Array.isArray(response) ? response : []);
-      if (Array.isArray(yearsData) && yearsData.length > 0) {
-        setYears(yearsData);
-        if (!yearsData.includes(selectedYear)) {
-          setSelectedYear(yearsData[0]);
+  useEffect(() => {
+    const fetchYears = async () => {
+      try {
+        const response = await bannerAPI.getBannerYears();
+        const yearsData = response?.data || (Array.isArray(response) ? response : []);
+        if (Array.isArray(yearsData) && yearsData.length > 0) {
+          setYears(yearsData);
+          if (!yearsData.includes(selectedYear)) {
+            setSelectedYear(yearsData[0]);
+          }
         }
+      } catch (error) {
+        console.error("Error fetching banner years:", error);
       }
-    } catch (error) {
-      console.error("Error fetching banner years:", error);
-    }
-  };
+    };
+    fetchYears();
+  }, [selectedYear]);
 
   const fetchBanners = useCallback(async () => {
     setLoading(true);
@@ -45,10 +48,6 @@ const BannerSection = () => {
       setLoading(false);
     }
   }, [selectedYear]);
-
-  useEffect(() => {
-    fetchYears();
-  }, []);
 
   useEffect(() => {
     fetchBanners();

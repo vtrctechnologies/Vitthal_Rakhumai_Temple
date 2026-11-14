@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 /* ─────────────────────────────────────────────────────────────
    All animations are CSS @keyframes — no JS on the main thread.
@@ -60,8 +60,8 @@ const loaderStyles = `
     to   { opacity: 1; }
   }
   @keyframes vr-progress {
-    from { width: 0%; }
-    to   { width: 100%; }
+    from { transform: scaleX(0); }
+    to   { transform: scaleX(1); }
   }
 
   /* Outer ring – slow clockwise */
@@ -112,14 +112,18 @@ const loaderStyles = `
   .vr-dot-1 { animation: vr-dots 1.4s ease-in-out 1.8s infinite; }
   .vr-dot-2 { animation: vr-dots 1.4s ease-in-out 2.0s infinite; }
   .vr-dot-3 { animation: vr-dots 1.4s ease-in-out 2.2s infinite; }
-  /* Progress bar */
+  /* Progress bar (GPU-composited transform so main-thread work never freezes it) */
   .vr-progress-bar {
-    animation: vr-progress 2.3s cubic-bezier(0.4,0,0.2,1) 0.2s forwards;
-    will-change: width;
+    width: 100%;
+    transform: scaleX(0);
+    transform-origin: left center;
+    animation: vr-progress 2.3s cubic-bezier(0.22,1,0.36,1) 0.15s forwards;
+    will-change: transform;
   }
   /* Whole loader fade-out */
   .vr-loader-exit {
     animation: vr-fadeOut 0.6s ease forwards;
+    pointer-events: none;
   }
 `;
 
@@ -203,13 +207,48 @@ const MandalaRing = ({ size, dashes, color, className }) => (
 );
 
 /* ── Main Loader Component ── */
-const CinematicLoader = () => {
+const CinematicLoader = ({ onComplete }) => {
   const [isExiting, setIsExiting] = useState(false);
+  const onCompleteRef = useRef(onComplete);
+  onCompleteRef.current = onComplete;
 
-  // Pre-trigger the exit animation a bit before unmount
+  // Strictly prevent any scrolling or touch-dragging while loading screen is active
   useEffect(() => {
-    const t = setTimeout(() => setIsExiting(true), 2100);
-    return () => clearTimeout(t);
+    window.scrollTo(0, 0);
+
+    const blockScroll = (e) => {
+      if (e.cancelable) {
+        e.preventDefault();
+      }
+      e.stopPropagation();
+      return false;
+    };
+
+    window.addEventListener("wheel", blockScroll, { passive: false });
+    window.addEventListener("touchmove", blockScroll, { passive: false });
+    document.addEventListener("touchmove", blockScroll, { passive: false });
+
+    return () => {
+      window.removeEventListener("wheel", blockScroll);
+      window.removeEventListener("touchmove", blockScroll);
+      document.removeEventListener("touchmove", blockScroll);
+    };
+  }, []);
+
+  // Allow the full glorious cinematic animation to complete first, then smoothly fade out
+  useEffect(() => {
+    const exitTimer = setTimeout(() => {
+      setIsExiting(true);
+    }, 2450);
+
+    const doneTimer = setTimeout(() => {
+      if (onCompleteRef.current) onCompleteRef.current();
+    }, 3050);
+
+    return () => {
+      clearTimeout(exitTimer);
+      clearTimeout(doneTimer);
+    };
   }, []);
 
   return (
@@ -219,16 +258,32 @@ const CinematicLoader = () => {
 
       <div
         className={isExiting ? "vr-loader-exit" : ""}
+        onTouchMove={(e) => {
+          if (e.cancelable) e.preventDefault();
+        }}
+        onWheel={(e) => {
+          if (e.cancelable) e.preventDefault();
+        }}
         style={{
           position: "fixed",
           inset: 0,
-          zIndex: 9999,
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          width: "100%",
+          height: "100dvh",
+          minHeight: "100%",
+          zIndex: 999999,
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
           background: "linear-gradient(160deg, #3a0a0a 0%, #6b1a1a 45%, #4a0f0f 100%)",
           overflow: "hidden",
+          touchAction: "none",
+          overscrollBehavior: "none",
+          userSelect: "none",
           color: "white",
         }}
       >

@@ -1,4 +1,4 @@
-import { useState, useCallback, memo } from "react";
+import { useState, memo } from "react";
 import { useInView } from "react-intersection-observer";
 import {
   Target,
@@ -13,9 +13,8 @@ import {
   CalendarDays,
   Landmark,
   Sparkles,
-  Calendar,
 } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useLanguage } from "../context/LanguageContext";
 
@@ -128,7 +127,6 @@ const fadeUp = {
    Redesigned to perfectly harmonize with Home.jsx theme & layout
 ══════════════════════════════════════════════════════════════ */
 const About = memo(() => {
-  const navigate = useNavigate();
   const { isMarathi } = useLanguage();
   const [activeTab, setActiveTab] = useState("story");
 
@@ -138,108 +136,75 @@ const About = memo(() => {
     rootMargin: "50px",
   });
 
-  const handleDonateClick = useCallback(() => navigate("/donation"), [navigate]);
-  const handleEventsClick = useCallback(() => navigate("/events"), [navigate]);
-
   return (
     <div className="w-full overflow-x-hidden bg-cream font-body text-ink-dark">
-      {/* ══ 1. GRAND CINEMATIC HERO (Mirrors Home.jsx Architecture) ══ */}
-      <header className="relative min-h-[82vh] sm:min-h-[88vh] flex items-center justify-center overflow-hidden">
-        {/* Subtle Light Gold Arch Top Accent Line */}
-        <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-amber-400 to-transparent z-10 opacity-70" />
+      {/* ── 1. CINEMATIC HEADER BANNER (Consistent with Other Pages) ── */}
+      <section className="relative pt-28 pb-16 sm:pt-32 sm:pb-20 bg-gradient-to-b from-[#180303] via-[#100202] to-[#180303] text-cream border-b border-amber-500/25 overflow-hidden">
+        {/* Subtle Top Gold Filament */}
+        <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-amber-400 to-transparent opacity-80" />
 
-        {/* Cinematic Divine Background Layer */}
-        <div className="absolute inset-0 z-0">
-          <img
-            src={templeHero}
-            alt="Shree Vitthal Rakhumai Sanctum"
-            fetchpriority="high"
-            loading="eager"
-            decoding="async"
-            className="w-full h-full object-cover object-center brightness-[0.65] contrast-[1.08]"
-          />
+        {/* Ambient Divine Radiance */}
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(245,158,11,0.12)_0%,_rgba(24,4,4,0.40)_65%,_rgba(12,2,2,0.95)_100%)] pointer-events-none" />
 
-          {/* Directional Lighting Overlays (Exact match to Home.jsx) */}
-          {/* 1. Top Navbar Contrast Bleed */}
-          <div className="absolute top-0 left-0 right-0 h-44 bg-gradient-to-b from-[#180303]/90 via-[#180303]/45 to-transparent" />
+        {/* Repeating Sacred Grid Texture */}
+        <div
+          className="absolute inset-0 pointer-events-none opacity-10"
+          style={{
+            backgroundImage:
+              "repeating-linear-gradient(45deg, var(--color-gold) 0, var(--color-gold) 1px, transparent 0, transparent 40px)",
+          }}
+        />
 
-          {/* 2. Center Cinematic Vignette */}
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(24,4,4,0.30)_0%,_rgba(18,3,3,0.70)_75%,_rgba(12,2,2,0.92)_100%)]" />
-
-          {/* 3. Bottom Smooth Fade to Section */}
-          <div className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-[#140202] via-[#140202]/70 to-transparent" />
-        </div>
-
-        {/* Hero Content Center Stack */}
-        <div className="relative z-10 max-w-4xl mx-auto pt-24 sm:pt-28 pb-16 sm:pb-20 px-4 sm:px-6 text-center flex flex-col items-center justify-center my-auto">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 relative z-10 text-center">
           {/* Sacred Heritage Announcement Badge */}
+          <motion.div
+            className="inline-flex items-center gap-2 bg-black/45 border border-amber-400/40 rounded-full px-4 py-1.5 font-heading text-xs sm:text-[0.82rem] font-medium text-amber-200 tracking-wide mb-4 shadow-sm backdrop-blur-xs select-none"
+            initial={{ opacity: 0, y: -14 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-400" />
+            </span>
+            <Sparkles size={13} className="text-amber-300 shrink-0" />
+            <span>{isMarathi ? "पवित्र वारसा व इतिहास" : "Sacred Heritage & History"}</span>
+          </motion.div>
 
           {/* Main Titles */}
           <motion.h1
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.15 }}
             className="flex flex-col items-center select-none"
           >
-            <span className="font-heading text-[clamp(2.1rem,6.2vw,4.8rem)] font-black text-white leading-tight tracking-wider drop-shadow-[0_4px_24px_rgba(0,0,0,0.9)]">
+            <span className="font-heading text-[clamp(2rem,5.5vw,4rem)] font-black text-white leading-tight tracking-wider drop-shadow-[0_4px_24px_rgba(0,0,0,0.9)]">
               {isMarathi ? "आमच्या मंदिराविषयी" : "About Our Temple"}
+            </span>
+            <span className="font-heading text-[clamp(1.1rem,3vw,2rem)] font-bold tracking-[0.16em] uppercase text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-amber-300 to-amber-100 drop-shadow-[0_2px_14px_rgba(0,0,0,0.9)] mt-1 block">
+              {isMarathi ? "श्री विठ्ठल रखुमाई मंदिर ट्रस्ट" : "Shree Vitthal Rakhumai Mandir Trust"}
             </span>
           </motion.h1>
 
-          {/* Sacred Diamond Divider */}
-          <div className="flex items-center gap-3 my-1.5 sm:my-2 w-full max-w-[320px] sm:max-w-[420px]">
-            <div className="flex-1 h-px bg-gradient-to-r from-transparent via-amber-400/60 to-transparent" />
-            <div className="w-2 h-2 rotate-45 bg-amber-300 border border-amber-200/60 shadow-xs shrink-0" />
-            <div className="flex-1 h-px bg-gradient-to-r from-transparent via-amber-400/60 to-transparent" />
-          </div>
+          <DiamondDivider />
 
           {/* Subtitle Description */}
           <motion.p
-            className="font-body text-[clamp(0.95rem,2.2vw,1.2rem)] text-cream/90 mt-0.5 leading-relaxed max-w-[620px] font-normal drop-shadow-sm px-2"
+            className="max-w-2xl mx-auto text-base sm:text-lg text-cream/85 font-body leading-relaxed mt-2"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.6, delay: 0.3 }}
           >
             {isMarathi
-              ? "आंबेकरवाडीच्या निसर्गरम्य भूमीत वसलेले, भक्ती, शांती आणि अखंड सामुदायिक सेवेचे प्रतीक. पिढ्यान्पिढ्या सुरू असलेला भक्तीचा अखंड प्रवास."
-              : "A sanctuary of devotion, peace, and timeless community service nestled in Amberkarwadi, guiding generations toward spiritual fulfillment."}
+              ? "“आंबेकरवाडीच्या निसर्गरम्य भूमीत वसलेले, भक्ती, शांती आणि अखंड सामुदायिक सेवेचे प्रतीक. पिढ्यान्पिढ्या सुरू असलेला भक्तीचा अखंड प्रवास.”"
+              : "“A sanctuary of devotion, peace, and timeless community service nestled in Amberkarwadi, guiding generations toward spiritual fulfillment.”"}
           </motion.p>
         </div>
+      </section>
 
-        {/* Modern Bottom Info Dock (Exact match to Home.jsx) */}
-        <div className="absolute bottom-0 left-0 right-0 z-10 border-t border-amber-400/20 bg-[#140303]/90 backdrop-blur-xs">
-          <div className="max-w-6xl mx-auto px-4 py-2 sm:py-2.5 flex items-center justify-between gap-3 text-xs sm:text-[0.82rem]">
-            {/* Location */}
-            <div className="flex items-center gap-1.5 sm:gap-2 text-cream/90 truncate min-w-0">
-              <MapPin size={14} className="text-amber-400 shrink-0" />
-              <span className="truncate">
-                {isMarathi
-                  ? "आंबेकरवाडी, गावडे अंबेरे, रत्नागिरी"
-                  : "Amberkarwadi, Gavade Ambere, Ratnagiri"}
-              </span>
-            </div>
-
-            {/* Timing */}
-            <div className="flex items-center gap-1.5 sm:gap-2 text-cream/90 whitespace-nowrap shrink-0">
-              <Clock size={14} className="text-amber-400 shrink-0" />
-              <span>
-                {isMarathi
-                  ? "२४ तास खुले | प्रवेश विनामूल्य"
-                  : "Open 24 Hours · Free Entry"}
-              </span>
-            </div>
-
-            {/* Sacred Mantra */}
-            <div className="hidden md:flex items-center gap-1.5 text-amber-200/85 font-marathi whitespace-nowrap shrink-0">
-              <span>|| राम कृष्ण हरी ||</span>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      {/* ══ 2. SACRED SHLOKA STRIP (Mirrors Home.jsx) ══ */}
+      {/* ═══════════ 2. SACRED SHLOKA STRIP ═══════════ */}
       <div className="h-[3px] bg-gradient-to-r from-maroon via-gold via-saffron-lt to-maroon" />
-      <div className="relative bg-maroon px-6 py-9 text-center overflow-hidden">
+      <div className="relative bg-maroon px-6 py-7 sm:py-8 text-center overflow-hidden">
         <div
           className="absolute inset-0 z-0"
           style={{
@@ -247,7 +212,7 @@ const About = memo(() => {
               "repeating-linear-gradient(90deg, rgba(212,175,55,0.15) 0, rgba(212,175,55,0.15) 1px, transparent 0, transparent 60px)",
           }}
         />
-        <p className="relative z-10 font-marathi text-[clamp(1.2rem,3vw,1.7rem)] text-gold-lt tracking-wide leading-relaxed">
+        <p className="relative z-10 font-marathi text-[clamp(1.1rem,2.8vw,1.5rem)] text-gold-lt tracking-wide leading-relaxed">
           पुंडलिका वरदा हरी विठ्ठल — श्री ज्ञानदेव तुकाराम
         </p>
       </div>
@@ -404,22 +369,21 @@ const About = memo(() => {
                 </div>
               </div>
 
-              {/* Rectangular Action Buttons with Refined Hover Animations */}
-              <div className="flex flex-wrap items-center gap-3.5 pt-1">
+              {/* Rectangular Action Buttons - Uniform sizing on all devices */}
+              <div className="flex flex-wrap items-center gap-3 sm:gap-4 pt-1">
                 <Link
                   to="/donation"
-                  className="group relative inline-flex items-center justify-center gap-2 px-6 sm:px-7 py-3 rounded-md font-heading text-xs sm:text-[0.8rem] font-bold tracking-widest uppercase bg-gradient-to-r from-amber-400 via-amber-300 to-amber-400 text-maroon-dk border border-amber-400/70 shadow-[0_3px_12px_rgba(245,158,11,0.25)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_8px_22px_rgba(245,158,11,0.45)] hover:border-amber-300 active:translate-y-0 active:scale-98 select-none overflow-hidden"
+                  className="group relative inline-flex items-center justify-center gap-2 h-10 sm:h-12 px-5 sm:px-7 sm:min-w-[160px] rounded-md font-heading text-xs sm:text-sm font-bold tracking-wider uppercase bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-[#2b0808] border border-amber-400/70 shadow-xs hover:shadow-sm active:scale-95 transition-all duration-200 select-none"
                 >
-                  <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/40 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-out" />
-                  <Heart size={15} className="fill-maroon-dk text-maroon-dk shrink-0 transition-transform duration-200 group-hover:scale-120" />
+                  <Heart size={14} className="fill-[#2b0808] text-[#2b0808] shrink-0 transition-transform duration-200 group-hover:scale-105" />
                   <span className="relative z-10">{isMarathi ? "देणगी अर्पण करा" : "Donate Now"}</span>
                 </Link>
 
                 <Link
                   to="/gallery"
-                  className="group inline-flex items-center justify-center gap-2 px-6 sm:px-7 py-3 rounded-md font-heading text-xs sm:text-[0.8rem] font-bold tracking-widest uppercase bg-white/90 hover:bg-maroon text-maroon hover:text-amber-100 border border-amber-500/40 hover:border-maroon shadow-xs transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_8px_20px_rgba(107,26,26,0.3)] active:translate-y-0 active:scale-98 select-none"
+                  className="group inline-flex items-center justify-center gap-2 h-10 sm:h-12 px-5 sm:px-7 sm:min-w-[160px] rounded-md font-heading text-xs sm:text-sm font-bold tracking-wider uppercase bg-white/90 hover:bg-maroon text-maroon hover:text-amber-100 border border-amber-500/40 hover:border-maroon shadow-xs transition-all duration-200 active:scale-95 select-none"
                 >
-                  <span className="transition-transform duration-200 group-hover:scale-105">
+                  <span>
                     {isMarathi ? "गॅलरी पहा" : "View Gallery"}
                   </span>
                 </Link>
@@ -724,23 +688,23 @@ const About = memo(() => {
               </div>
 
               {/* Action Buttons matching Home */}
-              <div className="flex flex-wrap gap-3.5 pt-2">
+              <div className="flex flex-wrap gap-3 sm:gap-4 pt-2">
                 <Link
                   to="/contact"
-                  className="group inline-flex items-center justify-center gap-2 px-6 sm:px-7 py-3 rounded-full font-heading text-xs sm:text-[0.8rem] font-bold tracking-widest uppercase bg-gradient-to-r from-maroon via-maroon-lt to-maroon hover:from-maroon-dk hover:to-maroon text-gold-lt shadow-[0_4px_16px_rgba(107,26,26,0.35)] active:scale-95 transition-all select-none"
+                  className="group inline-flex items-center justify-center gap-2 h-10 sm:h-12 px-5 sm:px-7 sm:min-w-[160px] rounded-md font-heading text-xs sm:text-sm font-bold tracking-wider uppercase bg-gradient-to-r from-maroon via-maroon-lt to-maroon hover:from-maroon-dk hover:to-maroon text-gold-lt shadow-xs active:scale-95 transition-all select-none"
                 >
                   <span>{isMarathi ? "दर्शनासाठी या" : "Visit Us"}</span>
                   <ArrowRight
-                    size={15}
+                    size={14}
                     className="group-hover:translate-x-1 transition-transform"
                   />
                 </Link>
 
                 <Link
                   to="/events"
-                  className="inline-flex items-center justify-center gap-2 px-6 sm:px-7 py-3 rounded-full font-heading text-xs sm:text-[0.8rem] font-bold tracking-widest uppercase bg-white/70 hover:bg-white border border-maroon/40 text-maroon hover:text-maroon-dk transition-all active:scale-95 shadow-xs"
+                  className="inline-flex items-center justify-center gap-2 h-10 sm:h-12 px-5 sm:px-7 sm:min-w-[160px] rounded-md font-heading text-xs sm:text-sm font-bold tracking-wider uppercase bg-white/70 hover:bg-white border border-maroon/40 text-maroon hover:text-maroon-dk transition-all active:scale-95 shadow-xs select-none"
                 >
-                  <CalendarDays size={15} />
+                  <CalendarDays size={14} />
                   <span>{isMarathi ? "उत्सव दिनदर्शिका" : "View Festivals"}</span>
                 </Link>
               </div>
@@ -748,16 +712,6 @@ const About = memo(() => {
           </div>
         </div>
       </section>
-
-      {/* ══ 7. FOOTER MANTRA STRIP (Exact match to Home.jsx) ══ */}
-      <div className="bg-ink-dark border-t-4 border-gold p-6 text-center">
-        <p className="font-marathi text-[1.1rem] text-gold-lt tracking-wide">
-          || पुंडलिका वरदा हरी विठ्ठल — पांडुरंग ||
-        </p>
-        <p className="font-body italic text-cream-dk/50 text-[0.9rem] mt-1.5">
-          Shree Vitthal Rakhumai Temple, Amberkarwadi · Open 24 Hours
-        </p>
-      </div>
     </div>
   );
 });

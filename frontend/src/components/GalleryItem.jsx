@@ -5,10 +5,10 @@ import { getImageUrl } from "@/utils/imageUrl";
 /* Corner accents for sacred temple artwork framing */
 const CornerAccents = () => (
   <>
-    <span className="absolute -top-0.5 -left-0.5 w-3.5 h-3.5 border-t-2 border-l-2 border-saffron z-30" />
-    <span className="absolute -top-0.5 -right-0.5 w-3.5 h-3.5 border-t-2 border-r-2 border-saffron z-30" />
-    <span className="absolute -bottom-0.5 -left-0.5 w-3.5 h-3.5 border-b-2 border-l-2 border-saffron z-30" />
-    <span className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 border-b-2 border-r-2 border-saffron z-30" />
+    <span className="absolute -top-0.5 -left-0.5 w-4 h-4 border-t-4 border-l-4 border-saffron z-30 pointer-events-none" />
+    <span className="absolute -top-0.5 -right-0.5 w-4 h-4 border-t-4 border-r-4 border-saffron z-30 pointer-events-none" />
+    <span className="absolute -bottom-0.5 -left-0.5 w-4 h-4 border-b-4 border-l-4 border-saffron z-30 pointer-events-none" />
+    <span className="absolute -bottom-0.5 -right-0.5 w-4 h-4 border-b-4 border-r-4 border-saffron z-30 pointer-events-none" />
   </>
 );
 
@@ -43,18 +43,16 @@ const GalleryItem = memo(({ image, index, onClick }) => {
 
   return (
     <div
-      className={`group relative ${spanClass} rounded-md border border-gold/40 hover:border-gold overflow-hidden bg-black shadow-sm hover:shadow-xl cursor-pointer transition-colors duration-300`}
+      className={`group relative ${spanClass} bg-cream-dk border-2 border-gold rounded-sm p-1.5 sm:p-2 shadow-sm hover:shadow-xl cursor-pointer transition-shadow duration-300`}
       onClick={onClick}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {/* Saffron Corner Accents: Revealed on hover without card movement */}
-      <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
-        <CornerAccents />
-      </div>
+      {/* 4 Saffron Corner Brackets */}
+      <CornerAccents />
 
-      {/* Media Content */}
-      <div className="w-full h-full overflow-hidden relative">
+      {/* Inner Framed Media Container */}
+      <div className="w-full h-full border border-saffron-lt/60 rounded-sm overflow-hidden relative bg-maroon-dk">
         <div className="absolute inset-0 bg-cream-dk animate-pulse -z-10"></div>
         {imageUrl ? (
           isVideo ? (
@@ -97,24 +95,24 @@ const GalleryItem = memo(({ image, index, onClick }) => {
           <Sparkles className="w-12 h-12 text-gold" />
         </div>
         {/* Gradient Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/35 to-transparent opacity-75 group-hover:opacity-85 transition-opacity duration-300"></div>
-      </div>
+        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent opacity-80 group-hover:opacity-90 transition-opacity duration-300 pointer-events-none"></div>
 
-      {/* Content */}
-      <div
-        className="absolute bottom-0 left-0 right-0 p-4 sm:p-5 z-20"
-        style={{ transform: "translateZ(0)" }}
-      >
-        <div className="flex flex-col items-start">
-          <div className="flex items-center gap-1.5 mb-1.5">
-            <Sparkles size={11} className="text-amber-400 shrink-0" />
-            <span className="text-amber-300 text-[10.5px] font-heading font-bold uppercase tracking-wider">
-              {image.category?.name || "Uncategorized"}
-            </span>
+        {/* Content */}
+        <div
+          className="absolute bottom-0 left-0 right-0 p-3.5 sm:p-4 z-20 pointer-events-none"
+          style={{ transform: "translateZ(0)" }}
+        >
+          <div className="flex flex-col items-start">
+            <div className="flex items-center gap-1.5 mb-1">
+              <Sparkles size={11} className="text-amber-400 shrink-0" />
+              <span className="text-amber-300 text-[10.5px] font-heading font-bold uppercase tracking-wider">
+                {image.category?.name || "Uncategorized"}
+              </span>
+            </div>
+            <h3 className="text-white font-heading text-base sm:text-lg font-bold leading-snug drop-shadow-md group-hover:text-amber-200 transition-colors line-clamp-2">
+              {image.title}
+            </h3>
           </div>
-          <h3 className="text-white font-heading text-base sm:text-lg font-bold leading-snug drop-shadow-md group-hover:text-amber-200 transition-colors line-clamp-2">
-            {image.title}
-          </h3>
         </div>
       </div>
     </div>

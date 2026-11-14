@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 import {
   Calendar,
   Clock,
@@ -14,7 +14,6 @@ import { useLanguage } from "@/context/LanguageContext";
 import { motion } from "framer-motion";
 
 const EventsSection = () => {
-  const navigate = useNavigate();
   const { isMarathi } = useLanguage();
   const scrollContainerRef = useRef(null);
   const [events, setEvents] = useState([]);
@@ -100,7 +99,7 @@ const EventsSection = () => {
       {/* Container */}
       <div
         ref={scrollContainerRef}
-        className="flex overflow-x-auto gap-8 pb-12 px-4 scrollbar-hide snap-x"
+        className="flex overflow-x-auto gap-8 pt-3 pb-12 px-4 scrollbar-hide snap-x"
         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
       >
         {events.map((event, index) => {
@@ -118,13 +117,15 @@ const EventsSection = () => {
             >
               <Link 
                 to={`/events/${event._id}`}
-                className="block group/card relative bg-white border border-gold/20 rounded-lg overflow-hidden shadow-sm hover:shadow-xl transition-all duration-500 hover:-translate-y-2"
+                className="block group/card relative border-2 border-gold rounded-sm p-1.5 sm:p-2 bg-cream-dk shadow-sm hover:shadow-xl transition-shadow duration-500"
               >
-                {/* Decorative Frame Corner */}
-                <div className="absolute top-0 right-0 w-16 h-16 pointer-events-none z-10 opacity-40 group-hover/card:opacity-100 transition-opacity">
-                   <div className="absolute top-2 right-2 w-full h-full border-t-2 border-r-2 border-saffron rounded-tr-lg" />
-                </div>
+                {/* Sacred 4-Corner Saffron Frame Brackets */}
+                <span className="absolute -top-0.5 -left-0.5 w-5 h-5 border-t-4 border-l-4 border-saffron z-20 pointer-events-none" />
+                <span className="absolute -top-0.5 -right-0.5 w-5 h-5 border-t-4 border-r-4 border-saffron z-20 pointer-events-none" />
+                <span className="absolute -bottom-0.5 -left-0.5 w-5 h-5 border-b-4 border-l-4 border-saffron z-20 pointer-events-none" />
+                <span className="absolute -bottom-0.5 -right-0.5 w-5 h-5 border-b-4 border-r-4 border-saffron z-20 pointer-events-none" />
 
+                <div className="border border-saffron-lt/60 rounded-sm overflow-hidden bg-white relative">
                 {/* Image Section */}
                 <div className="relative h-56 overflow-hidden bg-stone-100">
                   <img
@@ -183,6 +184,7 @@ const EventsSection = () => {
                       <ArrowRight size={14} />
                     </div>
                   </div>
+                </div>
                 </div>
               </Link>
             </motion.div>

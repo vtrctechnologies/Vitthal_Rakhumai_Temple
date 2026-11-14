@@ -24,7 +24,7 @@ const Switch = memo(({ className = "" }) => {
         <div className="relative grid grid-cols-2 items-center w-[74px] sm:w-[80px] h-7 sm:h-7.5">
           {/* Smooth Sliding Sacred Gold Pill Indicator */}
           <motion.div
-            className="absolute inset-y-0 left-0 w-1/2 rounded-[4px] bg-gradient-to-r from-amber-400 via-amber-300 to-amber-500 shadow-[0_1px_8px_rgba(245,158,11,0.35)] pointer-events-none"
+            className="absolute inset-y-0 left-0 w-1/2 rounded-[4px] bg-gradient-to-r from-amber-400 via-amber-300 to-amber-500 shadow-xs pointer-events-none"
             initial={false}
             animate={{
               x: isMarathi ? "100%" : "0%",

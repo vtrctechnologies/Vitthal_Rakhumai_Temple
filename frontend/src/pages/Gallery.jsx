@@ -71,7 +71,7 @@ const CustomYearDropdown = memo(({ activeYear, availableYears, onChange, isMarat
       <button
         type="button"
         onClick={() => setIsOpen((prev) => !prev)}
-        className="flex items-center gap-2.5 h-9 px-4 rounded-md bg-cream-dk/90 border border-gold/45 hover:border-amber-500 hover:bg-cream text-maroon font-heading text-xs font-bold uppercase tracking-wider transition-all duration-200 cursor-pointer shadow-xs select-none"
+        className="flex items-center gap-2.5 h-10 sm:h-11 px-4 sm:px-5 rounded-md bg-cream-dk/90 border border-gold/45 hover:border-amber-500 hover:bg-cream text-maroon font-heading text-xs sm:text-sm font-bold uppercase tracking-wider transition-all duration-200 cursor-pointer shadow-xs select-none"
         aria-haspopup="listbox"
         aria-expanded={isOpen}
       >
@@ -111,11 +111,10 @@ const CustomYearDropdown = memo(({ activeYear, availableYears, onChange, isMarat
                       onChange(opt.value);
                       setIsOpen(false);
                     }}
-                    className={`w-full flex items-center justify-between px-3 py-2 rounded-sm text-xs font-heading font-bold uppercase tracking-wider transition-all cursor-pointer select-none ${
-                      isSelected
-                        ? "bg-gradient-to-r from-amber-400 via-amber-300 to-amber-400 text-maroon-dk shadow-xs"
-                        : "text-amber-100/80 hover:text-white hover:bg-white/10"
-                    }`}
+                    className={`w-full flex items-center justify-between px-3 py-2 rounded-sm text-xs font-heading font-bold uppercase tracking-wider transition-all cursor-pointer select-none ${isSelected
+                      ? "bg-gradient-to-r from-amber-400 via-amber-300 to-amber-400 text-maroon-dk shadow-xs"
+                      : "text-amber-100/80 hover:text-white hover:bg-white/10"
+                      }`}
                   >
                     <span>{opt.label}</span>
                     {isSelected && (
@@ -132,6 +131,102 @@ const CustomYearDropdown = memo(({ activeYear, availableYears, onChange, isMarat
   );
 });
 CustomYearDropdown.displayName = "CustomYearDropdown";
+
+/* ── Custom Temple-Themed Dropdown for Categories (Mobile Only) ── */
+const CustomCategoryDropdown = memo(({ activeCategory, categories, onChange, isMarathi }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setIsOpen(false);
+      }
+    };
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") setIsOpen(false);
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, []);
+
+  const options = [
+    { value: "all", label: isMarathi ? "सर्व चित्रे" : "All Photos" },
+    ...categories.map((cat) => ({
+      value: cat._id,
+      label: isMarathi && cat.nameMarathi ? cat.nameMarathi : cat.name,
+    })),
+  ];
+
+  const currentOption = options.find((opt) => opt.value === activeCategory) || options[0];
+
+  return (
+    <div className="relative w-full max-w-xs sm:hidden" ref={dropdownRef}>
+      <button
+        type="button"
+        onClick={() => setIsOpen((prev) => !prev)}
+        className="w-full flex items-center justify-between gap-2.5 h-11 px-4 rounded-md bg-gradient-to-r from-amber-400 via-amber-300 to-amber-400 text-maroon-dk border border-amber-500/70 font-heading text-xs font-bold uppercase tracking-wider shadow-sm cursor-pointer select-none transition-all"
+        aria-haspopup="listbox"
+        aria-expanded={isOpen}
+      >
+        <div className="flex items-center gap-2 min-w-0">
+          <Filter size={14} className="text-maroon-dk shrink-0" />
+          <span className="truncate">{currentOption.label}</span>
+        </div>
+        <ChevronDown
+          size={15}
+          className={`text-maroon-dk shrink-0 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
+        />
+      </button>
+
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: -6, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -6, scale: 0.98 }}
+            transition={{ duration: 0.15, ease: "easeOut" }}
+            className="absolute left-0 right-0 top-full mt-1.5 max-h-64 overflow-y-auto bg-gradient-to-b from-[#1c0505]/98 via-[#140303]/98 to-[#0c0202]/98 border border-amber-500/35 rounded-md shadow-[0_12px_32px_rgba(0,0,0,0.65)] p-1.5 z-50 backdrop-blur-md"
+            role="listbox"
+          >
+            <div className="flex flex-col gap-0.5">
+              {options.map((opt) => {
+                const isSelected = activeCategory === opt.value;
+                return (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    role="option"
+                    aria-selected={isSelected}
+                    onClick={() => {
+                      onChange(opt.value);
+                      setIsOpen(false);
+                    }}
+                    className={`w-full flex items-center justify-between px-3 py-2.5 rounded-sm text-xs font-heading font-bold uppercase tracking-wider transition-all cursor-pointer select-none ${
+                      isSelected
+                        ? "bg-gradient-to-r from-amber-400 via-amber-300 to-amber-400 text-maroon-dk shadow-xs"
+                        : "text-amber-100/85 hover:text-white hover:bg-white/10"
+                    }`}
+                  >
+                    <span className="truncate">{opt.label}</span>
+                    {isSelected && (
+                      <Check size={13} className="text-maroon-dk stroke-[2.5] shrink-0" />
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+});
+CustomCategoryDropdown.displayName = "CustomCategoryDropdown";
 
 const Gallery = () => {
   const { isMarathi } = useLanguage();
@@ -322,15 +417,22 @@ const Gallery = () => {
         <section className="bg-cream border-b border-gold/30 shadow-xs relative z-20">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
             <div className="flex flex-col lg:flex-row items-center justify-between gap-4">
-              {/* Category Filter Tabs (Rectangular Styling) */}
-              <div className="flex flex-wrap items-center justify-center gap-2 p-1.5 bg-[#180404]/8 border border-amber-500/25 rounded-md">
+              {/* Mobile-Only Custom Category Dropdown */}
+              <CustomCategoryDropdown
+                activeCategory={activeCategory}
+                categories={categories}
+                onChange={setActiveCategory}
+                isMarathi={isMarathi}
+              />
+
+              {/* Category Filter Tabs (Tablet & Desktop Only) */}
+              <div className="hidden sm:flex flex-wrap items-center justify-center gap-2 p-1.5 bg-[#180404]/8 border border-amber-500/25 rounded-md">
                 <button
                   onClick={() => setActiveCategory("all")}
-                  className={`px-4 sm:px-5 py-2 rounded-md font-heading text-xs sm:text-sm font-bold tracking-wider uppercase transition-all duration-200 border cursor-pointer select-none ${
-                    activeCategory === "all"
-                      ? "bg-gradient-to-r from-amber-400 via-amber-300 to-amber-400 text-maroon-dk border-amber-400/70 shadow-xs"
-                      : "bg-transparent border-transparent text-maroon hover:border-amber-500/40 hover:bg-cream hover:text-maroon-dk"
-                  }`}
+                  className={`px-4 sm:px-5 py-2 rounded-md font-heading text-xs sm:text-sm font-bold tracking-wider uppercase transition-all duration-200 border cursor-pointer select-none ${activeCategory === "all"
+                    ? "bg-gradient-to-r from-amber-400 via-amber-300 to-amber-400 text-maroon-dk border-amber-400/70 shadow-xs"
+                    : "bg-transparent border-transparent text-maroon hover:border-amber-500/40 hover:bg-cream hover:text-maroon-dk"
+                    }`}
                 >
                   {isMarathi ? "सर्व चित्रे" : "All Photos"}
                 </button>
@@ -339,11 +441,10 @@ const Gallery = () => {
                   <button
                     key={cat._id}
                     onClick={() => setActiveCategory(cat._id)}
-                    className={`px-4 sm:px-5 py-2 rounded-md font-heading text-xs sm:text-sm font-bold tracking-wider uppercase transition-all duration-200 border cursor-pointer select-none ${
-                      activeCategory === cat._id
-                        ? "bg-gradient-to-r from-amber-400 via-amber-300 to-amber-400 text-maroon-dk border-amber-400/70 shadow-xs"
-                        : "bg-transparent border-transparent text-maroon hover:border-amber-500/40 hover:bg-cream hover:text-maroon-dk"
-                    }`}
+                    className={`px-4 sm:px-5 py-2 rounded-md font-heading text-xs sm:text-sm font-bold tracking-wider uppercase transition-all duration-200 border cursor-pointer select-none ${activeCategory === cat._id
+                      ? "bg-gradient-to-r from-amber-400 via-amber-300 to-amber-400 text-maroon-dk border-amber-400/70 shadow-xs"
+                      : "bg-transparent border-transparent text-maroon hover:border-amber-500/40 hover:bg-cream hover:text-maroon-dk"
+                      }`}
                   >
                     {isMarathi && cat.nameMarathi ? cat.nameMarathi : cat.name}
                   </button>
@@ -414,16 +515,6 @@ const Gallery = () => {
             </>
           )}
         </main>
-
-        {/* ═══════════ 5. FOOTER STRIP (Home.jsx Signature) ═══════════ */}
-        <div className="bg-ink-dark border-t-4 border-gold py-6 text-center">
-          <p className="font-marathi text-[1.1rem] text-gold-lt tracking-wide">
-            || पुंडलिका वरदा हरी विठ्ठल — श्री ज्ञानदेव तुकाराम ||
-          </p>
-          <p className="font-body italic text-cream/45 text-[0.85rem] mt-1 tracking-wider">
-            Shree Vitthal Rakhumai Temple · Amberkarwadi, Ratnagiri
-          </p>
-        </div>
       </div>
 
       {/* ═══════════ LIGHTBOX ═══════════ */}

@@ -1,8 +1,9 @@
-import React, { useState, useEffect, memo } from "react";
-import { Trophy, ChevronDown, Medal, Users, Loader2, X, Sparkles, Calendar } from "lucide-react";
+import React, { useState, useEffect, useRef, useCallback, memo } from "react";
+import { createPortal } from "react-dom";
+import { useSearchParams } from "react-router-dom";
+import { Trophy, Medal, Users, Loader2, Calendar, ChevronDown, Check, X, Share2 } from "lucide-react";
 import { sportsAPI } from "../../services/api";
-import Modal from "@/components/base/Modal";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useLanguage } from "../../context/LanguageContext";
 
 /* ── Sacred Diamond Divider ── */
@@ -38,15 +39,105 @@ const DiamondDivider = () => (
 /* ── Corner Accents for Cards ── */
 const CornerAccents = () => (
   <>
-    <span className="absolute -top-0.5 -left-0.5 w-3.5 h-3.5 border-t-2 border-l-2 border-saffron z-20" />
-    <span className="absolute -top-0.5 -right-0.5 w-3.5 h-3.5 border-t-2 border-r-2 border-saffron z-20" />
-    <span className="absolute -bottom-0.5 -left-0.5 w-3.5 h-3.5 border-b-2 border-l-2 border-saffron z-20" />
-    <span className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 border-b-2 border-r-2 border-saffron z-20" />
+    <span className="absolute -top-0.5 -left-0.5 w-4 h-4 border-t-4 border-l-4 border-saffron z-30 pointer-events-none" />
+    <span className="absolute -top-0.5 -right-0.5 w-4 h-4 border-t-4 border-r-4 border-saffron z-30 pointer-events-none" />
+    <span className="absolute -bottom-0.5 -left-0.5 w-4 h-4 border-b-4 border-l-4 border-saffron z-30 pointer-events-none" />
+    <span className="absolute -bottom-0.5 -right-0.5 w-4 h-4 border-b-4 border-r-4 border-saffron z-30 pointer-events-none" />
   </>
 );
 
+/* ── Custom Temple Dropdown for Years (Mobile Only) ── */
+const CustomYearDropdown = memo(({ selectedYear, availableYears, onChange, isMarathi }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setIsOpen(false);
+      }
+    };
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") setIsOpen(false);
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, []);
+
+  return (
+    <div className="relative w-full max-w-xs mx-auto sm:hidden" ref={dropdownRef}>
+      <button
+        type="button"
+        onClick={() => setIsOpen((prev) => !prev)}
+        className="w-full flex items-center justify-between gap-2.5 h-11 px-4 rounded-md bg-gradient-to-r from-amber-400 via-amber-300 to-amber-400 text-maroon-dk border border-amber-500/70 font-heading text-xs font-bold uppercase tracking-wider shadow-sm cursor-pointer select-none transition-all"
+        aria-haspopup="listbox"
+        aria-expanded={isOpen}
+      >
+        <div className="flex items-center gap-2 min-w-0">
+          <Calendar size={14} className="text-maroon-dk shrink-0" />
+          <span>{isMarathi ? `वर्ष: ${selectedYear}` : `Year: ${selectedYear}`}</span>
+        </div>
+        <ChevronDown
+          size={15}
+          className={`text-maroon-dk shrink-0 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
+        />
+      </button>
+
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: -6, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -6, scale: 0.98 }}
+            transition={{ duration: 0.15, ease: "easeOut" }}
+            className="absolute left-0 right-0 top-full mt-1.5 max-h-60 overflow-y-auto bg-gradient-to-b from-[#1c0505]/98 via-[#140303]/98 to-[#0c0202]/98 border border-amber-500/35 rounded-md shadow-[0_12px_32px_rgba(0,0,0,0.65)] p-1.5 z-50 backdrop-blur-md"
+            role="listbox"
+          >
+            <div className="flex flex-col gap-0.5">
+              {availableYears.map((year) => {
+                const isSelected = selectedYear === year;
+                return (
+                  <button
+                    key={year}
+                    type="button"
+                    role="option"
+                    aria-selected={isSelected}
+                    onClick={() => {
+                      onChange(year);
+                      setIsOpen(false);
+                    }}
+                    className={`w-full flex items-center justify-between px-3 py-2.5 rounded-sm text-xs font-heading font-bold uppercase tracking-wider transition-all cursor-pointer select-none ${
+                      isSelected
+                        ? "bg-gradient-to-r from-amber-400 via-amber-300 to-amber-400 text-maroon-dk shadow-xs"
+                        : "text-amber-100/85 hover:text-white hover:bg-white/10"
+                    }`}
+                  >
+                    <span>{year}</span>
+                    {isSelected && <Check size={13} className="text-maroon-dk stroke-[2.5]" />}
+                  </button>
+                );
+              })}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+});
+CustomYearDropdown.displayName = "CustomYearDropdown";
+
 const Sports = () => {
   const { isMarathi } = useLanguage();
+  const [searchParams] = useSearchParams();
+  const sharedYearParam = searchParams.get("year");
+  const sharedSportParam = searchParams.get("sport");
+  const sharedWinnerParam = searchParams.get("winner");
+  const handledDeepLinkRef = useRef(false);
+
   const [sports, setSports] = useState([]);
   const [activeTab, setActiveTab] = useState(null);
   const [currentSport, setCurrentSport] = useState(null);
@@ -59,39 +150,52 @@ const Sports = () => {
   const [loading, setLoading] = useState(true);
   const [showMembersModal, setShowMembersModal] = useState(null);
   const [showImageModal, setShowImageModal] = useState(null);
-  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+  const [copiedRank, setCopiedRank] = useState(null);
+  const [selectedYear, setSelectedYear] = useState(() => {
+    const parsed = sharedYearParam ? parseInt(sharedYearParam, 10) : NaN;
+    return !Number.isNaN(parsed) ? parsed : new Date().getFullYear();
+  });
   const [availableYears, setAvailableYears] = useState([]);
+  const [yearsReady, setYearsReady] = useState(false);
+  const sportsReqRef = useRef(0);
+  const sportDataReqRef = useRef(0);
 
   useEffect(() => {
     if (showMembersModal || showImageModal) {
       document.body.style.overflow = "hidden";
+      document.documentElement.style.overflow = "hidden";
     } else {
       document.body.style.overflow = "";
+      document.documentElement.style.overflow = "";
     }
     return () => {
       document.body.style.overflow = "";
+      document.documentElement.style.overflow = "";
     };
   }, [showMembersModal, showImageModal]);
 
   useEffect(() => {
     const initialize = async () => {
       await fetchAvailableYears();
+      setYearsReady(true);
     };
     initialize();
   }, []);
-
   useEffect(() => {
-    if (selectedYear) {
+    if (yearsReady && selectedYear) {
       setActiveTab(null);
       setCurrentSport(null);
       setWinners({ first: null, second: null, third: null });
-      fetchSports();
+      fetchSports(selectedYear);
     }
-  }, [selectedYear]);
+  }, [yearsReady, selectedYear]);
 
   useEffect(() => {
     if (activeTab) {
       fetchSportData(activeTab);
+    } else {
+      setCurrentSport(null);
+      setWinners({ first: null, second: null, third: null });
     }
   }, [activeTab]);
 
@@ -101,31 +205,43 @@ const Sports = () => {
       if (response && response.status === "success" && response.data) {
         const years = Array.isArray(response.data) ? response.data : [];
         const currentYear = new Date().getFullYear();
-        const nextYear = currentYear + 1;
-        const allYears = new Set([...years, currentYear, nextYear]);
+        const allYears = new Set([...years, currentYear]);
         const sortedYears = Array.from(allYears).sort((a, b) => b - a);
         setAvailableYears(sortedYears);
-        if (sortedYears.length > 0) setSelectedYear(sortedYears[0]);
+        const parsedSharedYear = sharedYearParam ? parseInt(sharedYearParam, 10) : NaN;
+        if (!Number.isNaN(parsedSharedYear) && allYears.has(parsedSharedYear)) {
+          setSelectedYear(parsedSharedYear);
+        } else if (years.includes(currentYear)) {
+          setSelectedYear(currentYear);
+        } else if (years.length > 0) {
+          const sortedActual = [...years].sort((a, b) => b - a);
+          setSelectedYear(sortedActual[0]);
+        } else {
+          setSelectedYear(currentYear);
+        }
       } else {
         const currentYear = new Date().getFullYear();
-        setAvailableYears([currentYear + 1, currentYear]);
+        setAvailableYears([currentYear]);
         setSelectedYear(currentYear);
       }
     } catch (error) {
       console.error("Frontend: Error fetching sport years:", error);
       const currentYear = new Date().getFullYear();
-      setAvailableYears([currentYear + 1, currentYear]);
+      setAvailableYears([currentYear]);
       setSelectedYear(currentYear);
     }
   };
 
-  const fetchSports = async () => {
+  const fetchSports = async (targetYear = selectedYear) => {
+    const reqId = ++sportsReqRef.current;
     try {
       setLoading(true);
       const params = { active: "true" };
-      if (selectedYear) params.year = selectedYear.toString();
+      if (targetYear) params.year = targetYear.toString();
 
       const response = await sportsAPI.getSports(params);
+      if (reqId !== sportsReqRef.current) return;
+
       let sportsList = [];
 
       if (response) {
@@ -139,54 +255,99 @@ const Sports = () => {
       }
 
       setSports(sportsList);
-      if (sportsList.length > 0 && !activeTab) {
-        setActiveTab(sportsList[0]._id);
-      } else if (sportsList.length === 0) {
+      if (sportsList.length > 0) {
+        const matchedSport =
+          sharedSportParam && sportsList.find((s) => s._id === sharedSportParam);
+        setActiveTab(matchedSport ? matchedSport._id : sportsList[0]._id);
+      } else {
         setActiveTab(null);
         setCurrentSport(null);
         setWinners({ first: null, second: null, third: null });
       }
     } catch (error) {
+      if (reqId !== sportsReqRef.current) return;
       console.error("Frontend: Error fetching sports:", error);
       setSports([]);
       setActiveTab(null);
+      setCurrentSport(null);
+      setWinners({ first: null, second: null, third: null });
     } finally {
-      setLoading(false);
+      if (reqId === sportsReqRef.current) {
+        setLoading(false);
+      }
     }
   };
 
   const fetchSportData = async (sportId) => {
+    const reqId = ++sportDataReqRef.current;
     try {
       if (!sportId) return;
       const response = await sportsAPI.getSportWithWinners(sportId);
+      if (reqId !== sportDataReqRef.current) return;
 
       if (response && (response.status === "success" || response.data)) {
         const data = response.data || response;
         setCurrentSport(data.sport);
-        setWinners(data.winners || { first: null, second: null, third: null });
+        const resolvedWinners = data.winners || { first: null, second: null, third: null };
+        setWinners(resolvedWinners);
+
+        if (
+          !handledDeepLinkRef.current &&
+          sharedWinnerParam &&
+          resolvedWinners[sharedWinnerParam]?.imageUrl
+        ) {
+          handledDeepLinkRef.current = true;
+          setShowImageModal({
+            ...resolvedWinners[sharedWinnerParam],
+            _position: sharedWinnerParam,
+          });
+        }
       } else {
         setCurrentSport(null);
         setWinners({ first: null, second: null, third: null });
       }
     } catch (error) {
+      if (reqId !== sportDataReqRef.current) return;
       console.error("Frontend: Error fetching sport data:", error);
       setCurrentSport(null);
       setWinners({ first: null, second: null, third: null });
     }
   };
 
-  const getImageUrl = (imageUrl) => {
-    if (!imageUrl) return null;
-    if (imageUrl.startsWith("http")) return imageUrl;
-    const API_BASE_URL =
-      import.meta.env.VITE_API_URL?.replace("/api", "") ||
-      "http://localhost:5000";
-    return `${API_BASE_URL}${imageUrl}`;
-  };
-
   const toggleList = (rank) => {
     setExpandedList(expandedList === rank ? null : rank);
   };
+
+  const handleShareWinner = useCallback(async (e, winner, position) => {
+    e?.stopPropagation?.();
+    if (!winner) return;
+    const shareUrl = `${window.location.origin}/events/sports?year=${selectedYear}${activeTab ? `&sport=${activeTab}` : ""}${position ? `&winner=${position}` : ""}`;
+    const sportTitle = currentSport?.name || (isMarathi ? "क्रीडा स्पर्धा" : "Sports Tournament");
+    const shareData = {
+      title: `${winner.teamName} — ${sportTitle} (${selectedYear})`,
+      text: isMarathi
+        ? `${sportTitle} ${selectedYear} मधील ${winner.teamName} चा विजयाचा क्षण पहा!`
+        : `Celebrate ${winner.teamName}'s winning moment in ${sportTitle} ${selectedYear}!`,
+      url: shareUrl,
+    };
+
+    if (navigator.share) {
+      try {
+        await navigator.share(shareData);
+        return;
+      } catch (err) {
+        if (err.name === "AbortError") return;
+      }
+    }
+
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      setCopiedRank(position || "shared");
+      setTimeout(() => setCopiedRank(null), 2000);
+    } catch (err) {
+      console.error("Share copy failed:", err);
+    }
+  }, [selectedYear, activeTab, currentSport, isMarathi]);
 
   return (
     <div className="w-full bg-cream font-body text-ink-dark min-h-screen relative overflow-hidden">
@@ -265,27 +426,36 @@ const Sports = () => {
       {/* ═══════════ 3. YEAR & SPORT SELECTOR BAR ═══════════ */}
       <section className="bg-cream border-b border-gold/30 shadow-xs relative z-20 py-6">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4">
-          {/* Year Filter */}
+          {/* Year Filter: Dropdown on Mobile Only, Horizontal Tabs on Tablet/Desktop */}
           {availableYears.length > 0 && (
-            <div className="flex flex-wrap items-center justify-center gap-2 p-1.5 bg-[#180404]/8 border border-amber-500/25 rounded-md max-w-fit mx-auto">
-              <span className="text-xs font-heading font-bold text-maroon uppercase tracking-wider px-2 flex items-center gap-1.5">
-                <Calendar size={13} className="text-saffron shrink-0" />
-                <span>{isMarathi ? "वर्ष:" : "Year:"}</span>
-              </span>
-              {availableYears.map((year) => (
-                <button
-                  key={year}
-                  onClick={() => setSelectedYear(year)}
-                  className={`px-3.5 py-1.5 rounded-md text-xs font-heading font-bold uppercase tracking-wider transition-all duration-200 border cursor-pointer ${
-                    selectedYear === year
-                      ? "bg-gradient-to-r from-amber-400 via-amber-300 to-amber-400 text-maroon-dk border-amber-400/70 shadow-xs"
-                      : "bg-white/80 text-ink-mid border-gold/30 hover:border-gold hover:text-maroon"
-                  }`}
-                >
-                  {year}
-                </button>
-              ))}
-            </div>
+            <>
+              <CustomYearDropdown
+                selectedYear={selectedYear}
+                availableYears={availableYears}
+                onChange={setSelectedYear}
+                isMarathi={isMarathi}
+              />
+
+              <div className="hidden sm:flex flex-wrap items-center justify-center gap-2 p-1.5 bg-[#180404]/8 border border-amber-500/25 rounded-md max-w-fit mx-auto">
+                <span className="text-xs font-heading font-bold text-maroon uppercase tracking-wider px-2 flex items-center gap-1.5">
+                  <Calendar size={13} className="text-saffron shrink-0" />
+                  <span>{isMarathi ? "वर्ष:" : "Year:"}</span>
+                </span>
+                {availableYears.map((year) => (
+                  <button
+                    key={year}
+                    onClick={() => setSelectedYear(year)}
+                    className={`px-3.5 py-1.5 rounded-md text-xs font-heading font-bold uppercase tracking-wider transition-all duration-200 border cursor-pointer ${
+                      selectedYear === year
+                        ? "bg-gradient-to-r from-amber-400 via-amber-300 to-amber-400 text-maroon-dk border-amber-400/70 shadow-xs"
+                        : "bg-white/80 text-ink-mid border-gold/30 hover:border-gold hover:text-maroon"
+                    }`}
+                  >
+                    {year}
+                  </button>
+                ))}
+              </div>
+            </>
           )}
 
           {/* Sports Navigation Tabs (Rectangular Theme) */}
@@ -337,7 +507,7 @@ const Sports = () => {
           </div>
         )}
 
-        {currentSport && (
+        {!loading && sports.length > 0 && currentSport && (
           <div className="space-y-12">
             {/* Sport Banner Overview */}
             <div className="text-center max-w-3xl mx-auto">
@@ -371,8 +541,10 @@ const Sports = () => {
                   onToggle={() => toggleList("second")}
                   onViewMembers={() => setShowMembersModal(winners.second)}
                   onViewImage={() =>
-                    winners.second?.imageUrl && setShowImageModal(winners.second)
+                    winners.second?.imageUrl && setShowImageModal({ ...winners.second, _position: "second" })
                   }
+                  onShare={(e) => handleShareWinner(e, winners.second, "second")}
+                  isCopied={copiedRank === "second"}
                   isMarathi={isMarathi}
                 />
 
@@ -383,8 +555,10 @@ const Sports = () => {
                   onToggle={() => toggleList("first")}
                   onViewMembers={() => setShowMembersModal(winners.first)}
                   onViewImage={() =>
-                    winners.first?.imageUrl && setShowImageModal(winners.first)
+                    winners.first?.imageUrl && setShowImageModal({ ...winners.first, _position: "first" })
                   }
+                  onShare={(e) => handleShareWinner(e, winners.first, "first")}
+                  isCopied={copiedRank === "first"}
                   isMarathi={isMarathi}
                 />
 
@@ -395,8 +569,10 @@ const Sports = () => {
                   onToggle={() => toggleList("third")}
                   onViewMembers={() => setShowMembersModal(winners.third)}
                   onViewImage={() =>
-                    winners.third?.imageUrl && setShowImageModal(winners.third)
+                    winners.third?.imageUrl && setShowImageModal({ ...winners.third, _position: "third" })
                   }
+                  onShare={(e) => handleShareWinner(e, winners.third, "third")}
+                  isCopied={copiedRank === "third"}
                   isMarathi={isMarathi}
                 />
               </div>
@@ -419,19 +595,11 @@ const Sports = () => {
         <WinnerImageModal
           winner={showImageModal}
           onClose={() => setShowImageModal(null)}
+          onShare={(e) => handleShareWinner(e, showImageModal, showImageModal._position)}
+          isCopied={copiedRank === showImageModal._position}
           isMarathi={isMarathi}
         />
       )}
-
-      {/* ═══════════ 5. FOOTER STRIP ═══════════ */}
-      <div className="bg-ink-dark border-t-4 border-gold py-6 text-center">
-        <p className="font-marathi text-[1.1rem] text-gold-lt tracking-wide">
-          || पुंडलिका वरदा हरी विठ्ठल — श्री ज्ञानदेव तुकाराम ||
-        </p>
-        <p className="font-body italic text-cream/45 text-[0.85rem] mt-1 tracking-wider">
-          Shree Vitthal Rakhumai Temple · Amberkarwadi, Ratnagiri
-        </p>
-      </div>
     </div>
   );
 };
@@ -440,10 +608,12 @@ const Sports = () => {
 const WinnerCard = ({
   winner,
   position,
-  expanded,
+  _expanded,
   onToggle,
   onViewMembers,
   onViewImage,
+  onShare,
+  isCopied,
   isMarathi,
 }) => {
   const getImageUrl = (imageUrl) => {
@@ -478,13 +648,16 @@ const WinnerCard = ({
   if (!winner) {
     return (
       <div className={`${config.order} flex flex-col`}>
-        <div className="relative rounded-md border border-dashed border-gold/40 bg-cream-dk/50 p-6 flex flex-col items-center justify-center min-h-[260px]">
-          <div className="w-12 h-12 bg-white rounded-md mb-3 flex items-center justify-center text-gold-dk border border-gold/30">
-            <Users size={20} />
+        <div className="relative bg-cream-dk border-2 border-gold/60 rounded-sm p-1.5 sm:p-2 shadow-xs h-full">
+          <CornerAccents />
+          <div className="border border-dashed border-gold/45 rounded-sm bg-cream/60 p-6 flex flex-col items-center justify-center min-h-[260px] h-full">
+            <div className="w-12 h-12 bg-white rounded-sm mb-3 flex items-center justify-center text-gold-dk border border-gold/30">
+              <Users size={20} />
+            </div>
+            <span className="text-ink-light font-heading text-xs font-bold uppercase tracking-wider">
+              {isMarathi ? "माहिती उपलब्ध नाही" : "Position Vacant"}
+            </span>
           </div>
-          <span className="text-ink-light font-heading text-xs font-bold uppercase tracking-wider">
-            {isMarathi ? "माहिती उपलब्ध नाही" : "Position Vacant"}
-          </span>
         </div>
       </div>
     );
@@ -496,120 +669,185 @@ const WinnerCard = ({
 
   return (
     <div className={`${config.order} flex flex-col group h-full`}>
-      <div className="relative bg-cream-dk rounded-md border border-gold/45 p-6 flex flex-col items-center justify-between shadow-xs hover:border-gold hover:shadow-md transition-colors duration-200 h-full overflow-hidden">
-        {/* Saffron Corner Accents */}
-        <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
-          <CornerAccents />
-        </div>
+      <div className="relative bg-cream-dk border-2 border-gold rounded-sm p-1.5 sm:p-2 shadow-sm h-full flex flex-col">
+        {/* 4 Saffron Corner Brackets */}
+        <CornerAccents />
 
-        {/* Position Badge */}
-        <div
-          className={`absolute top-2.5 right-2.5 ${config.badge} px-2.5 py-0.5 rounded-sm text-[10px] font-heading font-bold uppercase tracking-wider border shadow-xs`}
-        >
-          {config.label}
-        </div>
-
-        <div className="w-full flex flex-col items-center pt-4">
-          {/* Winner Image Frame */}
+        {/* Inner Framed Card */}
+        <div className="relative border border-saffron-lt/60 rounded-sm overflow-hidden bg-cream/95 p-5 sm:p-6 flex flex-col items-center justify-between flex-1">
+          {/* Position Badge */}
           <div
-            className="relative mb-3 rounded-md overflow-hidden bg-stone w-24 h-24 border border-gold/40 shrink-0 cursor-pointer shadow-xs"
-            onClick={onViewImage}
+            className={`absolute top-2.5 right-2.5 ${config.badge} px-2.5 py-0.5 rounded-sm text-[10px] font-heading font-bold uppercase tracking-wider border shadow-xs`}
           >
-            {winner.imageUrl ? (
-              <img
-                src={getImageUrl(winner.imageUrl)}
-                alt={winner.teamName}
-                className="w-full h-full object-cover"
-                onError={(e) => {
-                  e.target.style.display = "none";
-                  e.target.nextSibling.style.display = "flex";
-                }}
-              />
-            ) : null}
-            <div
-              className={`absolute inset-0 flex items-center justify-center bg-stone text-gold-dk ${
-                winner.imageUrl ? "hidden" : "flex"
-              }`}
-            >
-              <Trophy size={32} className="text-maroon/70" />
-            </div>
+            {config.label}
           </div>
 
-          <h3 className="font-display font-bold text-lg text-maroon text-center leading-tight mb-1">
-            {winner.teamName}
-          </h3>
+          <div className="w-full flex flex-col items-center pt-6">
+            {/* Winner Image Frame */}
+            <div
+              className="relative mb-3.5 rounded-sm overflow-hidden bg-stone w-full aspect-[16/10] border-2 border-gold/70 shrink-0 cursor-pointer shadow-xs"
+              onClick={onViewImage}
+            >
+              {winner.imageUrl ? (
+                <img
+                  src={getImageUrl(winner.imageUrl)}
+                  alt={winner.teamName}
+                  className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                  onError={(e) => {
+                    e.target.style.display = "none";
+                    e.target.nextSibling.style.display = "flex";
+                  }}
+                />
+              ) : null}
+              <div
+                className={`absolute inset-0 flex items-center justify-center bg-stone text-gold-dk ${
+                  winner.imageUrl ? "hidden" : "flex"
+                }`}
+              >
+                <Trophy size={32} className="text-maroon/70" />
+              </div>
+            </div>
 
-          <p className="text-xs text-ink-mid font-body mb-4">
-            <span className="text-ink-light mr-1">{isMarathi ? "कर्णधार:" : "Captain:"}</span>
-            <span className="text-maroon font-bold">{winner.captain}</span>
-          </p>
-        </div>
+            <h3 className="font-display font-bold text-lg text-maroon text-center leading-tight mb-1">
+              {winner.teamName}
+            </h3>
 
-        {/* Action Button */}
-        <div className="w-full mt-auto">
-          <button
-            onClick={members.length > 0 ? onViewMembers : onToggle}
-            className="w-full py-2 px-3 rounded-md bg-white border border-gold/40 hover:border-gold text-maroon hover:bg-cream flex items-center justify-between text-xs font-heading font-bold uppercase tracking-wider transition-colors cursor-pointer"
-          >
-            <span>{members.length > 0 ? (isMarathi ? "खेळाडू यादी" : "View Squad") : (isMarathi ? "खेळाडू नाहीत" : "No Members")}</span>
-            {members.length > 0 && (
-              <span className="bg-amber-100 text-maroon px-2 py-0.5 rounded-sm text-[10px]">
-                {members.length}
-              </span>
-            )}
-          </button>
+            <p className="text-xs text-ink-mid font-body mb-4">
+              <span className="text-ink-light mr-1">{isMarathi ? "कर्णधार:" : "Captain:"}</span>
+              <span className="text-maroon font-bold">{winner.captain}</span>
+            </p>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="w-full mt-auto flex items-center gap-2">
+            <button
+              type="button"
+              onClick={members.length > 0 ? onViewMembers : onToggle}
+              className="flex-1 min-w-0 py-2 px-2.5 sm:px-3 rounded-sm bg-white border border-gold/50 hover:border-gold text-maroon hover:bg-cream flex items-center justify-between gap-1.5 text-[11px] sm:text-xs font-heading font-bold uppercase tracking-wider transition-colors cursor-pointer"
+            >
+              <span className="truncate">{members.length > 0 ? (isMarathi ? "खेळाडू यादी" : "View Squad") : (isMarathi ? "खेळाडू नाहीत" : "No Members")}</span>
+              {members.length > 0 && (
+                <span className="bg-amber-100 text-maroon px-1.5 py-0.5 rounded-sm text-[10px] shrink-0">
+                  {members.length}
+                </span>
+              )}
+            </button>
+            <button
+              type="button"
+              onClick={(e) => onShare?.(e)}
+              title={isMarathi ? "विजयाचा क्षण शेअर करा" : "Share Winning Moment"}
+              className="shrink-0 py-2 px-2.5 sm:px-3 rounded-sm bg-gradient-to-r from-amber-400 via-amber-300 to-amber-400 text-maroon-dk border border-amber-500/60 flex items-center justify-center gap-1 text-[11px] sm:text-xs font-heading font-bold uppercase tracking-wider shadow-xs hover:shadow-md transition-all cursor-pointer"
+            >
+              {isCopied ? (
+                <Check size={13} className="text-emerald-700 shrink-0" />
+              ) : (
+                <Share2 size={13} className="shrink-0" />
+              )}
+              <span>{isCopied ? (isMarathi ? "कॉपी!" : "Copied") : isMarathi ? "शेअर" : "Share"}</span>
+            </button>
+          </div>
         </div>
       </div>
     </div>
   );
 };
 
-// Team Members Modal
+// Team Members Modal (Fixed Portal, No Page Scrollbar)
 const TeamMembersModal = ({ winner, onClose, isMarathi }) => {
+  useEffect(() => {
+    if (!winner) return;
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") onClose?.();
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [winner, onClose]);
+
   if (!winner) return null;
 
   const members = winner.members
     ? winner.members.map((m) => (typeof m === "string" ? m : m.name))
     : [];
 
-  return (
-    <Modal isOpen={!!winner} onClose={onClose} title={winner.teamName}>
-      <div className="flex-1 overflow-y-auto p-6 bg-cream">
-        {winner.captain && (
-          <div className="mb-4 p-3.5 bg-maroon rounded-md border border-gold/40 text-gold-lt flex items-center gap-3">
-            <Trophy size={20} className="text-gold" />
-            <div>
-              <p className="text-[10px] text-gold-lt uppercase tracking-widest font-heading font-bold">
-                {isMarathi ? "कर्णधार" : "Team Captain"}
-              </p>
-              <h4 className="text-base font-display font-bold text-white">{winner.captain}</h4>
-            </div>
+  return createPortal(
+    <div
+      className="fixed inset-0 z-[9999] h-[100dvh] w-full overflow-hidden flex items-center justify-center p-3 sm:p-6 bg-black/85 overscroll-none"
+      onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+    >
+      <div
+        className="relative w-full max-w-md max-h-[88dvh] bg-cream border-2 border-gold rounded-sm overflow-hidden flex flex-col shadow-2xl"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Maroon Header */}
+        <div className="bg-gradient-to-r from-[#2c0707] via-[#4a0f0f] to-[#2c0707] px-4 sm:px-5 py-3.5 border-b border-gold/40 flex items-center justify-between gap-3 shrink-0">
+          <div className="min-w-0">
+            <p className="text-[10px] font-heading font-bold uppercase tracking-[0.18em] text-amber-300">
+              {isMarathi ? "संघ खेळाडू यादी" : "Team Squad"}
+            </p>
+            <h3 className="font-heading text-base sm:text-lg font-bold text-white truncate">
+              {winner.teamName}
+            </h3>
           </div>
-        )}
+          <button
+            type="button"
+            aria-label="Close"
+            onClick={onClose}
+            className="shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-white/10 hover:bg-maroon text-amber-200 hover:text-white border border-gold/40 transition-colors cursor-pointer"
+          >
+            <X size={16} />
+          </button>
+        </div>
 
-        <div className="space-y-2">
-          <p className="text-xs font-heading font-bold uppercase tracking-wider text-ink-light mb-2">
-            {isMarathi ? "खेळाडूंची नावे" : "Squad Members"}
-          </p>
-          {members.map((member, index) => (
-            <div
-              key={index}
-              className="flex items-center gap-3 p-2.5 bg-white border border-gold/30 rounded-md text-xs font-body text-ink-dark"
-            >
-              <span className="w-5 h-5 rounded-full bg-cream-dk border border-gold/30 flex items-center justify-center font-bold text-maroon text-[10px]">
-                {index + 1}
-              </span>
-              <span className="font-medium">{member}</span>
+        {/* Scrollable Squad Body */}
+        <div className="flex-1 min-h-0 overflow-y-auto p-4 sm:p-5 bg-cream">
+          {winner.captain && (
+            <div className="mb-4 p-3.5 bg-maroon rounded-sm border border-gold/40 text-gold-lt flex items-center gap-3">
+              <Trophy size={20} className="text-gold shrink-0" />
+              <div className="min-w-0">
+                <p className="text-[10px] text-gold-lt uppercase tracking-widest font-heading font-bold">
+                  {isMarathi ? "कर्णधार" : "Team Captain"}
+                </p>
+                <h4 className="text-base font-display font-bold text-white truncate">{winner.captain}</h4>
+              </div>
             </div>
-          ))}
+          )}
+
+          <div className="space-y-2">
+            <p className="text-xs font-heading font-bold uppercase tracking-wider text-ink-light mb-2">
+              {isMarathi ? "खेळाडूंची नावे" : "Squad Members"}
+            </p>
+            {members.map((member, index) => (
+              <div
+                key={index}
+                className="flex items-center gap-3 p-2.5 bg-white border border-gold/30 rounded-sm text-xs sm:text-sm font-body text-ink-dark"
+              >
+                <span className="w-6 h-6 shrink-0 rounded-full bg-cream-dk border border-gold/30 flex items-center justify-center font-bold text-maroon text-[11px]">
+                  {index + 1}
+                </span>
+                <span className="font-medium">{member}</span>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
-    </Modal>
+    </div>,
+    document.body
   );
 };
 
-// Winner Image Modal
-const WinnerImageModal = ({ winner, onClose }) => {
+// Winner Image Modal (Fixed Portal, No Scrollbar)
+const WinnerImageModal = ({ winner, onClose, onShare, isCopied, isMarathi }) => {
+  useEffect(() => {
+    if (!winner) return;
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") onClose?.();
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [winner, onClose]);
+
   if (!winner || !winner.imageUrl) return null;
 
   const getImageUrl = (imageUrl) => {
@@ -621,22 +859,72 @@ const WinnerImageModal = ({ winner, onClose }) => {
     return `${API_BASE_URL}${imageUrl}`;
   };
 
-  return (
-    <Modal isOpen={!!winner} onClose={onClose} title={winner.teamName}>
-      <div className="relative flex flex-col bg-cream p-4">
-        <div className="flex items-center justify-center min-h-[300px] overflow-hidden rounded-md border border-gold/30 bg-black">
+  return createPortal(
+    <div
+      className="fixed inset-0 z-[9999] h-[100dvh] w-full overflow-hidden flex items-center justify-center p-3 sm:p-6 bg-black/90 overscroll-none"
+      onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+    >
+      <div
+        className="relative w-full max-w-3xl max-h-[90dvh] bg-gradient-to-b from-[#1c0505] to-[#0c0202] border-2 border-gold/60 rounded-sm p-3 sm:p-5 overflow-hidden flex flex-col shadow-2xl"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex justify-between items-center gap-3 mb-3 border-b border-amber-500/25 pb-2.5">
+          <h3 className="text-white font-heading text-base sm:text-xl font-bold truncate">
+            {winner.teamName}
+          </h3>
+          <button
+            type="button"
+            aria-label="Close"
+            onClick={onClose}
+            className="shrink-0 w-9 h-9 flex items-center justify-center text-amber-200 hover:text-white bg-white/5 hover:bg-maroon rounded-full border border-gold/40 transition-colors cursor-pointer"
+          >
+            <X size={18} />
+          </button>
+        </div>
+
+        <div className="flex-1 min-h-0 flex items-center justify-center bg-black/50 rounded-sm p-2 border border-gold/20">
           <img
             src={getImageUrl(winner.imageUrl)}
             alt={winner.teamName}
-            className="max-w-full max-h-[70vh] object-contain rounded-md"
+            className="max-h-[60dvh] sm:max-h-[68dvh] w-auto max-w-full object-contain mx-auto rounded-sm"
           />
         </div>
-        <div className="pt-3 text-center">
-          <h3 className="font-display font-bold text-lg text-maroon">{winner.teamName}</h3>
-          <p className="text-xs text-ink-mid">Captain: {winner.captain}</p>
+
+        <div className="pt-3 flex flex-col sm:flex-row items-center justify-between gap-3">
+          <div className="text-center sm:text-left min-w-0">
+            <h4 className="font-display font-bold text-base sm:text-lg text-amber-200 truncate">{winner.teamName}</h4>
+            {winner.captain && (
+              <p className="text-xs text-cream/80 mt-0.5">
+                {isMarathi ? "कर्णधार:" : "Captain:"} {winner.captain}
+              </p>
+            )}
+          </div>
+          <button
+            type="button"
+            onClick={(e) => onShare?.(e)}
+            className="w-full sm:w-auto shrink-0 inline-flex items-center justify-center gap-1.5 bg-gradient-to-r from-amber-400 via-amber-300 to-amber-400 text-maroon-dk px-4 py-2 rounded-sm text-xs font-heading font-bold uppercase tracking-wider shadow-xs cursor-pointer"
+          >
+            {isCopied ? (
+              <Check size={14} className="text-emerald-700 shrink-0" />
+            ) : (
+              <Share2 size={14} className="shrink-0" />
+            )}
+            <span>
+              {isCopied
+                ? isMarathi
+                  ? "लिंक कॉपी झाली!"
+                  : "Link Copied!"
+                : isMarathi
+                  ? "क्षण शेअर करा"
+                  : "Share Moment"}
+            </span>
+          </button>
         </div>
       </div>
-    </Modal>
+    </div>,
+    document.body
   );
 };
 

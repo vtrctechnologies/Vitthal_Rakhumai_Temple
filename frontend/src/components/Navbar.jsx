@@ -53,7 +53,7 @@ const DesktopNavItem = memo(({ link, active, isActive, isMarathi }) => {
 
   const handleMouseLeave = useCallback(() => {
     if (link.dropdown) {
-      closeTimer.current = setTimeout(() => setOpen(false), 160);
+      closeTimer.current = setTimeout(() => setOpen(false), 220);
     }
   }, [link.dropdown]);
 
@@ -74,16 +74,16 @@ const DesktopNavItem = memo(({ link, active, isActive, isMarathi }) => {
       <Link
         to={link.path}
         className={`group relative flex items-center gap-1.5 px-3 py-1.5 rounded-md font-heading text-[0.72rem] tracking-[0.14em] uppercase transition-all duration-200 select-none leading-none ${active
-          ? "text-amber-100 font-bold bg-gradient-to-r from-amber-500/25 via-amber-400/20 to-amber-500/25 border border-amber-400/40 shadow-[0_0_12px_rgba(245,158,11,0.22)]"
-          : "text-amber-100/75 hover:text-amber-100 hover:bg-white/[0.06] border border-transparent font-semibold"
+          ? "text-gold-lt font-bold bg-amber-500/20 border border-gold/40 shadow-[0_0_12px_rgba(212,175,55,0.22)]"
+          : "text-cream/75 hover:text-gold-lt hover:bg-white/[0.06] border border-transparent font-semibold"
           }`}
         aria-expanded={link.dropdown ? open : undefined}
       >
         <IconComponent
           size={13}
           className={`transition-colors duration-200 ${active
-            ? "text-amber-300 drop-shadow-[0_0_6px_rgba(245,158,11,0.5)]"
-            : "text-amber-400/70 group-hover:text-amber-300"
+            ? "text-gold-lt drop-shadow-[0_0_6px_rgba(212,175,55,0.5)]"
+            : "text-amber-400/70 group-hover:text-gold-lt"
             }`}
         />
 
@@ -101,7 +101,7 @@ const DesktopNavItem = memo(({ link, active, isActive, isMarathi }) => {
         {link.dropdown && (
           <ChevronDown
             size={11}
-            className={`text-amber-400/70 transition-transform duration-200 ${open ? "rotate-180 text-amber-300" : "group-hover:text-amber-300"
+            className={`text-gold/70 transition-transform duration-200 ${open ? "rotate-180 text-gold-lt" : "group-hover:text-gold-lt"
               }`}
           />
         )}
@@ -115,12 +115,22 @@ const DesktopNavItem = memo(({ link, active, isActive, isMarathi }) => {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 4, scale: 0.98 }}
             transition={{ duration: 0.16, ease: "easeOut" }}
-            className="absolute top-full left-1/2 -translate-x-1/2 min-w-[310px] pt-2 z-50 origin-top"
+            className="absolute top-full left-1/2 -translate-x-1/2 min-w-[310px] pt-2 z-[100] origin-top pointer-events-auto"
           >
             {/* Card Shell */}
-            <div className="relative rounded-md bg-gradient-to-b from-[#1c0505]/98 via-[#140303]/98 to-[#0c0202]/98 border border-amber-500/35 backdrop-blur-xl shadow-[0_16px_40px_rgba(0,0,0,0.7),0_0_16px_rgba(212,175,55,0.1)] p-2 overflow-hidden">
+            <div className="relative rounded-md bg-maroon-dk border border-gold/40 shadow-[0_16px_40px_rgba(0,0,0,0.7),0_0_16px_rgba(212,175,55,0.1)] p-2 overflow-hidden">
+              {/* Subtle Pattern Background (Exact match to Footer) */}
+              <div
+                className="absolute inset-0 z-0 opacity-10 pointer-events-none"
+                style={{
+                  backgroundImage:
+                    "repeating-linear-gradient(45deg, var(--color-gold) 0, var(--color-gold) 1px, transparent 0, transparent 50%)",
+                  backgroundSize: "20px 20px",
+                }}
+              />
+
               {/* Top ambient gold filament */}
-              <div className="absolute top-0 left-0 right-0 h-[1.5px] bg-gradient-to-r from-transparent via-amber-400 to-transparent" />
+              <div className="absolute top-0 left-0 right-0 h-[1.5px] bg-gradient-to-r from-transparent via-gold to-transparent z-10" />
 
               <div className="flex flex-col gap-1 relative z-10 pt-0.5">
                 {link.dropdown.map((sub) => {
@@ -133,8 +143,8 @@ const DesktopNavItem = memo(({ link, active, isActive, isMarathi }) => {
                       to={sub.path}
                       onClick={() => setOpen(false)}
                       className={`group flex items-center justify-between p-2 rounded-md transition-all duration-150 border ${isSubActive
-                        ? "bg-amber-500/15 border-amber-400/35 text-amber-100"
-                        : "border-transparent hover:bg-white/[0.05] hover:border-amber-500/20 text-cream/80 hover:text-white"
+                        ? "bg-amber-500/15 border-gold/40 text-gold-lt"
+                        : "border-transparent hover:bg-white/[0.05] hover:border-gold/20 text-cream/80 hover:text-gold-lt"
                         }`}
                     >
                       <div className="flex items-center gap-2.5 min-w-0">
@@ -142,17 +152,17 @@ const DesktopNavItem = memo(({ link, active, isActive, isMarathi }) => {
                         <div
                           className={`w-7 h-7 rounded-sm flex items-center justify-center shrink-0 transition-all duration-200 ${isSubActive
                             ? "bg-gradient-to-r from-amber-400 via-amber-300 to-amber-400 text-[#2b0808] shadow-[0_0_10px_rgba(245,158,11,0.4)]"
-                            : "bg-amber-500/10 text-amber-300 border border-amber-500/20 group-hover:bg-amber-400 group-hover:text-[#2b0808] group-hover:border-amber-300"
+                            : "bg-amber-500/10 text-gold-lt border border-gold/20 group-hover:bg-amber-400 group-hover:text-[#2b0808] group-hover:border-gold"
                             }`}
                         >
                           <SubIcon size={14} />
                         </div>
 
                         <div className="flex flex-col text-left min-w-0">
-                          <span className="font-heading text-[0.74rem] font-bold tracking-wider uppercase text-amber-100 group-hover:text-amber-200 transition-colors truncate">
+                          <span className="font-heading text-[0.74rem] font-bold tracking-wider uppercase text-gold-lt transition-colors truncate">
                             {isMarathi ? sub.mr : sub.name}
                           </span>
-                          <span className="font-marathi text-[0.66rem] text-amber-200/60 group-hover:text-amber-200/85 transition-colors leading-tight truncate">
+                          <span className="font-marathi text-[0.66rem] text-cream/65 group-hover:text-cream/90 transition-colors leading-tight truncate">
                             {isMarathi ? sub.descMr : sub.desc}
                           </span>
                         </div>
@@ -160,7 +170,7 @@ const DesktopNavItem = memo(({ link, active, isActive, isMarathi }) => {
 
                       <ChevronRight
                         size={13}
-                        className={`text-amber-400/40 group-hover:text-amber-300 transition-transform duration-150 transform group-hover:translate-x-0.5 shrink-0 ${isSubActive ? "text-amber-300 opacity-100" : ""
+                        className={`text-gold/40 group-hover:text-gold-lt transition-transform duration-150 transform group-hover:translate-x-0.5 shrink-0 ${isSubActive ? "text-gold-lt opacity-100" : ""
                           }`}
                       />
                     </Link>
@@ -169,14 +179,14 @@ const DesktopNavItem = memo(({ link, active, isActive, isMarathi }) => {
               </div>
 
               {/* Dropdown Auxiliary Footer: Darshan Times */}
-              <div className="mt-1.5 pt-1.5 border-t border-amber-500/15 px-2.5 py-1.5 flex items-center justify-between bg-amber-500/[0.04] rounded-sm text-[0.66rem] text-amber-200/80">
+              <div className="mt-1.5 pt-1.5 border-t border-gold/20 px-2.5 py-1.5 flex items-center justify-between bg-black/25 rounded-sm text-[0.66rem] text-cream/75 relative z-10">
                 <span className="flex items-center gap-1.5 font-marathi">
-                  <Clock size={11} className="text-amber-400 shrink-0" />
+                  <Clock size={11} className="text-gold-lt shrink-0" />
                   {isMarathi ? "दर्शन: स. ६ ते रा. ९" : "Darshan: 6 AM – 9 PM"}
                 </span>
-                <span className="font-marathi font-medium text-amber-300 flex items-center gap-1">
-                  <SacredOm className="text-amber-400 text-[0.75rem]" />
-                  <span>{isMarathi ? "पंढरपूर रूप" : "Ratnagiri"}</span>
+                <span className="font-marathi font-medium text-gold-lt flex items-center gap-1">
+                  <SacredOm className="text-gold-lt text-[0.75rem]" />
+                  <span>{isMarathi ? "रत्नागिरी" : "Ratnagiri"}</span>
                 </span>
               </div>
             </div>
@@ -198,20 +208,44 @@ const Navbar = memo(() => {
   const location = useLocation();
   const { isMarathi } = useLanguage();
 
-  // Lock scroll when mobile menu is open
+  // Lock scroll and pause Lenis when mobile menu is open (smoothly without layout reflow)
   useEffect(() => {
-    document.body.style.overflow = isOpen ? "hidden" : "";
-    return () => {
+    if (isOpen) {
+      if (window.lenis) window.lenis.stop();
+      document.body.style.overflow = "hidden";
+      document.body.style.touchAction = "none";
+    } else {
+      if (window.lenis) window.lenis.start();
       document.body.style.overflow = "";
+      document.body.style.touchAction = "";
+    }
+    return () => {
+      if (window.lenis) window.lenis.start();
+      document.body.style.overflow = "";
+      document.body.style.touchAction = "";
     };
   }, [isOpen]);
 
-  // Track scroll state for sleek dock transition
+  // Track scroll state with zero-lag requestAnimationFrame throttling
   useEffect(() => {
+    let ticking = false;
+    let lastScrolled = window.scrollY > 20;
+    setScrolled(lastScrolled);
+
     const onScroll = () => {
-      setScrolled(window.scrollY > 20);
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          const isScrolled = window.scrollY > 20;
+          if (isScrolled !== lastScrolled) {
+            lastScrolled = isScrolled;
+            setScrolled(isScrolled);
+          }
+          ticking = false;
+        });
+        ticking = true;
+      }
     };
-    onScroll();
+
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
@@ -323,52 +357,65 @@ const Navbar = memo(() => {
   return (
     <>
       <header
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ease-out ${scrolled
-          ? "py-2 bg-[#120303]/95 backdrop-blur-xl border-b border-amber-500/25 shadow-[0_8px_32px_rgba(0,0,0,0.55)]"
-          : "py-3 sm:py-3.5 bg-gradient-to-b from-[#180303]/90 via-[#130202]/85 to-transparent backdrop-blur-sm border-b border-amber-500/15"
-          }`}
+        className={`fixed top-0 left-0 right-0 z-50 bg-maroon-dk text-cream border-b-2 border-gold/40 py-2.5 sm:py-3 transition-shadow duration-200 transform-gpu ${
+          scrolled ? "shadow-[0_6px_28px_rgba(0,0,0,0.75)]" : "shadow-[0_2px_14px_rgba(0,0,0,0.45)]"
+        }`}
       >
-        {/* Sacred Golden Top Filament Line */}
-        <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-amber-400 to-transparent opacity-85 shadow-[0_0_8px_rgba(245,158,11,0.6)]" />
+        {/* Subtle Sacred Diagonal Texture Overlay (Exact match to Footer, pinned to header bounds) */}
+        <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
+          <div
+            className="absolute inset-0 opacity-10"
+            style={{
+              backgroundImage:
+                "repeating-linear-gradient(45deg, var(--color-gold) 0, var(--color-gold) 1px, transparent 0, transparent 50%)",
+              backgroundSize: "20px 20px",
+            }}
+          />
+        </div>
 
-        <div className="max-w-7xl mx-auto px-3.5 sm:px-6 flex items-center justify-between gap-3 sm:gap-4">
+        {/* Sacred Golden Top Filament Line */}
+        <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-gold to-transparent opacity-90 z-10 pointer-events-none" />
+
+        <div className="max-w-7xl mx-auto px-2.5 sm:px-6 flex items-center justify-between gap-2 sm:gap-4 relative z-10">
           {/* ── Brand / Temple Deity Crest ── */}
           <Link
             to="/"
-            className="group flex items-center gap-2.5 sm:gap-3.5 shrink-0 py-0.5 min-w-0"
+            className="group flex items-center gap-2 sm:gap-3.5 min-w-0 flex-1 sm:flex-initial py-0.5"
             onClick={() => setIsOpen(false)}
             aria-label="Home"
           >
             {/* Medallion with luminous gold rim & subtle sacred halo */}
-            <div className="relative w-9 h-9 sm:w-11 sm:h-11 shrink-0 rounded-full border-2 border-amber-400/60 p-[2px] bg-gradient-to-tr from-amber-600/30 via-[#220707] to-amber-400/30 group-hover:border-amber-300 group-hover:shadow-[0_0_14px_rgba(245,158,11,0.4)] transition-all duration-300">
+            <div className="relative w-8 h-8 sm:w-10 sm:h-10 md:w-11 md:h-11 shrink-0 rounded-full border-2 border-gold/60 p-[2px] bg-gradient-to-tr from-amber-600/30 via-[#220707] to-gold/30 group-hover:border-gold-lt transition-all duration-300 shadow-md">
               <div className="w-full h-full rounded-full overflow-hidden bg-[#180303]">
                 <img
                   src="/temple-logo-optimized.png"
                   alt="Shree Vitthal Rakhumai Mandir Trust Logo"
                   loading="eager"
-                  className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-108"
+                  className="w-full h-full object-cover transition-transform duration-200 group-hover:scale-105"
                 />
               </div>
             </div>
 
-            {/* Typography Stack */}
+            {/* Typography Stack (Exact match to Footer fonts and colors) */}
             <div className="flex flex-col text-left min-w-0">
-              <div className="flex items-center gap-1.5">
-                <span className="font-marathi text-[0.88rem] sm:text-[1.02rem] font-bold text-amber-100 tracking-wide leading-tight group-hover:text-amber-200 transition-colors truncate">
+              <div className="flex items-center gap-1.5 min-w-0">
+                <span className={`text-[0.82rem] sm:text-[1rem] md:text-[1.1rem] font-bold text-gold-lt tracking-wide leading-tight group-hover:text-amber-200 transition-colors drop-shadow-md truncate ${
+                  isMarathi ? "font-marathi" : "font-display"
+                }`}>
                   {isMarathi ? "श्री विठ्ठल रखुमाई" : "Shree Vitthal Rakhumai"}
                 </span>
-                <SacredOm className="hidden sm:inline-block text-amber-400/70 text-[0.8rem]" />
+                <SacredOm className="hidden sm:inline-block text-gold-lt/80 text-[0.8rem] shrink-0" />
               </div>
 
-              <div className="flex items-center gap-2">
-                <span className="font-heading text-[0.58rem] sm:text-[0.66rem] font-semibold text-amber-300/80 tracking-[0.2em] uppercase leading-tight group-hover:text-amber-200 transition-colors">
+              <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
+                <span className="font-heading text-[0.52rem] sm:text-[0.62rem] md:text-[0.66rem] font-semibold text-saffron-lt tracking-[0.2em] uppercase leading-tight group-hover:text-gold-lt transition-colors truncate">
                   {isMarathi ? "मंदिर" : "Mandir"}
                 </span>
-                <span className="hidden md:inline-block text-[0.55rem] text-amber-400/40">
+                <span className="hidden md:inline-block text-[0.55rem] text-gold/40">
                   •
                 </span>
-                <span className="hidden md:flex items-center gap-1 font-body text-[0.64rem] text-cream/70 tracking-wider">
-                  <MapPin size={10} className="text-amber-400 shrink-0" />
+                <span className="hidden md:flex items-center gap-1 font-body text-[0.65rem] text-cream/75 tracking-wider truncate">
+                  <MapPin size={10} className="text-gold-lt shrink-0" />
                   {isMarathi ? "आंबेकरवाडी · रत्नागिरी" : "Ambekarwadi · Ratnagiri"}
                 </span>
               </div>
@@ -378,7 +425,7 @@ const Navbar = memo(() => {
           {/* ── Modern Floating Desktop Nav Capsule (Rectangular Temple Architecture) ── */}
           <nav
             aria-label="Main Navigation"
-            className="hidden lg:flex items-center justify-center gap-1 xl:gap-1.5 px-2.5 py-1.5 rounded-md bg-black/45 border border-amber-500/25 backdrop-blur-md shadow-[inset_0_1px_1px_rgba(255,255,255,0.06),0_4px_16px_rgba(0,0,0,0.35)]"
+            className="hidden lg:flex items-center justify-center gap-1 xl:gap-1.5 px-3 py-1.5 rounded-md bg-[#220505]/75 border border-gold/30 shadow-[inset_0_1px_1px_rgba(255,255,255,0.06),0_4px_16px_rgba(0,0,0,0.35)] relative z-10"
           >
             {navLinks.map((link) => (
               <DesktopNavItem
@@ -392,18 +439,15 @@ const Navbar = memo(() => {
           </nav>
 
           {/* ── Right Action Hub (Aesthetic Donation CTA + Language Switch + Menu Toggle) ── */}
-          <div className="flex items-center gap-2.5 sm:gap-3 shrink-0">
-            {/* Primary Spiritual Offering CTA: Donate / देणगी */}
+          <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0 relative z-10">
+            {/* Primary Spiritual Offering CTA: Donate / देणगी (Exact match to Footer button) */}
             <Link
               to="/donation"
-              className="group relative inline-flex items-center justify-center gap-1.5 sm:gap-2 h-7.5 sm:h-8 px-3 sm:px-4 rounded-md font-heading text-[0.68rem] sm:text-[0.76rem] font-bold tracking-wider uppercase bg-gradient-to-r from-amber-400 via-amber-300 to-amber-500 hover:from-amber-300 hover:to-amber-200 text-[#2b0808] shadow-[0_2px_14px_rgba(245,158,11,0.32)] hover:shadow-[0_4px_20px_rgba(245,158,11,0.5)] active:scale-95 transition-all duration-200 select-none overflow-hidden leading-none"
+              className="hidden sm:inline-flex group relative items-center justify-center gap-1.5 h-9 px-4 rounded-md font-heading text-xs font-bold tracking-wider uppercase bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-[#2b0808] border border-amber-400/60 shadow-xs hover:shadow-sm active:scale-95 transition-all duration-200 select-none leading-none shrink-0"
             >
-              {/* Subtle inner shimmer sweep */}
-              <span className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/30 to-transparent ease-out" />
-
               <Heart
                 size={13}
-                className="fill-[#2b0808] text-[#2b0808] shrink-0 sm:w-3.5 sm:h-3.5 transition-transform duration-200 group-hover:scale-110"
+                className="fill-[#2b0808] text-[#2b0808] shrink-0"
               />
               <span className="whitespace-nowrap relative z-10">
                 {isMarathi ? "देणगी" : "Donate"}
@@ -411,14 +455,14 @@ const Navbar = memo(() => {
             </Link>
 
             {/* Language Switcher on larger screens */}
-            <div className="hidden sm:flex items-center">
+            <div className="hidden sm:flex items-center shrink-0">
               <Switch />
             </div>
 
-            {/* Mobile Menu Trigger Button */}
+            {/* Mobile Menu Trigger Button (Always visible on mobile & tablet < lg) */}
             <button
               type="button"
-              className="flex lg:hidden items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-amber-500/10 border border-amber-500/30 hover:border-amber-400 hover:bg-amber-500/20 text-amber-200 transition-all active:scale-90 cursor-pointer shrink-0 shadow-xs"
+              className="flex lg:hidden items-center justify-center w-9 h-9 rounded-md bg-amber-500/15 border border-gold/40 hover:border-gold hover:bg-amber-500/25 text-gold-lt transition-all active:scale-90 cursor-pointer shrink-0 shadow-xs"
               onClick={() => setIsOpen((prev) => !prev)}
               aria-label={isOpen ? "Close menu" : "Open menu"}
               aria-expanded={isOpen}
@@ -429,201 +473,216 @@ const Navbar = memo(() => {
         </div>
       </header>
 
-      {/* ── Aesthetic Mobile Navigation Drawer / Slide-Over Sheet ── */}
-      <AnimatePresence>
-        {isOpen && (
-          <>
-            {/* Backdrop Blur Overlay */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.22 }}
-              className="fixed inset-0 z-50 bg-black/65 backdrop-blur-sm lg:hidden"
+      {/* ── Aesthetic Mobile Navigation Drawer / Slide-Over Sheet (Hardware-Composited Zero Lag) ── */}
+      {/* Backdrop Overlay */}
+      <div
+        className={`fixed inset-0 z-[65] bg-black/75 lg:hidden transition-opacity duration-300 ease-out ${
+          isOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+        }`}
+        style={{ willChange: "opacity" }}
+        onClick={() => setIsOpen(false)}
+        aria-hidden="true"
+      />
+
+      {/* Slide-in Aesthetic Temple Sheet (Full Height Mobile Drawer) */}
+      <div
+        className={`fixed inset-y-0 right-0 z-[70] w-[86vw] max-w-[340px] h-full h-[100dvh] bg-maroon-dk text-cream border-l-2 border-gold/40 shadow-2xl flex flex-col justify-between overflow-hidden lg:hidden transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] transform-gpu ${
+          isOpen ? "translate-x-0 pointer-events-auto" : "translate-x-full pointer-events-none"
+        }`}
+        style={{
+          willChange: "transform",
+          WebkitBackfaceVisibility: "hidden",
+          backfaceVisibility: "hidden",
+        }}
+      >
+        {/* Subtle Pattern Background (Exact match to Footer, GPU cached) */}
+        <div
+          className="absolute inset-0 z-0 opacity-10 pointer-events-none transform-gpu"
+          style={{
+            backgroundImage:
+              "repeating-linear-gradient(45deg, var(--color-gold) 0, var(--color-gold) 1px, transparent 0, transparent 50%)",
+            backgroundSize: "20px 20px",
+            transform: "translateZ(0)",
+          }}
+        />
+
+        {/* Mobile Drawer Top Section (Scrollable content) */}
+        <div
+          className="relative z-10 flex-1 overflow-y-auto flex flex-col"
+          style={{ touchAction: "pan-y", WebkitOverflowScrolling: "touch" }}
+        >
+          {/* Header */}
+          <div className="p-3.5 sm:p-4 flex items-center justify-between border-b border-gold/25 bg-black/35">
+            <Link
+              to="/"
+              className="flex items-center gap-2.5"
               onClick={() => setIsOpen(false)}
-            />
-
-            {/* Slide-in Aesthetic Temple Sheet */}
-            <motion.div
-              initial={{ x: "100%" }}
-              animate={{ x: 0 }}
-              exit={{ x: "100%" }}
-              transition={{ type: "spring", damping: 28, stiffness: 280 }}
-              className="fixed top-0 right-0 bottom-0 z-50 w-[86vw] max-w-[340px] bg-gradient-to-b from-[#1c0505] via-[#140303] to-[#0c0202] border-l border-amber-500/30 shadow-2xl flex flex-col justify-between overflow-y-auto lg:hidden"
             >
-              {/* Mobile Drawer Top Section */}
-              <div>
-                {/* Header */}
-                <div className="p-3.5 sm:p-4 flex items-center justify-between border-b border-amber-500/20 bg-black/30">
-                  <Link
-                    to="/"
-                    className="flex items-center gap-2.5"
-                    onClick={() => setIsOpen(false)}
-                  >
-                    <div className="w-8 h-8 rounded-full border border-amber-400/60 p-0.5 shrink-0 bg-[#180303]">
-                      <img
-                        src="/temple-logo-optimized.png"
-                        alt="Temple Logo"
-                        className="w-full h-full object-cover rounded-full"
-                      />
-                    </div>
-                    <div className="flex flex-col text-left">
-                      <span className="font-marathi text-[0.86rem] font-bold text-amber-200 leading-tight">
-                        {isMarathi ? "श्री विठ्ठल रखुमाई" : "Shree Vitthal Rakhumai"}
-                      </span>
-                      <span className="font-heading text-[0.58rem] text-amber-300/80 tracking-widest uppercase">
-                        {isMarathi ? "मंदिर ट्रस्ट" : "Mandir Trust"}
-                      </span>
-                    </div>
-                  </Link>
-
-                  <button
-                    onClick={() => setIsOpen(false)}
-                    className="w-8 h-8 rounded-lg bg-amber-500/10 border border-amber-500/25 flex items-center justify-center text-amber-200 hover:bg-amber-500/20 transition-colors cursor-pointer"
-                    aria-label="Close menu"
-                  >
-                    <X size={16} />
-                  </button>
-                </div>
-
-                {/* Devotional Shloka Banner with Language Switcher */}
-                <div className="px-4 py-2 bg-gradient-to-r from-amber-500/15 via-gold/10 to-amber-500/15 border-b border-amber-500/20 flex items-center justify-between">
-                  <span className="font-marathi text-xs text-amber-200 font-bold tracking-wide flex items-center gap-1.5">
-                    <SacredOm className="text-amber-400 text-[0.75rem]" />
-                    <span>|| राम कृष्ण हरी ||</span>
-                  </span>
-                  <div className="sm:hidden">
-                    <Switch />
-                  </div>
-                </div>
-
-                {/* Mobile Navigation Links */}
-                <div className="p-3 flex flex-col gap-1.5">
-                  {navLinks.map((link) => {
-                    const active =
-                      isActive(link.path) || isParActive(link.path);
-                    const isExpanded = mobileExpanded[link.name];
-                    const LinkIcon = link.icon;
-
-                    return (
-                      <div
-                        key={link.path}
-                        className="rounded-xl overflow-hidden border border-amber-500/20 bg-white/[0.02]"
-                      >
-                        <div className="flex items-center justify-between">
-                          <Link
-                            to={link.path}
-                            onClick={() => !link.dropdown && setIsOpen(false)}
-                            className={`flex-1 flex items-center gap-2.5 px-3 py-2.5 font-heading text-[0.78rem] font-semibold tracking-wider uppercase transition-colors ${active
-                              ? "text-amber-200 bg-amber-500/15 font-bold"
-                              : "text-cream/85 hover:text-amber-200"
-                              }`}
-                          >
-                            <LinkIcon
-                              size={15}
-                              className={
-                                active ? "text-amber-300" : "text-amber-400/70"
-                              }
-                            />
-                            <span>{isMarathi ? link.mr : link.name}</span>
-                            {link.hasLive && (
-                              <span className="text-[8px] px-1.5 py-0.5 rounded-full bg-saffron text-white font-bold tracking-widest shadow-[0_0_6px_rgba(232,101,10,0.8)]">
-                                LIVE
-                              </span>
-                            )}
-                          </Link>
-
-                          {link.dropdown && (
-                            <button
-                              type="button"
-                              onClick={() => toggleMobileSubmenu(link.name)}
-                              className="w-11 h-10 flex items-center justify-center text-amber-400/70 hover:text-amber-200 border-l border-amber-500/15 active:bg-amber-500/10 transition-colors cursor-pointer"
-                              aria-label={
-                                isExpanded ? "Collapse submenu" : "Expand submenu"
-                              }
-                            >
-                              <ChevronDown
-                                size={15}
-                                className={`transform transition-transform duration-200 ${isExpanded ? "rotate-180 text-amber-300" : ""
-                                  }`}
-                              />
-                            </button>
-                          )}
-                        </div>
-
-                        {/* Collapsible Submenu */}
-                        <AnimatePresence>
-                          {link.dropdown && isExpanded && (
-                            <motion.div
-                              initial={{ height: 0, opacity: 0 }}
-                              animate={{ height: "auto", opacity: 1 }}
-                              exit={{ height: 0, opacity: 0 }}
-                              transition={{ duration: 0.18 }}
-                              className="px-2.5 pb-2.5 pt-1 flex flex-col gap-1 border-t border-amber-500/15 bg-black/25"
-                            >
-                              {link.dropdown.map((sub) => {
-                                const SubIcon = sub.icon || Sparkles;
-                                const isSubActive = isActive(sub.path);
-
-                                return (
-                                  <Link
-                                    key={sub.path}
-                                    to={sub.path}
-                                    onClick={() => setIsOpen(false)}
-                                    className={`flex items-center gap-2.5 p-2 rounded-lg text-xs font-heading font-medium tracking-wide transition-colors ${isSubActive
-                                      ? "text-amber-200 bg-amber-500/20 font-semibold"
-                                      : "text-cream/70 hover:text-amber-200 hover:bg-white/5"
-                                      }`}
-                                  >
-                                    <div className="w-5 h-5 rounded flex items-center justify-center bg-amber-500/10 text-amber-300 shrink-0">
-                                      <SubIcon size={12} />
-                                    </div>
-                                    <div className="flex flex-col text-left min-w-0">
-                                      <span className="text-[0.74rem] font-semibold text-amber-100 truncate">
-                                        {isMarathi ? sub.mr : sub.name}
-                                      </span>
-                                      <span className="font-marathi text-[9px] text-cream/50 leading-tight truncate">
-                                        {isMarathi ? sub.descMr : sub.desc}
-                                      </span>
-                                    </div>
-                                  </Link>
-                                );
-                              })}
-                            </motion.div>
-                          )}
-                        </AnimatePresence>
-                      </div>
-                    );
-                  })}
-                </div>
+              <div className="w-8 h-8 rounded-full border border-gold/60 p-0.5 shrink-0 bg-[#180303] shadow-xs">
+                <img
+                  src="/temple-logo-optimized.png"
+                  alt="Temple Logo"
+                  className="w-full h-full object-cover rounded-full"
+                />
               </div>
+              <div className="flex flex-col text-left">
+                <span className={`text-[0.88rem] font-bold text-gold-lt leading-tight ${
+                  isMarathi ? "font-marathi" : "font-display"
+                }`}>
+                  {isMarathi ? "श्री विठ्ठल रखुमाई" : "Shree Vitthal Rakhumai"}
+                </span>
+                <span className="font-heading text-[0.58rem] text-saffron-lt tracking-widest uppercase font-semibold">
+                  {isMarathi ? "मंदिर ट्रस्ट" : "Mandir Trust"}
+                </span>
+              </div>
+            </Link>
 
-              {/* Mobile Drawer Footer with Sacred Offering Action */}
-              <div className="p-3.5 border-t border-amber-500/20 bg-black/40 flex flex-col gap-2.5">
-                <Link
-                  to="/donation"
-                  onClick={() => setIsOpen(false)}
-                  className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl font-heading text-xs font-bold tracking-widest uppercase bg-gradient-to-r from-amber-400 via-amber-300 to-amber-500 text-[#2b0808] shadow-[0_2px_12px_rgba(245,158,11,0.35)] active:scale-98 transition-all"
+            <button
+              onClick={() => setIsOpen(false)}
+              className="w-8 h-8 rounded-md bg-amber-500/10 border border-gold/30 flex items-center justify-center text-gold-lt hover:bg-amber-500/20 transition-colors cursor-pointer"
+              aria-label="Close menu"
+            >
+              <X size={16} />
+            </button>
+          </div>
+
+          {/* Devotional Shloka Banner with Language Switcher */}
+          <div className="px-4 py-2 bg-gradient-to-r from-amber-500/15 via-gold/10 to-amber-500/15 border-b border-gold/20 flex items-center justify-between">
+            <span className="font-marathi text-xs text-gold-lt font-bold tracking-wide flex items-center gap-1.5">
+              <SacredOm className="text-gold-lt text-[0.75rem]" />
+              <span>|| राम कृष्ण हरी ||</span>
+            </span>
+            <div className="sm:hidden">
+              <Switch />
+            </div>
+          </div>
+
+          {/* Mobile Navigation Links */}
+          <div className="p-3 flex flex-col gap-1.5">
+            {navLinks.map((link) => {
+              const active =
+                isActive(link.path) || isParActive(link.path);
+              const isExpanded = mobileExpanded[link.name];
+              const LinkIcon = link.icon;
+
+              return (
+                <div
+                  key={link.path}
+                  className="rounded-md overflow-hidden border border-gold/20 bg-white/[0.03]"
                 >
-                  <Heart size={14} className="fill-[#2b0808]" />
-                  <span>{isMarathi ? "देणगी अर्पण करा" : "Offer Donation"}</span>
-                </Link>
+                  <div className="flex items-center justify-between">
+                    <Link
+                      to={link.path}
+                      onClick={() => !link.dropdown && setIsOpen(false)}
+                      className={`flex-1 flex items-center gap-2.5 px-3 py-2.5 font-heading text-[0.78rem] font-semibold tracking-wider uppercase transition-colors ${active
+                        ? "text-gold-lt bg-amber-500/20 font-bold"
+                        : "text-cream/80 hover:text-gold-lt"
+                        }`}
+                    >
+                      <LinkIcon
+                        size={15}
+                        className={
+                          active ? "text-gold-lt" : "text-amber-400/70"
+                        }
+                      />
+                      <span>{isMarathi ? link.mr : link.name}</span>
+                      {link.hasLive && (
+                        <span className="text-[8px] px-1.5 py-0.5 rounded-full bg-saffron text-white font-bold tracking-widest shadow-[0_0_6px_rgba(232,101,10,0.8)]">
+                          LIVE
+                        </span>
+                      )}
+                    </Link>
 
-                <div className="flex items-center justify-between text-[0.68rem] text-amber-200/80 font-marathi pt-0.5">
-                  <span className="flex items-center gap-1.5">
-                    <Clock size={11} className="text-amber-400 shrink-0" />
-                    {isMarathi ? "दर्शन: स. ६ ते रा. ९" : "Darshan: 6 AM – 9 PM"}
-                  </span>
-                  <span className="italic opacity-80 flex items-center gap-1">
-                    <SacredOm className="text-amber-400 text-[0.7rem]" />
-                    <span>{isMarathi ? "रत्नागिरी" : "Ratnagiri"}</span>
-                  </span>
+                    {link.dropdown && (
+                      <button
+                        type="button"
+                        onClick={() => toggleMobileSubmenu(link.name)}
+                        className="w-11 h-10 flex items-center justify-center text-gold/70 hover:text-gold-lt border-l border-gold/20 active:bg-amber-500/10 transition-colors cursor-pointer"
+                        aria-label={
+                          isExpanded ? "Collapse submenu" : "Expand submenu"
+                        }
+                      >
+                        <ChevronDown
+                          size={15}
+                          className={`transform transition-transform duration-200 ${isExpanded ? "rotate-180 text-gold-lt" : ""
+                            }`}
+                        />
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Collapsible Submenu (Zero reflow CSS grid animation) */}
+                  {link.dropdown && (
+                    <div
+                      className={`grid transition-[grid-template-rows,opacity] duration-200 ease-out border-t border-gold/15 bg-black/30 ${
+                        isExpanded
+                          ? "grid-rows-[1fr] opacity-100"
+                          : "grid-rows-[0fr] opacity-0 pointer-events-none"
+                      }`}
+                    >
+                      <div className="overflow-hidden">
+                        <div className="px-2.5 pb-2.5 pt-1 flex flex-col gap-1">
+                          {link.dropdown.map((sub) => {
+                            const SubIcon = sub.icon || Sparkles;
+                            const isSubActive = isActive(sub.path);
+
+                            return (
+                              <Link
+                                key={sub.path}
+                                to={sub.path}
+                                onClick={() => setIsOpen(false)}
+                                className={`flex items-center gap-2.5 p-2 rounded-md text-xs font-heading font-medium tracking-wide transition-colors ${isSubActive
+                                  ? "text-gold-lt bg-amber-500/20 font-semibold border border-gold/30"
+                                  : "text-cream/70 hover:text-gold-lt hover:bg-white/5"
+                                  }`}
+                              >
+                                <div className="w-5 h-5 rounded flex items-center justify-center bg-amber-500/10 text-gold-lt shrink-0">
+                                  <SubIcon size={12} />
+                                </div>
+                                <div className="flex flex-col text-left min-w-0">
+                                  <span className="text-[0.74rem] font-semibold text-gold-lt truncate">
+                                    {isMarathi ? sub.mr : sub.name}
+                                  </span>
+                                  <span className="font-marathi text-[9px] text-cream/55 leading-tight truncate">
+                                    {isMarathi ? sub.descMr : sub.desc}
+                                  </span>
+                                </div>
+                              </Link>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
-              </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Mobile Drawer Footer with Sacred Offering Action */}
+        <div className="p-3.5 border-t border-gold/25 bg-black/45 flex flex-col gap-2.5 relative z-10 shrink-0">
+          <Link
+            to="/donation"
+            onClick={() => setIsOpen(false)}
+            className="w-full flex items-center justify-center gap-2 py-2.5 rounded-md font-heading text-xs font-bold tracking-wider uppercase bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-[#2b0808] border border-amber-400/60 shadow-xs active:scale-98 transition-all"
+          >
+            <Heart size={14} className="fill-[#2b0808]" />
+            <span>{isMarathi ? "देणगी अर्पण करा" : "Offer Donation"}</span>
+          </Link>
+
+          <div className="flex items-center justify-between text-[0.68rem] text-gold-lt/85 font-marathi pt-0.5">
+            <span className="flex items-center gap-1.5">
+              <Clock size={11} className="text-gold-lt shrink-0" />
+              {isMarathi ? "दर्शन: स. ६ ते रा. ९" : "Darshan: 6 AM – 9 PM"}
+            </span>
+            <span className="italic opacity-85 flex items-center gap-1">
+              <SacredOm className="text-gold-lt text-[0.7rem]" />
+              <span>{isMarathi ? "रत्नागिरी" : "Ratnagiri"}</span>
+            </span>
+          </div>
+        </div>
+      </div>
     </>
   );
 });

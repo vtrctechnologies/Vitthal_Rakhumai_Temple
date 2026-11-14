@@ -15,7 +15,7 @@ const BentoGridGallery = memo(() => {
     {
       id: 1,
       type: "tall",
-      className: "lg:col-span-2 lg:row-span-1 h-48 lg:h-auto",
+      className: "lg:col-span-2 lg:row-span-1 lg:col-start-1 lg:row-start-1 h-48 lg:h-auto",
       image: HeroImg,
       title: "Temple Morning",
       subtitle: "Divine Atmosphere",
@@ -23,7 +23,7 @@ const BentoGridGallery = memo(() => {
     {
       id: 2,
       type: "tall",
-      className: "lg:col-span-2 lg:row-span-1 h-48 lg:h-auto",
+      className: "lg:col-span-2 lg:row-span-1 lg:col-start-1 lg:row-start-2 h-48 lg:h-auto",
       image: templeMain,
       title: "Shree Vitthal",
       subtitle: "Main Sanctum",
@@ -31,7 +31,7 @@ const BentoGridGallery = memo(() => {
     {
       id: 3,
       type: "tall",
-      className: "lg:col-span-2 lg:row-span-2 h-64 lg:h-auto",
+      className: "lg:col-span-2 lg:row-span-2 lg:col-start-3 lg:row-start-1 h-64 lg:h-auto",
       image: templeHero,
       title: "Festival Celebration",
       subtitle: "Annual Gathering",
@@ -39,7 +39,7 @@ const BentoGridGallery = memo(() => {
     {
       id: 4,
       type: "featured",
-      className: "lg:col-span-4 lg:row-span-2 h-80 lg:h-auto",
+      className: "lg:col-span-4 lg:row-span-2 lg:col-start-5 lg:row-start-1 h-80 lg:h-auto",
       image: HeroBg,
       title: "Shree Vitthal Rakhumai",
       description:
@@ -50,7 +50,7 @@ const BentoGridGallery = memo(() => {
     {
       id: 5,
       type: "tall",
-      className: "lg:col-span-2 lg:row-span-2 h-64 lg:h-auto",
+      className: "lg:col-span-2 lg:row-span-2 lg:col-start-9 lg:row-start-1 h-64 lg:h-auto",
       image: HeroImg,
       title: "Evening Aarti",
       subtitle: "Peaceful Moments",
@@ -58,7 +58,7 @@ const BentoGridGallery = memo(() => {
     {
       id: 6,
       type: "tall",
-      className: "lg:col-span-2 lg:row-span-1 h-48 lg:h-auto",
+      className: "lg:col-span-2 lg:row-span-1 lg:col-start-11 lg:row-start-1 h-48 lg:h-auto",
       image: templeMain,
       title: "Temple Entrance",
       subtitle: "Welcoming Devotees",
@@ -66,7 +66,7 @@ const BentoGridGallery = memo(() => {
     {
       id: 7,
       type: "tall",
-      className: "lg:col-span-2 lg:row-span-1 h-48 lg:h-auto",
+      className: "lg:col-span-2 lg:row-span-1 lg:col-start-11 lg:row-start-2 h-48 lg:h-auto",
       image: templeHero,
       title: "Cultural Program",
       subtitle: "Community Unity",
@@ -82,7 +82,7 @@ const BentoGridGallery = memo(() => {
             <div className="absolute inset-0 bg-gradient-to-t from-[#2c1a0e]/90 via-[#6b1a1a]/40 to-transparent opacity-90 group-hover:opacity-100 transition-opacity duration-300" />
 
             {/* Gold border glow on hover */}
-            <div className="absolute inset-0 ring-0 group-hover:ring-2 ring-inset ring-[#d4af37]/60 transition-all duration-500 rounded-2xl pointer-events-none" />
+            <div className="absolute inset-0 ring-0 group-hover:ring-2 ring-inset ring-[#d4af37]/60 transition-all duration-500 rounded-sm pointer-events-none" />
 
             {/* Featured badge + content */}
             <div className="absolute bottom-0 left-0 p-6 lg:p-8 translate-y-2 group-hover:translate-y-0 transition-transform duration-500">
@@ -134,7 +134,7 @@ const BentoGridGallery = memo(() => {
             <div className="absolute inset-0 bg-gradient-to-t from-[#2c1a0e]/80 via-transparent to-[#6b1a1a]/10 group-hover:from-[#2c1a0e]/70 transition-all duration-300" />
 
             {/* Gold border glow on hover */}
-            <div className="absolute inset-0 ring-0 group-hover:ring-2 ring-inset ring-[#d4af37]/50 transition-all duration-500 rounded-2xl pointer-events-none" />
+            <div className="absolute inset-0 ring-0 group-hover:ring-2 ring-inset ring-[#d4af37]/50 transition-all duration-500 rounded-sm pointer-events-none" />
 
             {/* Zoom icon */}
             <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
@@ -165,177 +165,50 @@ const BentoGridGallery = memo(() => {
   return (
     <div className="w-full">
       {/* Bento Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 lg:grid-rows-2 gap-3 lg:gap-4 h-auto lg:h-[600px]">
-        {/* Row 1: col1(2) + col2-top(2) + featured(4) + col4(2) + col5-top(2) */}
-        {/* Row 2: col1(2) + col2-bottom(hidden, merged) + featured continues + col4 continues + col5-bottom(2) */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 lg:grid-rows-2 gap-3 lg:gap-4 h-auto lg:h-[600px]">
+        {galleryItems.map((item, idx) => {
+          const isFeatured = item.type === "featured";
+          return (
+            <motion.div
+              key={item.id}
+              initial={isFeatured ? { opacity: 0, scale: 0.97 } : { opacity: 0, y: 20 }}
+              whileInView={isFeatured ? { opacity: 1, scale: 1 } : { opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: isFeatured ? 0.6 : 0.5, delay: 0.05 * (idx + 1) }}
+              className={`relative group border-2 border-gold rounded-sm p-1.5 bg-cream-dk cursor-pointer ${item.className}`}
+              style={{
+                boxShadow:
+                  hoveredId === item.id
+                    ? isFeatured
+                      ? "0 0 0 1px #d4af37, 0 12px 40px rgba(107,26,26,0.35)"
+                      : "0 0 0 1px #d4af37, 0 8px 32px rgba(107,26,26,0.25)"
+                    : isFeatured
+                      ? "0 6px 24px rgba(44,26,14,0.2)"
+                      : "0 4px 16px rgba(44,26,14,0.18)",
+                transition: "box-shadow 0.3s ease",
+              }}
+              onMouseEnter={() => setHoveredId(item.id)}
+              onMouseLeave={() => setHoveredId(null)}
+            >
+              {/* Sacred 4-Corner Saffron Frame Brackets */}
+              <span className="absolute -top-0.5 -left-0.5 w-4 h-4 border-t-4 border-l-4 border-saffron z-30 pointer-events-none" />
+              <span className="absolute -top-0.5 -right-0.5 w-4 h-4 border-t-4 border-r-4 border-saffron z-30 pointer-events-none" />
+              <span className="absolute -bottom-0.5 -left-0.5 w-4 h-4 border-b-4 border-l-4 border-saffron z-30 pointer-events-none" />
+              <span className="absolute -bottom-0.5 -right-0.5 w-4 h-4 border-b-4 border-r-4 border-saffron z-30 pointer-events-none" />
 
-        {/* Cell 1 – top-left */}
-        {galleryItems.filter((i) => i.id === 1).map((item) => (
-          <motion.div
-            key={item.id}
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: 0.05 }}
-            className={`relative group overflow-hidden rounded-2xl cursor-pointer ${item.className} lg:col-start-1 lg:row-start-1`}
-            style={{
-              boxShadow: hoveredId === item.id ? "0 0 0 2px #d4af37, 0 8px 32px rgba(107,26,26,0.25)" : "0 4px 16px rgba(44,26,14,0.18)",
-              transition: "box-shadow 0.3s ease",
-            }}
-            onMouseEnter={() => setHoveredId(item.id)}
-            onMouseLeave={() => setHoveredId(null)}
-          >
-            <div
-              className="absolute inset-0 w-full h-full bg-cover bg-center transition-transform duration-700 group-hover:scale-110"
-              style={{ backgroundImage: `url(${item.image})` }}
-            />
-            <div className="relative h-full w-full">{renderItemContent(item)}</div>
-          </motion.div>
-        ))}
-
-        {/* Cell 2 – bottom-left */}
-        {galleryItems.filter((i) => i.id === 2).map((item) => (
-          <motion.div
-            key={item.id}
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-            className={`relative group overflow-hidden rounded-2xl cursor-pointer ${item.className} lg:col-start-1 lg:row-start-2`}
-            style={{
-              boxShadow: hoveredId === item.id ? "0 0 0 2px #d4af37, 0 8px 32px rgba(107,26,26,0.25)" : "0 4px 16px rgba(44,26,14,0.18)",
-              transition: "box-shadow 0.3s ease",
-            }}
-            onMouseEnter={() => setHoveredId(item.id)}
-            onMouseLeave={() => setHoveredId(null)}
-          >
-            <div
-              className="absolute inset-0 w-full h-full bg-cover bg-center transition-transform duration-700 group-hover:scale-110"
-              style={{ backgroundImage: `url(${item.image})` }}
-            />
-            <div className="relative h-full w-full">{renderItemContent(item)}</div>
-          </motion.div>
-        ))}
-
-        {/* Cell 3 – left tall (2 rows) */}
-        {galleryItems.filter((i) => i.id === 3).map((item) => (
-          <motion.div
-            key={item.id}
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: 0.15 }}
-            className={`relative group overflow-hidden rounded-2xl cursor-pointer ${item.className} lg:col-start-3 lg:row-start-1`}
-            style={{
-              boxShadow: hoveredId === item.id ? "0 0 0 2px #d4af37, 0 8px 32px rgba(107,26,26,0.25)" : "0 4px 16px rgba(44,26,14,0.18)",
-              transition: "box-shadow 0.3s ease",
-            }}
-            onMouseEnter={() => setHoveredId(item.id)}
-            onMouseLeave={() => setHoveredId(null)}
-          >
-            <div
-              className="absolute inset-0 w-full h-full bg-cover bg-center transition-transform duration-700 group-hover:scale-110"
-              style={{ backgroundImage: `url(${item.image})` }}
-            />
-            <div className="relative h-full w-full">{renderItemContent(item)}</div>
-          </motion.div>
-        ))}
-
-        {/* Cell 4 – featured center (2 rows) */}
-        {galleryItems.filter((i) => i.id === 4).map((item) => (
-          <motion.div
-            key={item.id}
-            initial={{ opacity: 0, scale: 0.97 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className={`relative group overflow-hidden rounded-2xl cursor-pointer ${item.className} lg:col-start-5 lg:row-start-1`}
-            style={{
-              boxShadow: hoveredId === item.id ? "0 0 0 2px #d4af37, 0 12px 40px rgba(107,26,26,0.35)" : "0 6px 24px rgba(44,26,14,0.2)",
-              transition: "box-shadow 0.3s ease",
-            }}
-            onMouseEnter={() => setHoveredId(item.id)}
-            onMouseLeave={() => setHoveredId(null)}
-          >
-            <div
-              className="absolute inset-0 w-full h-full bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
-              style={{ backgroundImage: `url(${item.image})` }}
-            />
-            <div className="relative h-full w-full">{renderItemContent(item)}</div>
-          </motion.div>
-        ))}
-
-        {/* Cell 5 – right tall (2 rows) */}
-        {galleryItems.filter((i) => i.id === 5).map((item) => (
-          <motion.div
-            key={item.id}
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: 0.25 }}
-            className={`relative group overflow-hidden rounded-2xl cursor-pointer ${item.className} lg:col-start-9 lg:row-start-1`}
-            style={{
-              boxShadow: hoveredId === item.id ? "0 0 0 2px #d4af37, 0 8px 32px rgba(107,26,26,0.25)" : "0 4px 16px rgba(44,26,14,0.18)",
-              transition: "box-shadow 0.3s ease",
-            }}
-            onMouseEnter={() => setHoveredId(item.id)}
-            onMouseLeave={() => setHoveredId(null)}
-          >
-            <div
-              className="absolute inset-0 w-full h-full bg-cover bg-center transition-transform duration-700 group-hover:scale-110"
-              style={{ backgroundImage: `url(${item.image})` }}
-            />
-            <div className="relative h-full w-full">{renderItemContent(item)}</div>
-          </motion.div>
-        ))}
-
-        {/* Cell 6 – top-right */}
-        {galleryItems.filter((i) => i.id === 6).map((item) => (
-          <motion.div
-            key={item.id}
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: 0.3 }}
-            className={`relative group overflow-hidden rounded-2xl cursor-pointer ${item.className} lg:col-start-11 lg:row-start-1`}
-            style={{
-              boxShadow: hoveredId === item.id ? "0 0 0 2px #d4af37, 0 8px 32px rgba(107,26,26,0.25)" : "0 4px 16px rgba(44,26,14,0.18)",
-              transition: "box-shadow 0.3s ease",
-            }}
-            onMouseEnter={() => setHoveredId(item.id)}
-            onMouseLeave={() => setHoveredId(null)}
-          >
-            <div
-              className="absolute inset-0 w-full h-full bg-cover bg-center transition-transform duration-700 group-hover:scale-110"
-              style={{ backgroundImage: `url(${item.image})` }}
-            />
-            <div className="relative h-full w-full">{renderItemContent(item)}</div>
-          </motion.div>
-        ))}
-
-        {/* Cell 7 – bottom-right */}
-        {galleryItems.filter((i) => i.id === 7).map((item) => (
-          <motion.div
-            key={item.id}
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: 0.35 }}
-            className={`relative group overflow-hidden rounded-2xl cursor-pointer ${item.className} lg:col-start-11 lg:row-start-2`}
-            style={{
-              boxShadow: hoveredId === item.id ? "0 0 0 2px #d4af37, 0 8px 32px rgba(107,26,26,0.25)" : "0 4px 16px rgba(44,26,14,0.18)",
-              transition: "box-shadow 0.3s ease",
-            }}
-            onMouseEnter={() => setHoveredId(item.id)}
-            onMouseLeave={() => setHoveredId(null)}
-          >
-            <div
-              className="absolute inset-0 w-full h-full bg-cover bg-center transition-transform duration-700 group-hover:scale-110"
-              style={{ backgroundImage: `url(${item.image})` }}
-            />
-            <div className="relative h-full w-full">{renderItemContent(item)}</div>
-          </motion.div>
-        ))}
+              {/* Inner Framed Image Container */}
+              <div className="relative w-full h-full border border-saffron-lt/60 rounded-sm overflow-hidden">
+                <div
+                  className={`absolute inset-0 w-full h-full bg-cover bg-center transition-transform duration-700 ${
+                    isFeatured ? "group-hover:scale-105" : "group-hover:scale-110"
+                  }`}
+                  style={{ backgroundImage: `url(${item.image})` }}
+                />
+                <div className="relative h-full w-full">{renderItemContent(item)}</div>
+              </div>
+            </motion.div>
+          );
+        })}
       </div>
 
       {/* View Full Gallery CTA */}
@@ -348,7 +221,7 @@ const BentoGridGallery = memo(() => {
       >
         <button
           onClick={() => navigate("/gallery")}
-          className="group flex items-center gap-2.5 border border-[#d4af37]/70 rounded-md px-8 py-3 font-heading text-sm font-semibold tracking-widest text-[#6b1a1a] uppercase transition-all duration-300 hover:bg-[#d4af37]/15 hover:-translate-y-0.5 hover:border-[#d4af37] hover:shadow-[0_4px_20px_rgba(212,175,55,0.2)]"
+          className="group cursor-pointer flex items-center gap-2.5 border border-[#d4af37]/70 rounded-md px-8 py-3 font-heading text-sm font-semibold tracking-widest text-[#6b1a1a] uppercase transition-all duration-300 hover:bg-[#d4af37]/15 hover:-translate-y-0.5 hover:border-[#d4af37] hover:shadow-[0_4px_20px_rgba(212,175,55,0.2)]"
           style={{ background: "rgba(254,246,228,0.6)" }}
         >
           <Camera size={16} className="group-hover:text-[#e8650a] transition-colors duration-200" />

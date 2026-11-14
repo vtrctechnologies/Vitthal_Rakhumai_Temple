@@ -95,13 +95,25 @@ export const liveProgramsAPI = {
     return apiClient.get("/live-programs", { params });
   },
 
+  getPrograms: async (params = {}) => {
+    return apiClient.get("/live-programs", { params });
+  },
+
   // Get single live program (public)
   getLiveProgram: async (id) => {
     return apiClient.get(`/live-programs/${id}`);
   },
 
+  getProgram: async (id) => {
+    return apiClient.get(`/live-programs/${id}`);
+  },
+
   // Get available years
   getLiveProgramYears: async () => {
+    return apiClient.get("/live-programs/years");
+  },
+
+  getProgramYears: async () => {
     return apiClient.get("/live-programs/years");
   },
 };
@@ -119,12 +131,20 @@ export const committeeAPI = {
   getMember: async (id) => {
     return apiClient.get(`/committee/${id}`);
   },
+
+  getCommitteeYears: async () => {
+    return apiClient.get("/committee/years");
+  },
 };
 
 // Live Program Categories API functions
 export const liveProgramCategoriesAPI = {
   // Get all categories (public)
   getCategories: async () => {
+    return apiClient.get("/live-programs/categories");
+  },
+
+  getAllCategories: async () => {
     return apiClient.get("/live-programs/categories");
   },
 };

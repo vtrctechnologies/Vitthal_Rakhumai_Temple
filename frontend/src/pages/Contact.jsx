@@ -412,16 +412,6 @@ const Contact = memo(() => {
           </div>
         </div>
       </section>
-
-      {/* ═══════════ 5. FOOTER STRIP ═══════════ */}
-      <div className="bg-ink-dark border-t-4 border-gold py-6 text-center">
-        <p className="font-marathi text-[1.1rem] text-gold-lt tracking-wide">
-          || पुंडलिका वरदा हरी विठ्ठल — श्री ज्ञानदेव तुकाराम ||
-        </p>
-        <p className="font-body italic text-cream/45 text-[0.85rem] mt-1 tracking-wider">
-          Shree Vitthal Rakhumai Temple · Amberkarwadi, Ratnagiri
-        </p>
-      </div>
     </div>
   );
 });

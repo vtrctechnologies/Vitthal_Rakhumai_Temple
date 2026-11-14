@@ -7,16 +7,12 @@ import {
   Youtube,
   Facebook,
   Instagram,
-  Twitter,
-  ExternalLink,
-  Video,
   Share2,
-  Copy,
   Check,
   ChevronDown,
   Sparkles,
-  BookOpenText,
   Radio,
+  Filter,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { liveProgramsAPI, liveProgramCategoriesAPI } from "../../services/api";
@@ -56,10 +52,10 @@ const DiamondDivider = () => (
 /* ── Corner Accents for Cards ── */
 const CornerAccents = () => (
   <>
-    <span className="absolute -top-0.5 -left-0.5 w-3.5 h-3.5 border-t-2 border-l-2 border-saffron z-20" />
-    <span className="absolute -top-0.5 -right-0.5 w-3.5 h-3.5 border-t-2 border-r-2 border-saffron z-20" />
-    <span className="absolute -bottom-0.5 -left-0.5 w-3.5 h-3.5 border-b-2 border-l-2 border-saffron z-20" />
-    <span className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 border-b-2 border-r-2 border-saffron z-20" />
+    <span className="absolute -top-0.5 -left-0.5 w-4 h-4 border-t-4 border-l-4 border-saffron z-30 pointer-events-none" />
+    <span className="absolute -top-0.5 -right-0.5 w-4 h-4 border-t-4 border-r-4 border-saffron z-30 pointer-events-none" />
+    <span className="absolute -bottom-0.5 -left-0.5 w-4 h-4 border-b-4 border-l-4 border-saffron z-30 pointer-events-none" />
+    <span className="absolute -bottom-0.5 -right-0.5 w-4 h-4 border-b-4 border-r-4 border-saffron z-30 pointer-events-none" />
   </>
 );
 
@@ -90,7 +86,7 @@ const CustomYearDropdown = memo(({ selectedYear, availableYears, onChange, isMar
       <button
         type="button"
         onClick={() => setIsOpen((prev) => !prev)}
-        className="flex items-center gap-2.5 h-9 px-4 rounded-md bg-cream-dk/90 border border-gold/45 hover:border-amber-500 hover:bg-cream text-maroon font-heading text-xs font-bold uppercase tracking-wider transition-all duration-200 cursor-pointer shadow-xs select-none"
+        className="flex items-center gap-2.5 h-10 sm:h-11 px-4 sm:px-5 rounded-md bg-cream-dk/90 border border-gold/45 hover:border-amber-500 hover:bg-cream text-maroon font-heading text-xs sm:text-sm font-bold uppercase tracking-wider transition-all duration-200 cursor-pointer shadow-xs select-none"
       >
         <Calendar size={14} className="text-saffron shrink-0" />
         <span className="text-ink-mid font-semibold">{isMarathi ? "वर्ष:" : "Year:"}</span>
@@ -140,6 +136,102 @@ const CustomYearDropdown = memo(({ selectedYear, availableYears, onChange, isMar
   );
 });
 CustomYearDropdown.displayName = "CustomYearDropdown";
+
+/* ── Custom Temple Dropdown for Categories (Mobile Only) ── */
+const CustomCategoryDropdown = memo(({ selectedCategory, categories, onChange, isMarathi }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setIsOpen(false);
+      }
+    };
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") setIsOpen(false);
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, []);
+
+  const options = [
+    { value: "all", label: isMarathi ? "सर्व कार्यक्रम" : "All Programs" },
+    ...categories.map((cat) => ({
+      value: cat._id,
+      label: cat.name,
+    })),
+  ];
+
+  const currentOption = options.find((opt) => opt.value === selectedCategory) || options[0];
+
+  return (
+    <div className="relative w-full max-w-xs sm:hidden" ref={dropdownRef}>
+      <button
+        type="button"
+        onClick={() => setIsOpen((prev) => !prev)}
+        className="w-full flex items-center justify-between gap-2.5 h-11 px-4 rounded-md bg-gradient-to-r from-amber-400 via-amber-300 to-amber-400 text-maroon-dk border border-amber-500/70 font-heading text-xs font-bold uppercase tracking-wider shadow-sm cursor-pointer select-none transition-all"
+        aria-haspopup="listbox"
+        aria-expanded={isOpen}
+      >
+        <div className="flex items-center gap-2 min-w-0">
+          <Filter size={14} className="text-maroon-dk shrink-0" />
+          <span className="truncate">{currentOption.label}</span>
+        </div>
+        <ChevronDown
+          size={15}
+          className={`text-maroon-dk shrink-0 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
+        />
+      </button>
+
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: -6, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -6, scale: 0.98 }}
+            transition={{ duration: 0.15, ease: "easeOut" }}
+            className="absolute left-0 right-0 top-full mt-1.5 max-h-64 overflow-y-auto bg-gradient-to-b from-[#1c0505]/98 via-[#140303]/98 to-[#0c0202]/98 border border-amber-500/35 rounded-md shadow-[0_12px_32px_rgba(0,0,0,0.65)] p-1.5 z-50 backdrop-blur-md"
+            role="listbox"
+          >
+            <div className="flex flex-col gap-0.5">
+              {options.map((opt) => {
+                const isSelected = selectedCategory === opt.value;
+                return (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    role="option"
+                    aria-selected={isSelected}
+                    onClick={() => {
+                      onChange(opt.value);
+                      setIsOpen(false);
+                    }}
+                    className={`w-full flex items-center justify-between px-3 py-2.5 rounded-sm text-xs font-heading font-bold uppercase tracking-wider transition-all cursor-pointer select-none ${
+                      isSelected
+                        ? "bg-gradient-to-r from-amber-400 via-amber-300 to-amber-400 text-maroon-dk shadow-xs"
+                        : "text-amber-100/85 hover:text-white hover:bg-white/10"
+                    }`}
+                  >
+                    <span className="truncate">{opt.label}</span>
+                    {isSelected && (
+                      <Check size={13} className="text-maroon-dk stroke-[2.5] shrink-0" />
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+});
+CustomCategoryDropdown.displayName = "CustomCategoryDropdown";
 
 // =========================================================================
 //                             Program Card Component
@@ -191,7 +283,7 @@ const ProgramCard = ({
 
   return (
     <motion.div
-      className={`group relative bg-cream-dk rounded-md border border-gold/45 shadow-xs hover:border-gold hover:shadow-md transition-colors duration-200 overflow-hidden flex flex-col justify-between ${
+      className={`group relative bg-cream-dk border-2 border-gold rounded-sm p-1.5 sm:p-2 shadow-sm flex flex-col justify-between ${
         isHighlighted ? "ring-2 ring-amber-500 shadow-md" : ""
       }`}
       initial={{ opacity: 0, y: 16 }}
@@ -199,137 +291,138 @@ const ProgramCard = ({
       viewport={{ once: true }}
       transition={{ duration: 0.45, delay: index * 0.05 }}
     >
-      {/* Saffron Corner Accents */}
-      <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
-        <CornerAccents />
-      </div>
+      {/* 4 Saffron Corner Brackets */}
+      <CornerAccents />
 
-      <div>
-        {/* Thumbnail */}
-        <div className="relative h-48 w-full overflow-hidden bg-black rounded-t-sm border-b border-gold/30">
-          {program.thumbnailUrl && !imgError ? (
-            <img
-              src={getImageUrl(program.thumbnailUrl)}
-              alt={program.title}
-              onError={() => setImgError(true)}
-              className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-              loading="lazy"
-            />
-          ) : (
-            <div className="h-full w-full flex items-center justify-center bg-stone text-gold-dk">
-              <Radio className="w-12 h-12 text-maroon/60" />
-            </div>
-          )}
+      {/* Inner Framed Card */}
+      <div className="border border-saffron-lt/60 rounded-sm overflow-hidden bg-cream/95 flex-1 flex flex-col justify-between">
+        <div>
+          {/* Thumbnail */}
+          <div className="relative h-48 w-full overflow-hidden bg-black border-b border-gold/30">
+            {program.thumbnailUrl && !imgError ? (
+              <img
+                src={getImageUrl(program.thumbnailUrl)}
+                alt={program.title}
+                onError={() => setImgError(true)}
+                className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                loading="lazy"
+              />
+            ) : (
+              <div className="h-full w-full flex items-center justify-center bg-stone text-gold-dk">
+                <Radio className="w-12 h-12 text-maroon/60" />
+              </div>
+            )}
 
-          {/* Status Badge */}
-          <div className="absolute top-2.5 right-2.5 z-10 flex flex-col gap-1">
-            <span
-              className={`px-2.5 py-0.5 rounded-sm text-[10px] font-heading font-bold uppercase tracking-wider shadow-xs ${
-                status === "live"
-                  ? "bg-red-600 text-white animate-pulse"
+            {/* Status Badge */}
+            <div className="absolute top-2.5 right-2.5 z-10 flex flex-col gap-1">
+              <span
+                className={`px-2.5 py-0.5 rounded-sm text-[10px] font-heading font-bold uppercase tracking-wider shadow-xs ${
+                  status === "live"
+                    ? "bg-red-600 text-white animate-pulse"
+                    : status === "upcoming"
+                    ? "bg-emerald-700 text-white"
+                    : "bg-ink-dark/80 text-cream"
+                }`}
+              >
+                {status === "live"
+                  ? "🔴 LIVE"
                   : status === "upcoming"
-                  ? "bg-emerald-700 text-white"
-                  : "bg-ink-dark/80 text-cream"
-              }`}
-            >
-              {status === "live"
-                ? "🔴 LIVE"
-                : status === "upcoming"
-                ? isMarathi
-                  ? "आगामी"
-                  : "Upcoming"
-                : isMarathi
-                ? "संपन्न"
-                : "Past"}
-            </span>
-          </div>
-
-          {/* Year Badge */}
-          <div className="absolute bottom-2 left-2 z-10">
-            <span className="px-2 py-0.5 rounded-sm text-[10px] font-heading font-bold bg-black/75 backdrop-blur-sm text-gold-lt border border-gold/30">
-              {program.year || new Date(program.startTimestamp).getFullYear()}
-            </span>
-          </div>
-        </div>
-
-        {/* Content */}
-        <div className="p-4 sm:p-5">
-          <div className="flex items-center gap-1.5 mb-1.5">
-            <Sparkles size={11} className="text-saffron shrink-0" />
-            <span className="text-[10px] font-heading font-bold uppercase tracking-wider text-saffron-dk">
-              {typeof program.category === "object" && program.category?.name
-                ? program.category.name
-                : "Satsang"}
-            </span>
-          </div>
-
-          <h3 className="font-display text-lg font-bold text-maroon group-hover:text-saffron-dk transition-colors leading-snug line-clamp-2 mb-2">
-            {program.title}
-          </h3>
-
-          {program.description && (
-            <p className="font-body text-xs text-ink-light line-clamp-2 mb-3">
-              {program.description}
-            </p>
-          )}
-
-          <div className="space-y-1 text-xs text-ink-mid pt-2 border-t border-gold/25 font-body">
-            <div className="flex items-center gap-1.5">
-              <Calendar size={12} className="text-saffron shrink-0" />
-              <span>{formatDate(program.startTimestamp)}</span>
+                  ? isMarathi
+                    ? "आगामी"
+                    : "Upcoming"
+                  : isMarathi
+                  ? "संपन्न"
+                  : "Past"}
+              </span>
             </div>
-            <div className="flex items-center gap-1.5">
-              <Clock size={12} className="text-saffron shrink-0" />
-              <span>
-                {formatTime(program.startTimestamp)}
-                {program.endTimestamp && ` - ${formatTime(program.endTimestamp)}`}
+
+            {/* Year Badge */}
+            <div className="absolute bottom-2 left-2 z-10">
+              <span className="px-2 py-0.5 rounded-sm text-[10px] font-heading font-bold bg-black/75 text-gold-lt border border-gold/30">
+                {program.year || new Date(program.startTimestamp).getFullYear()}
               </span>
             </div>
           </div>
-        </div>
-      </div>
 
-      {/* Social / Stream Links Footer */}
-      <div className="p-3 bg-cream border-t border-gold/30 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          {socialLinks.youtube && (
-            <button
-              onClick={() => handleSocialLinkClick(socialLinks.youtube)}
-              className="p-1.5 rounded-md bg-red-600/10 text-red-600 hover:bg-red-600 hover:text-white transition-colors cursor-pointer"
-              title="Watch on YouTube"
-            >
-              <Youtube size={15} />
-            </button>
-          )}
-          {socialLinks.facebook && (
-            <button
-              onClick={() => handleSocialLinkClick(socialLinks.facebook)}
-              className="p-1.5 rounded-md bg-blue-600/10 text-blue-600 hover:bg-blue-600 hover:text-white transition-colors cursor-pointer"
-              title="Watch on Facebook"
-            >
-              <Facebook size={15} />
-            </button>
-          )}
-          {socialLinks.instagram && (
-            <button
-              onClick={() => handleSocialLinkClick(socialLinks.instagram)}
-              className="p-1.5 rounded-md bg-pink-600/10 text-pink-600 hover:bg-pink-600 hover:text-white transition-colors cursor-pointer"
-              title="Watch on Instagram"
-            >
-              <Instagram size={15} />
-            </button>
-          )}
+          {/* Content */}
+          <div className="p-4 sm:p-5">
+            <div className="flex items-center gap-1.5 mb-1.5">
+              <Sparkles size={11} className="text-saffron shrink-0" />
+              <span className="text-[10px] font-heading font-bold uppercase tracking-wider text-saffron-dk">
+                {typeof program.category === "object" && program.category?.name
+                  ? program.category.name
+                  : "Satsang"}
+              </span>
+            </div>
+
+            <h3 className="font-display text-lg font-bold text-maroon group-hover:text-saffron-dk transition-colors leading-snug line-clamp-2 mb-2">
+              {program.title}
+            </h3>
+
+            {program.description && (
+              <p className="font-body text-xs text-ink-light line-clamp-2 mb-3">
+                {program.description}
+              </p>
+            )}
+
+            <div className="space-y-1 text-xs text-ink-mid pt-2 border-t border-gold/25 font-body">
+              <div className="flex items-center gap-1.5">
+                <Calendar size={12} className="text-saffron shrink-0" />
+                <span>{formatDate(program.startTimestamp)}</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <Clock size={12} className="text-saffron shrink-0" />
+                <span>
+                  {formatTime(program.startTimestamp)}
+                  {program.endTimestamp && ` - ${formatTime(program.endTimestamp)}`}
+                </span>
+              </div>
+            </div>
+          </div>
         </div>
 
-        <button
-          onClick={() =>
-            handleCopyShare(program._id, program.title, program.description)
-          }
-          className="flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-heading font-bold text-maroon hover:bg-amber-100/60 border border-gold/40 transition-colors cursor-pointer"
-        >
-          {copied ? <Check size={12} className="text-emerald-600" /> : <Share2 size={12} />}
-          <span>{copied ? (isMarathi ? "कॉपी झाले" : "Copied!") : isMarathi ? "शेअर" : "Share"}</span>
-        </button>
+        {/* Social / Stream Links Footer */}
+        <div className="p-3 bg-cream border-t border-gold/30 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            {socialLinks.youtube && (
+              <button
+                onClick={() => handleSocialLinkClick(socialLinks.youtube)}
+                className="p-1.5 rounded-md bg-red-600/10 text-red-600 hover:bg-red-600 hover:text-white transition-colors cursor-pointer"
+                title="Watch on YouTube"
+              >
+                <Youtube size={15} />
+              </button>
+            )}
+            {socialLinks.facebook && (
+              <button
+                onClick={() => handleSocialLinkClick(socialLinks.facebook)}
+                className="p-1.5 rounded-md bg-blue-600/10 text-blue-600 hover:bg-blue-600 hover:text-white transition-colors cursor-pointer"
+                title="Watch on Facebook"
+              >
+                <Facebook size={15} />
+              </button>
+            )}
+            {socialLinks.instagram && (
+              <button
+                onClick={() => handleSocialLinkClick(socialLinks.instagram)}
+                className="p-1.5 rounded-md bg-pink-600/10 text-pink-600 hover:bg-pink-600 hover:text-white transition-colors cursor-pointer"
+                title="Watch on Instagram"
+              >
+                <Instagram size={15} />
+              </button>
+            )}
+          </div>
+
+          <button
+            onClick={() =>
+              handleCopyShare(program._id, program.title, program.description)
+            }
+            className="flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-heading font-bold text-maroon hover:bg-amber-100/60 border border-gold/40 transition-colors cursor-pointer"
+          >
+            {copied ? <Check size={12} className="text-emerald-600" /> : <Share2 size={12} />}
+            <span>{copied ? (isMarathi ? "कॉपी झाले" : "Copied!") : isMarathi ? "शेअर" : "Share"}</span>
+          </button>
+        </div>
       </div>
     </motion.div>
   );
@@ -350,23 +443,21 @@ const LivePrograms = () => {
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [availableYears, setAvailableYears] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [categoriesLoading, setCategoriesLoading] = useState(true);
+  const [_categoriesLoading, setCategoriesLoading] = useState(true);
   const [error, setError] = useState(null);
 
   const programRefs = useRef({});
-
   useEffect(() => {
     fetchYears();
     fetchCategories();
   }, []);
-
   useEffect(() => {
     fetchPrograms();
   }, [selectedCategory, selectedYear]);
 
   const fetchYears = async () => {
     try {
-      const response = await liveProgramsAPI.getProgramYears();
+      const response = await (liveProgramsAPI.getLiveProgramYears || liveProgramsAPI.getProgramYears)();
       const yearsData =
         response?.data || (Array.isArray(response) ? response : []);
       if (Array.isArray(yearsData) && yearsData.length > 0) {
@@ -386,7 +477,7 @@ const LivePrograms = () => {
   const fetchCategories = async () => {
     try {
       setCategoriesLoading(true);
-      const response = await liveProgramCategoriesAPI.getAllCategories();
+      const response = await (liveProgramCategoriesAPI.getCategories || liveProgramCategoriesAPI.getAllCategories)();
       const catsData =
         response?.data || (Array.isArray(response) ? response : []);
       setCategories(Array.isArray(catsData) ? catsData : []);
@@ -408,7 +499,7 @@ const LivePrograms = () => {
       if (selectedCategory !== "all") {
         params.category = selectedCategory;
       }
-      const response = await liveProgramsAPI.getPrograms(params);
+      const response = await (liveProgramsAPI.getLivePrograms || liveProgramsAPI.getPrograms)(params);
       const progsData =
         response?.data || (Array.isArray(response) ? response : []);
       setPrograms(Array.isArray(progsData) ? progsData : []);
@@ -531,23 +622,19 @@ const LivePrograms = () => {
       </div>
       <div className="h-[3px] bg-gradient-to-r from-maroon via-gold via-saffron-lt to-maroon" />
 
-      {/* ═══════════ 3. YEAR & CATEGORY FILTER BAR ═══════════ */}
+      {/* ═══════════ 3. CATEGORY & YEAR FILTER BAR ═══════════ */}
       <section className="bg-cream border-b border-gold/30 shadow-xs relative z-20 py-6">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4">
-          {/* Year Dropdown */}
-          {availableYears.length > 0 && (
-            <div className="flex items-center justify-center">
-              <CustomYearDropdown
-                selectedYear={selectedYear}
-                availableYears={availableYears}
-                onChange={setSelectedYear}
-                isMarathi={isMarathi}
-              />
-            </div>
-          )}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center gap-4">
+          {/* Mobile-Only Custom Category Dropdown */}
+          <CustomCategoryDropdown
+            selectedCategory={selectedCategory}
+            categories={categories}
+            onChange={setSelectedCategory}
+            isMarathi={isMarathi}
+          />
 
-          {/* Category Tabs */}
-          <div className="flex flex-wrap items-center justify-center gap-2">
+          {/* Tablet & Desktop Category Tabs */}
+          <div className="hidden sm:flex flex-wrap items-center justify-center gap-2">
             <button
               onClick={() => setSelectedCategory("all")}
               className={`px-4 py-1.5 rounded-md text-xs font-heading font-bold uppercase tracking-wider transition-all duration-200 border cursor-pointer ${
@@ -572,6 +659,18 @@ const LivePrograms = () => {
               </button>
             ))}
           </div>
+
+          {/* Year Dropdown (Downside) */}
+          {availableYears.length > 0 && (
+            <div className="flex items-center justify-center">
+              <CustomYearDropdown
+                selectedYear={selectedYear}
+                availableYears={availableYears}
+                onChange={setSelectedYear}
+                isMarathi={isMarathi}
+              />
+            </div>
+          )}
         </div>
       </section>
 
@@ -634,16 +733,6 @@ const LivePrograms = () => {
           </div>
         )}
       </main>
-
-      {/* ═══════════ 5. FOOTER STRIP ═══════════ */}
-      <div className="bg-ink-dark border-t-4 border-gold py-6 text-center">
-        <p className="font-marathi text-[1.1rem] text-gold-lt tracking-wide">
-          || पुंडलिका वरदा हरी विठ्ठल — श्री ज्ञानदेव तुकाराम ||
-        </p>
-        <p className="font-body italic text-cream/45 text-[0.85rem] mt-1 tracking-wider">
-          Shree Vitthal Rakhumai Temple · Amberkarwadi, Ratnagiri
-        </p>
-      </div>
     </div>
   );
 };

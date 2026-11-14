@@ -1,11 +1,9 @@
-import { useState, useEffect, useCallback, useRef, memo } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { sportsRegistrationAPI } from "../../services/api";
 import {
-  Trophy, Clock, Users, ChevronRight, CheckCircle,
-  AlertCircle, Loader2, Calendar, MapPin, Phone,
-  User, Mail, Info, X, Lock, Hourglass, Sparkles,
-} from "lucide-react";
+  Trophy, Users, ChevronRight, CheckCircle,
+  AlertCircle, Loader2, X, } from "lucide-react";
 import { useLanguage } from "../../context/LanguageContext";
 
 /* ── Sacred Diamond Divider ── */
@@ -736,16 +734,6 @@ export default function SportsRegistration() {
           />
         )}
       </AnimatePresence>
-
-      {/* ═══════════ 4. FOOTER STRIP ═══════════ */}
-      <div className="bg-ink-dark border-t-4 border-gold py-6 text-center">
-        <p className="font-marathi text-[1.1rem] text-gold-lt tracking-wide">
-          || पुंडलिका वरदा हरी विठ्ठल — श्री ज्ञानदेव तुकाराम ||
-        </p>
-        <p className="font-body italic text-cream/45 text-[0.85rem] mt-1 tracking-wider">
-          Shree Vitthal Rakhumai Temple · Amberkarwadi, Ratnagiri
-        </p>
-      </div>
     </div>
   );
 }

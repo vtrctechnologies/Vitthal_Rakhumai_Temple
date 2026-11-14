@@ -30,7 +30,17 @@ const Footer = () => {
   ];
 
   return (
-    <footer className="bg-maroon-dk text-cream relative overflow-hidden border-t-4 border-gold pt-16 pb-8">
+    <footer className="bg-maroon-dk text-cream relative overflow-hidden">
+      {/* ── Sacred Devotional Top Shloka Header ── */}
+      <div className="bg-[#120202] border-t-4 border-gold border-b border-gold/35 py-4 sm:py-5 px-4 text-center">
+        <p className="font-marathi text-base sm:text-lg md:text-xl text-gold-lt tracking-wider drop-shadow-sm font-semibold">
+          || पुंडलिका वरदा हरी विठ्ठल — श्री ज्ञानदेव तुकाराम ||
+        </p>
+        <p className="font-body italic text-cream/65 text-xs sm:text-sm mt-1 tracking-wider">
+          Shree Vitthal Rakhumai Temple · Amberkarwadi, Ratnagiri · Open 24 Hours
+        </p>
+      </div>
+
       {/* Subtle Pattern Background */}
       <div
         className="absolute inset-0 z-0 opacity-10 pointer-events-none"
@@ -41,7 +51,7 @@ const Footer = () => {
         }}
       />
 
-      <div className="max-w-7xl mx-auto px-6 relative z-10">
+      <div className="max-w-7xl mx-auto px-6 pt-12 sm:pt-14 pb-8 relative z-10">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-14 mb-14">
           {/* Column 1: About & Donation CTA */}
           <div className="space-y-6">
@@ -61,9 +71,9 @@ const Footer = () => {
             {/* Donate CTA */}
             <Link
               to="/donation"
-              className="inline-flex items-center gap-2.5 bg-gradient-to-br from-vermillion to-saffron-dk text-white px-7 py-3 rounded-md text-[0.95rem] font-heading font-semibold tracking-widest uppercase transition-all duration-300 shadow-[0_4px_20px_rgba(192,57,43,0.35)] hover:-translate-y-1 hover:shadow-[0_6px_28px_rgba(192,57,43,0.5)] group"
+              className="inline-flex items-center gap-2.5 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-[#2b0808] border border-amber-400/60 px-6 py-2.5 rounded-md text-sm font-heading font-bold tracking-wider uppercase transition-all duration-200 shadow-xs hover:shadow-sm active:scale-95 group"
             >
-              <Heart className="w-4 h-4 fill-current group-hover:scale-110 transition-transform duration-300" />
+              <Heart className="w-4 h-4 fill-current group-hover:scale-105 transition-transform duration-200" />
               <span>{isMarathi ? "देणगी" : "Donate Now"}</span>
             </Link>
           </div>

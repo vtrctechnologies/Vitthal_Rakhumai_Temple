@@ -6,7 +6,6 @@ import {
   MapPin,
   Sparkles,
   Loader2,
-  CalendarDays,
   ChevronDown,
   Check,
 } from "lucide-react";
@@ -89,7 +88,7 @@ const CustomYearDropdown = memo(({ activeYear, availableYears, onChange, isMarat
       <button
         type="button"
         onClick={() => setIsOpen((prev) => !prev)}
-        className="flex items-center gap-2.5 h-9 px-4 rounded-md bg-cream-dk/90 border border-gold/45 hover:border-amber-500 hover:bg-cream text-maroon font-heading text-xs font-bold uppercase tracking-wider transition-all duration-200 cursor-pointer shadow-xs select-none"
+        className="flex items-center gap-2.5 h-10 sm:h-11 px-4 sm:px-5 rounded-md bg-cream-dk/90 border border-gold/45 hover:border-amber-500 hover:bg-cream text-maroon font-heading text-xs sm:text-sm font-bold uppercase tracking-wider transition-all duration-200 cursor-pointer shadow-xs select-none"
         aria-haspopup="listbox"
         aria-expanded={isOpen}
       >
@@ -533,15 +532,6 @@ const Events = memo(() => {
         )}
       </section>
 
-      {/* ═══════════ 5. FOOTER STRIP ═══════════ */}
-      <div className="bg-ink-dark border-t-4 border-gold py-6 text-center">
-        <p className="font-marathi text-[1.1rem] text-gold-lt tracking-wide">
-          || पुंडलिका वरदा हरी विठ्ठल — श्री ज्ञानदेव तुकाराम ||
-        </p>
-        <p className="font-body italic text-cream/45 text-[0.85rem] mt-1 tracking-wider">
-          Shree Vitthal Rakhumai Temple · Amberkarwadi, Ratnagiri
-        </p>
-      </div>
     </div>
   );
 });

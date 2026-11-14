@@ -1,7 +1,31 @@
+import { useEffect } from "react";
+import { createPortal } from "react-dom";
 import { X, ChevronLeft, ChevronRight } from "lucide-react";
 import { getImageUrl } from "@/utils/imageUrl";
 
 const GalleryLightbox = ({ image, onClose, onNext, onPrev, hasNext, hasPrev }) => {
+  // Lock page & html scroll while lightbox is open (prevents mobile/tablet scrollbars)
+  useEffect(() => {
+    if (!image) return;
+    const prevBodyOverflow = document.body.style.overflow;
+    const prevHtmlOverflow = document.documentElement.style.overflow;
+    document.body.style.overflow = "hidden";
+    document.documentElement.style.overflow = "hidden";
+
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") onClose?.();
+      if (e.key === "ArrowLeft" && hasPrev) onPrev?.();
+      if (e.key === "ArrowRight" && hasNext) onNext?.();
+    };
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.body.style.overflow = prevBodyOverflow;
+      document.documentElement.style.overflow = prevHtmlOverflow;
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [image, onClose, onNext, onPrev, hasNext, hasPrev]);
+
   if (!image) return null;
 
   const rawUrl = image.imageUrl || image.mediaUrl || "";
@@ -12,51 +36,62 @@ const GalleryLightbox = ({ image, onClose, onNext, onPrev, hasNext, hasPrev }) =
     rawUrl.includes("/video/") ||
     (rawUrl.includes("/upload/v") && !rawUrl.match(/\.(jpg|jpeg|png|webp|gif|svg)$/i));
 
-  return (
+  return createPortal(
     <div
-      className="fixed inset-0 z-1000 bg-ink-dark/95 backdrop-blur-xl flex flex-col items-center justify-center p-4 md:p-8 animate-fade-in"
+      className="fixed inset-0 z-[9999] h-[100dvh] w-full overflow-hidden bg-ink-dark/95 backdrop-blur-xl flex flex-col items-center justify-center p-4 sm:p-6 md:p-8 animate-fade-in overscroll-none"
       onClick={onClose}
+      role="dialog"
+      aria-modal="true"
     >
       {/* Close Button - Floating Top Right */}
       <button
-        className="absolute top-6 right-6 z-1020 text-gold-lt/60 hover:text-gold-lt transition-colors p-2 hover:bg-white/5 rounded-full"
-        onClick={onClose}
+        type="button"
+        aria-label="Close"
+        className="fixed top-4 right-4 sm:top-6 sm:right-6 z-[10010] w-10 h-10 sm:w-11 sm:h-11 flex items-center justify-center rounded-full bg-black/55 border border-gold/45 text-gold-lt hover:bg-maroon hover:text-white hover:border-gold transition-all cursor-pointer shadow-lg"
+        onClick={(e) => {
+          e.stopPropagation();
+          onClose();
+        }}
       >
-        <X size={32} />
+        <X size={22} />
       </button>
 
-      {/* Navigation - Minimalist Arrows */}
+      {/* Desktop Side Navigation Arrows */}
       {hasPrev && (
         <button
-          className="absolute left-4 top-1/2 -translate-y-1/2 z-1010 p-4 text-gold-lt/50 hover:text-gold-lt hover:bg-white/5 rounded-full transition-all hidden md:block"
+          type="button"
+          aria-label="Previous image"
+          className="fixed left-4 top-1/2 -translate-y-1/2 z-[10010] p-3 text-gold-lt/70 hover:text-gold-lt hover:bg-white/10 rounded-full transition-all hidden md:flex items-center justify-center cursor-pointer"
           onClick={(e) => {
             e.stopPropagation();
             onPrev();
           }}
         >
-          <ChevronLeft size={48} strokeWidth={1} />
+          <ChevronLeft size={44} strokeWidth={1.5} />
         </button>
       )}
 
       {hasNext && (
         <button
-          className="absolute right-4 top-1/2 -translate-y-1/2 z-1010 p-4 text-gold-lt/50 hover:text-gold-lt hover:bg-white/5 rounded-full transition-all hidden md:block"
+          type="button"
+          aria-label="Next image"
+          className="fixed right-4 top-1/2 -translate-y-1/2 z-[10010] p-3 text-gold-lt/70 hover:text-gold-lt hover:bg-white/10 rounded-full transition-all hidden md:flex items-center justify-center cursor-pointer"
           onClick={(e) => {
             e.stopPropagation();
             onNext();
           }}
         >
-          <ChevronRight size={48} strokeWidth={1} />
+          <ChevronRight size={44} strokeWidth={1.5} />
         </button>
       )}
 
-      {/* Main Content Wrapper */}
+      {/* Main Content Wrapper - Fits cleanly inside 100dvh without scrolling */}
       <div
-        className="relative w-full max-w-6xl h-full flex flex-col items-center justify-center"
+        className="relative w-full max-w-5xl max-h-full flex flex-col items-center justify-center px-1 sm:px-4"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Image Container */}
-        <div className="relative group shadow-2xl shadow-black/80 max-h-[70vh] overflow-hidden rounded-lg border border-gold/30 bg-cream-dk">
+        {/* Framed Media Container */}
+        <div className="relative shadow-2xl shadow-black/80 overflow-hidden rounded-sm border-2 border-gold/60 bg-black/60 flex items-center justify-center max-w-full max-h-[58dvh] sm:max-h-[65dvh] md:max-h-[72dvh]">
           {imageUrl ? (
             isVideo ? (
               <video
@@ -66,16 +101,16 @@ const GalleryLightbox = ({ image, onClose, onNext, onPrev, hasNext, hasPrev }) =
                 muted
                 loop
                 playsInline
-                className="w-auto h-auto max-h-[70vh] max-w-full object-contain"
+                className="w-auto h-auto max-h-[58dvh] sm:max-h-[65dvh] md:max-h-[72dvh] max-w-full object-contain block"
               />
             ) : (
               <img
                 src={imageUrl}
                 alt={image.title}
-                className="w-auto h-auto max-h-[70vh] max-w-full object-contain"
+                className="w-auto h-auto max-h-[58dvh] sm:max-h-[65dvh] md:max-h-[72dvh] max-w-full object-contain block"
                 onError={(e) => {
                   e.target.style.display = "none";
-                  const placeholder = e.target.parentElement?.querySelector('.image-placeholder');
+                  const placeholder = e.target.parentElement?.querySelector(".image-placeholder");
                   if (placeholder) {
                     placeholder.style.display = "flex";
                   }
@@ -83,30 +118,56 @@ const GalleryLightbox = ({ image, onClose, onNext, onPrev, hasNext, hasPrev }) =
               />
             )
           ) : null}
-          <div className="image-placeholder w-full h-full min-h-[400px] flex items-center justify-center bg-ink-dark/60" style={{ display: imageUrl ? "none" : "flex" }}>
-            <p className="text-gold-lt/60 font-heading italic">Image not available</p>
+          <div
+            className="image-placeholder w-full min-w-[260px] min-h-[240px] sm:min-h-[320px] flex items-center justify-center bg-ink-dark/60"
+            style={{ display: imageUrl ? "none" : "flex" }}
+          >
+            <p className="text-gold-lt/60 font-heading italic text-sm">Image not available</p>
           </div>
-
-          {/* Subtle gradient for depth */}
-          <div className="pointer-events-none absolute inset-0 ring-1 ring-inset ring-black/10 rounded-lg"></div>
         </div>
 
-        {/* Info Caption - "Museum Label" Style */}
-        <div className="mt-8 max-w-2xl text-center space-y-4 animate-fade-in-up">
-          <div className="flex items-center justify-center gap-3 text-saffron-lt text-xs font-heading font-bold tracking-[0.2em] uppercase">
-            <span className="w-8 h-px bg-saffron/40"></span>
-            {image.category?.name || "Uncategorized"}
-            <span className="w-8 h-px bg-saffron/40"></span>
+        {/* Info Caption - Compact & Responsive */}
+        <div className="mt-4 sm:mt-6 max-w-2xl text-center space-y-2 sm:space-y-3 animate-fade-in-up px-2">
+          <div className="flex items-center justify-center gap-3 text-saffron-lt text-[11px] sm:text-xs font-heading font-bold tracking-[0.2em] uppercase">
+            <span className="w-6 sm:w-8 h-px bg-saffron/45"></span>
+            <span>{image.category?.name || "Uncategorized"}</span>
+            <span className="w-6 sm:w-8 h-px bg-saffron/45"></span>
           </div>
 
-          <h2 className="text-3xl md:text-4xl font-heading text-cream-dk tracking-tight">
+          <h2 className="text-lg sm:text-2xl md:text-3xl font-heading font-bold text-cream-dk tracking-tight line-clamp-2">
             {image.title}
           </h2>
         </div>
+
+        {/* Mobile & Tablet Prev/Next Controls */}
+        {(hasPrev || hasNext) && (
+          <div className="flex md:hidden items-center justify-center gap-4 mt-4">
+            <button
+              type="button"
+              disabled={!hasPrev}
+              onClick={onPrev}
+              aria-label="Previous image"
+              className="flex items-center gap-1.5 px-4 py-2 rounded-sm border border-gold/45 bg-black/50 text-gold-lt text-xs font-heading font-bold uppercase tracking-wider disabled:opacity-30 disabled:pointer-events-none active:scale-95 transition-all cursor-pointer"
+            >
+              <ChevronLeft size={16} />
+              <span>Prev</span>
+            </button>
+            <button
+              type="button"
+              disabled={!hasNext}
+              onClick={onNext}
+              aria-label="Next image"
+              className="flex items-center gap-1.5 px-4 py-2 rounded-sm border border-gold/45 bg-black/50 text-gold-lt text-xs font-heading font-bold uppercase tracking-wider disabled:opacity-30 disabled:pointer-events-none active:scale-95 transition-all cursor-pointer"
+            >
+              <span>Next</span>
+              <ChevronRight size={16} />
+            </button>
+          </div>
+        )}
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 
 export default GalleryLightbox;
-
