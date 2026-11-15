@@ -37,16 +37,18 @@ const prodOrigins = [
 ].filter(Boolean);
 
 const isProduction = process.env.NODE_ENV === 'production';
-const allowedOrigins = isProduction ? prodOrigins : [...devOrigins, ...prodOrigins];
+const allowedOrigins = [...new Set([...devOrigins, ...prodOrigins])];
 
 app.use(
   cors({
     origin: (origin, callback) => {
       // Allow requests with no origin (such as mobile apps, curl, or server-to-server)
-      if (!origin || allowedOrigins.includes(origin)) return callback(null, true);
-      callback(new Error('Not allowed by CORS policy'));
+      if (!origin || allowedOrigins.includes(origin) || origin.endsWith('.vercel.app') || origin.endsWith('.onrender.com')) return callback(null, true);
+      return callback(null, false);
     },
     credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
   })
 );
 

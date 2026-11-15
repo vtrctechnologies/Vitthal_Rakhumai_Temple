@@ -2,7 +2,7 @@ import axios from "axios";
 
 // Base URL for all admin API requests
 const API_BASE_URL =
-  import.meta.env.VITE_API_URL || "https://vrtemple-backend.onrender.com/api";
+  import.meta.env.VITE_API_URL || "https://vitthal-rakhumai-temple.onrender.com/api";
 
 // Shared axios instance for admin app
 export const apiClient = axios.create({

@@ -10,7 +10,7 @@ export const sendTokenCookie = (res, token) => {
   res.cookie("temple_admin_token", token, {
     httpOnly: true,
     secure: isProduction,
-    sameSite: isProduction ? "strict" : "lax",
+    sameSite: isProduction ? "none" : "lax",
     maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     path: "/",
   });
@@ -24,7 +24,7 @@ export const logoutUser = (req, res) => {
   res.clearCookie("temple_admin_token", {
     httpOnly: true,
     secure: isProduction,
-    sameSite: isProduction ? "strict" : "lax",
+    sameSite: isProduction ? "none" : "lax",
     path: "/",
   });
   res.json({
