@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Eye, EyeOff } from "lucide-react";
+import React, { useState, useRef, useEffect } from "react";
+import { Eye, EyeOff, ChevronDown, Check } from "lucide-react";
 
 export const Button = ({
   children,
@@ -200,6 +200,101 @@ export const StatCard = ({
           >
             {trend}
           </span>
+        </div>
+      )}
+    </div>
+  );
+};
+
+
+export const TempleSelect = ({
+  value,
+  onChange,
+  options = [],
+  placeholder = "Select option",
+  icon: Icon,
+  className = "",
+  disabled = false,
+}) => {
+  const [open, setOpen] = useState(false);
+  const containerRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (containerRef.current && !containerRef.current.contains(e.target)) {
+        setOpen(false);
+      }
+    };
+    const handleEscape = (e) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleEscape);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleEscape);
+    };
+  }, []);
+
+  const normalizedOptions = options.map((opt) =>
+    typeof opt === "object" ? opt : { value: opt, label: String(opt) }
+  );
+
+  const selectedOption = normalizedOptions.find(
+    (opt) => String(opt.value) === String(value)
+  );
+
+  return (
+    <div ref={containerRef} className={`relative ${className}`}>
+      <button
+        type="button"
+        disabled={disabled}
+        onClick={() => !disabled && setOpen((prev) => !prev)}
+        className={`w-full flex items-center justify-between gap-2.5 px-3.5 py-2.5 rounded-xl border text-sm font-medium transition-all duration-200 cursor-pointer ${
+          open
+            ? "bg-white border-[#e8650a] ring-2 ring-[#d4af37]/25 text-[#6b1a1a]"
+            : "bg-[#fffaf0] border-[#d4af37]/50 text-[#2c1a0e] hover:border-[#d4af37] hover:bg-white"
+        } ${disabled ? "opacity-60 cursor-not-allowed" : ""}`}
+      >
+        <span className="flex items-center gap-2 min-w-0 truncate">
+          {Icon && <Icon size={15} className="text-[#e8650a] shrink-0" />}
+          <span className="truncate">
+            {selectedOption ? selectedOption.label : placeholder}
+          </span>
+        </span>
+        <ChevronDown
+          size={16}
+          className={`text-[#8b5e3c] shrink-0 transition-transform duration-200 ${
+            open ? "rotate-180 text-[#e8650a]" : ""
+          }`}
+        />
+      </button>
+
+      {open && (
+        <div className="absolute left-0 right-0 mt-1.5 min-w-[160px] max-h-60 overflow-y-auto bg-[#fffdf8] border border-[#d4af37]/55 rounded-xl shadow-xl z-50 py-1 animate-subtle-pop">
+          {normalizedOptions.map((opt) => {
+            const isSelected = String(opt.value) === String(value);
+            return (
+              <button
+                key={String(opt.value)}
+                type="button"
+                onClick={() => {
+                  onChange(opt.value);
+                  setOpen(false);
+                }}
+                className={`w-full flex items-center justify-between gap-2 px-3.5 py-2 text-left text-sm transition-colors cursor-pointer ${
+                  isSelected
+                    ? "bg-[#fef6e4] text-[#6b1a1a] font-semibold"
+                    : "text-[#5c3317] hover:bg-[#f5e6c8]/50 hover:text-[#6b1a1a]"
+                }`}
+              >
+                <span className="truncate">{opt.label}</span>
+                {isSelected && (
+                  <Check size={14} className="text-[#e8650a] shrink-0" />
+                )}
+              </button>
+            );
+          })}
         </div>
       )}
     </div>

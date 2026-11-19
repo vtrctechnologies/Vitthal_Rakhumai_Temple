@@ -17,7 +17,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { eventsAPI } from "../../services/api"; // Adjust path
-import { Button, InputField } from "../customUi/AdminShared";
+import { Button, InputField, TempleSelect } from "../customUi/AdminShared";
 import { getImageUrl } from "../../utils/imageUrl";
 
 const EventsView = () => {
@@ -299,23 +299,21 @@ const EventsView = () => {
         </div>
 
         {/* Filters Section */}
-        <div className="flex flex-wrap items-center gap-4 bg-white p-4 rounded-xl border border-gray-100 shadow-sm">
+        <div className="temple-card flex flex-wrap items-center justify-between gap-4 p-4">
           <div className="flex items-center gap-2">
-            <Calendar size={18} className="text-gray-400" />
-            <span className="text-sm font-medium text-gray-700">Filter by Year:</span>
+            <Calendar size={18} className="text-[#e8650a]" />
+            <span className="text-sm font-semibold text-[#5c3317]">Filter by Year:</span>
           </div>
-          <select
+          <TempleSelect
             value={filterYear}
-            onChange={(e) => setFilterYear(e.target.value)}
-            className="bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block p-2 transition-all outline-none"
-          >
-            <option value="">All Years</option>
-            {availableYears.map((year) => (
-              <option key={year} value={year}>
-                {year}
-              </option>
-            ))}
-          </select>
+            onChange={(val) => setFilterYear(val)}
+            options={[
+              { value: "", label: "All Years" },
+              ...availableYears.map((y) => ({ value: String(y), label: String(y) })),
+            ]}
+            placeholder="All Years"
+            className="w-44"
+          />
           {filterYear && (
             <button
               onClick={() => setFilterYear("")}
@@ -460,21 +458,7 @@ const EventsView = () => {
                     Event Status
                   </label>
                   <div className="relative">
-                    <select
-                      className="w-full appearance-none py-3 px-4 rounded-xl bg-gray-50 border border-gray-200 focus:border-orange-500 focus:bg-white focus:ring-4 focus:ring-orange-500/10 outline-none transition-all duration-200 cursor-pointer"
-                      value={formData.status}
-                      onChange={(e) =>
-                        setFormData({ ...formData, status: e.target.value })
-                      }
-                    >
-                      <option value="upcoming">Upcoming</option>
-                      <option value="ongoing">Ongoing</option>
-                      <option value="completed">Completed</option>
-                      <option value="cancelled">Cancelled</option>
-                    </select>
-                    <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-gray-500">
-                      <MoreVertical size={16} />
-                    </div>
+                    <TempleSelect value={formData.status} onChange={(val) => setFormData({ ...formData, status: val })} options={[{ value: "upcoming", label: "Upcoming" }, { value: "ongoing", label: "Ongoing" }, { value: "completed", label: "Completed" }, { value: "cancelled", label: "Cancelled" }]} placeholder="Select status" />
                   </div>
                 </div>
 
@@ -615,12 +599,12 @@ const EventsView = () => {
             </Button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
             {Array.isArray(events) &&
               events.map((event) => (
                 <div
                   key={event._id}
-                  className="group bg-white rounded-2xl shadow-sm border border-gray-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col h-full"
+                  className="group temple-card hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col h-full"
                 >
                   {/* Card Image */}
                   <div className="relative h-48 bg-gray-100 overflow-hidden">
@@ -666,11 +650,11 @@ const EventsView = () => {
 
                   {/* Card Content */}
                   <div className="p-6 flex-1 flex flex-col">
-                    <h3 className="text-xl font-bold text-gray-900 mb-3 line-clamp-2 group-hover:text-orange-700 transition-colors">
+                    <h3 className="text-lg sm:text-xl font-bold text-[#6b1a1a] font-heading-temple mb-2.5 line-clamp-2 group-hover:text-[#e8650a] transition-colors">
                       {event.title}
                     </h3>
 
-                    <p className="text-sm text-gray-500 mb-6 line-clamp-3 leading-relaxed">
+                    <p className="text-sm text-[#5c3317]/85 mb-5 line-clamp-3 leading-relaxed">
                       {event.description}
                     </p>
 
@@ -699,7 +683,7 @@ const EventsView = () => {
                   </div>
 
                   {/* Card Actions */}
-                  <div className="px-6 py-4 bg-gray-50/50 border-t border-gray-100 flex gap-3 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                  <div className="px-5 py-3.5 bg-[#fef6e4]/70 border-t border-[#d4af37]/25 flex gap-3">
                     <Button
                       variant="outline"
                       onClick={() => handleEdit(event)}
