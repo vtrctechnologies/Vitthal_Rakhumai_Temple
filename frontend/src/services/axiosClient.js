@@ -2,7 +2,7 @@ import axios from "axios";
 
 // Base URL for all public-site API requests
 const API_BASE_URL =
-  import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+  import.meta.env.VITE_API_URL || "https://vitthal-rakhumai-temple.onrender.com/api";
 
 // Shared axios instance for frontend app
 export const apiClient = axios.create({

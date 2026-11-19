@@ -83,8 +83,11 @@ export default function AdminPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-orange-600 border-t-transparent rounded-full animate-spin" />
+      <div className="min-h-screen flex flex-col items-center justify-center gap-4 bg-[#fef6e4]">
+        <div className="w-10 h-10 border-[3px] border-[#d4af37]/35 border-t-[#6b1a1a] rounded-full animate-spin" />
+        <p className="text-xs font-semibold uppercase tracking-[0.25em] text-[#6b1a1a] font-heading-temple">
+          Vitthal Rakhumai Portal
+        </p>
       </div>
     );
   }

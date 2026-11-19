@@ -18,10 +18,12 @@ export default {
     },
     extend: {
       fontFamily: {
-        display: ["Inter", "serif"],
-        body: ["Poppins", "sans-serif"],
-        marathi: ["Tiro Devanagari Marathi", "serif"],
-        marathiTitle: ["Mukta", "sans-serif"],
+        display: ["Cinzel Decorative", "Cinzel", "serif"],
+        heading: ["Cinzel", "serif"],
+        body: ["Inter", "sans-serif"],
+        serifBody: ["EB Garamond", "Georgia", "serif"],
+        marathi: ["Noto Serif Devanagari", "serif"],
+        marathiTitle: ["Noto Serif Devanagari", "sans-serif"],
       },
       colors: {
         border: "hsl(var(--border))",

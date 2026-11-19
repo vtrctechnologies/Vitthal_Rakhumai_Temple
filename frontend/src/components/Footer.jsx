@@ -12,13 +12,43 @@ import {
 } from "lucide-react";
 import { useLanguage } from "../context/LanguageContext";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import SubscriptionModal from "./SubscriptionModal";
+import { subscriberAPI } from "../services/api";
 
 const Footer = () => {
   const { isMarathi } = useLanguage();
   const currentYear = new Date().getFullYear();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [subscribeSettings, setSubscribeSettings] = useState({
+    isVisible: true,
+    isDisabled: true,
+    disabledMessage: "Temporarily Disabled",
+    disabledMessageMr: "तात्पुरते बंद आहे",
+  });
+
+  useEffect(() => {
+    let mounted = true;
+    const loadSettings = async () => {
+      try {
+        const res = await subscriberAPI.getSettings();
+        if (mounted && res?.status === "success" && res.data) {
+          setSubscribeSettings({
+            isVisible: res.data.isVisible !== false,
+            isDisabled: res.data.isDisabled !== false,
+            disabledMessage: res.data.disabledMessage || "Temporarily Disabled",
+            disabledMessageMr: res.data.disabledMessageMr || "तात्पुरते बंद आहे",
+          });
+        }
+      } catch {
+        // Keep default temporarily disabled state on error
+      }
+    };
+    loadSettings();
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   const quickLinks = [
     { name: "Home", marathiName: "मुख्यपान", path: "/" },
@@ -170,24 +200,56 @@ const Footer = () => {
                 : "Subscribe to our newsletter for daily darshan updates and upcoming events."}
             </p>
 
-            {/* Newsletter Button */}
-            <div className="mb-8">
-              <button
-                type="button"
-                onClick={() => setIsModalOpen(true)}
-                className="w-full flex items-center justify-between gap-3 bg-gold/5 border border-gold/30 rounded-md px-4 py-3 text-cream-dk hover:bg-gold/15 transition-all duration-300 group"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-gold/20 rounded-sm group-hover:bg-gold-lt group-hover:text-maroon-dk transition-colors duration-300">
-                    <Send className="w-4 h-4" />
+            {/* Newsletter Button (Admin-controlled visibility & disabled state) */}
+            {subscribeSettings.isVisible && (
+              <div className="mb-8">
+                <button
+                  type="button"
+                  disabled={subscribeSettings.isDisabled}
+                  onClick={() => {
+                    if (!subscribeSettings.isDisabled) {
+                      setIsModalOpen(true);
+                    }
+                  }}
+                  className={`w-full flex items-center justify-between gap-3 border rounded-md px-4 py-3 transition-all duration-300 ${
+                    subscribeSettings.isDisabled
+                      ? "bg-gold/5 border-gold/20 text-cream-dk/55 opacity-70 cursor-not-allowed"
+                      : "bg-gold/5 border-gold/30 text-cream-dk hover:bg-gold/15 group cursor-pointer"
+                  }`}
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div
+                      className={`p-2 bg-gold/20 rounded-sm transition-colors duration-300 ${
+                        subscribeSettings.isDisabled
+                          ? "opacity-60"
+                          : "group-hover:bg-gold-lt group-hover:text-maroon-dk"
+                      }`}
+                    >
+                      <Send className="w-4 h-4" />
+                    </div>
+                    <div className="text-left min-w-0">
+                      <span className="block text-[0.9rem] font-heading font-semibold tracking-wide uppercase truncate">
+                        {isMarathi ? "आता सबस्क्राईब करा" : "Subscribe Now"}
+                      </span>
+                      {subscribeSettings.isDisabled && (
+                        <span className="block text-[10px] font-body text-saffron-lt/90 tracking-wider uppercase">
+                          {isMarathi
+                            ? subscribeSettings.disabledMessageMr
+                            : subscribeSettings.disabledMessage}
+                        </span>
+                      )}
+                    </div>
                   </div>
-                  <span className="text-[0.9rem] font-heading font-semibold tracking-wide uppercase">
-                    {isMarathi ? "आता सबस्क्राईब करा" : "Subscribe Now"}
-                  </span>
-                </div>
-                <ArrowRight className="w-4 h-4 text-gold-lt group-hover:translate-x-1 transition-transform" />
-              </button>
-            </div>
+                  <ArrowRight
+                    className={`w-4 h-4 text-gold-lt shrink-0 transition-transform ${
+                      subscribeSettings.isDisabled
+                        ? "opacity-40"
+                        : "group-hover:translate-x-1"
+                    }`}
+                  />
+                </button>
+              </div>
+            )}
 
             <SubscriptionModal
               isOpen={isModalOpen}

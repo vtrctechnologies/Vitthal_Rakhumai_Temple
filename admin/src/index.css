@@ -1,135 +1,74 @@
-@import url("https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap");
-@import url("https://fonts.googleapis.com/css2?family=Mukta:wght@200;300;400;500;600;700;800&display=swap");
-@import url("https://fonts.googleapis.com/css2?family=Tiro+Devanagari+Marathi:ital@0;1&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;600;700&family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Inter:wght@400;500;600;700&family=Noto+Serif+Devanagari:wght@400;600;700&display=swap");
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
-
+/* Sacred Vitthal Rakhumai Temple Design System (matched with Website Theme) */
 @layer base {
   :root {
-    --background: 40 40% 98%;
-    --foreground: 0 75% 20%;
+    --background: 42 93% 95%; /* #fef6e4 cream */
+    --foreground: 24 52% 11%; /* #2c1a0e ink-dark */
 
-    --card: 0 0% 100%;
-    --card-foreground: 0 75% 20%;
+    --card: 43 100% 99%; /* #fffdf8 warm ivory */
+    --card-foreground: 24 52% 11%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 0 75% 20%;
+    --popover: 43 100% 99%;
+    --popover-foreground: 24 52% 11%;
 
-    /* Saffron Gold - Primary */
-    --primary: 35 95% 55%;
+    /* Saffron - Primary */
+    --primary: 25 92% 48%; /* #e8650a */
     --primary-foreground: 0 0% 100%;
-    --primary-glow: 40 100% 65%;
+    --primary-glow: 37 91% 55%; /* #f5a623 */
 
     /* Deep Maroon - Secondary */
-    --secondary: 0 75% 35%;
-    --secondary-foreground: 40 90% 95%;
+    --secondary: 0 61% 26%; /* #6b1a1a */
+    --secondary-foreground: 46 84% 66%; /* #f0d060 */
 
-    /* Muted gold tones */
-    --muted: 35 30% 90%;
-    --muted-foreground: 0 40% 40%;
+    /* Stone / Cream Dark - Muted */
+    --muted: 39 45% 88%; /* #f5e6c8 */
+    --muted-foreground: 26 40% 39%; /* #8b5e3c */
 
-    /* Bright gold accent */
-    --accent: 45 100% 50%;
-    --accent-foreground: 0 75% 20%;
+    /* Temple Gold - Accent */
+    --accent: 46 65% 52%; /* #d4af37 */
+    --accent-foreground: 0 66% 17%; /* #4a0f0f */
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    /* Vermillion - Destructive */
+    --destructive: 6 63% 46%; /* #c0392b */
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 35 40% 85%;
-    --input: 35 40% 90%;
-    --ring: 35 95% 55%;
+    --border: 42 48% 78%; /* warm gold-tinted border */
+    --input: 42 48% 82%;
+    --ring: 25 92% 48%;
 
     --radius: 0.75rem;
 
-    /* Custom spiritual design tokens */
-    --gradient-divine: linear-gradient(
-      135deg,
-      hsl(35 95% 55%) 0%,
-      hsl(0 75% 45%) 100%
-    );
-    --gradient-sunset: linear-gradient(
-      180deg,
-      hsl(35 95% 55%) 0%,
-      hsl(25 90% 60%) 50%,
-      hsl(0 75% 35%) 100%
-    );
-    --shadow-divine: 0 10px 40px -10px hsl(35 95% 55% / 0.4);
-    --shadow-glow: 0 0 50px hsl(35 95% 55% / 0.3);
-    --transition-smooth: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    /* Temple tokens */
+    --temple-cream: #fef6e4;
+    --temple-cream-dk: #f5e6c8;
+    --temple-maroon: #6b1a1a;
+    --temple-maroon-dk: #4a0f0f;
+    --temple-maroon-deep: #3d0f0f;
+    --temple-gold: #d4af37;
+    --temple-gold-lt: #f0d060;
+    --temple-saffron: #e8650a;
+    --temple-ink: #2c1a0e;
+    --temple-ink-mid: #5c3317;
+    --temple-ink-light: #8b5e3c;
 
-    --sidebar-background: 0 0% 98%;
+    --gradient-divine: linear-gradient(135deg, #6b1a1a 0%, #e8650a 100%);
+    --gradient-temple-hero: linear-gradient(135deg, #2a0a0a 0%, #4a0f0f 55%, #6b1a1a 100%);
+    --shadow-divine: 0 10px 32px -10px rgba(107, 26, 26, 0.25);
+    --shadow-glow: 0 0 30px rgba(212, 175, 55, 0.35);
+    --transition-smooth: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
 
-    --sidebar-foreground: 240 5.3% 26.1%;
-
-    --sidebar-primary: 240 5.9% 10%;
-
-    --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
-  }
-
-  .dark {
-    --background: 0 60% 8%;
-    --foreground: 40 90% 95%;
-
-    --card: 0 50% 12%;
-    --card-foreground: 40 90% 95%;
-
-    --popover: 0 50% 12%;
-    --popover-foreground: 40 90% 95%;
-
-    --primary: 35 95% 55%;
-    --primary-foreground: 0 75% 10%;
-    --primary-glow: 40 100% 65%;
-
-    --secondary: 0 75% 25%;
-    --secondary-foreground: 40 90% 95%;
-
-    --muted: 0 40% 20%;
-    --muted-foreground: 35 30% 70%;
-
-    --accent: 45 100% 50%;
-    --accent-foreground: 0 75% 10%;
-
-    --destructive: 0 62.8% 50%;
-    --destructive-foreground: 40 90% 95%;
-
-    --border: 0 40% 25%;
-    --input: 0 40% 25%;
-    --ring: 35 95% 55%;
-
-    --gradient-divine: linear-gradient(
-      135deg,
-      hsl(35 95% 55%) 0%,
-      hsl(0 75% 35%) 100%
-    );
-    --gradient-sunset: linear-gradient(
-      180deg,
-      hsl(35 95% 55%) 0%,
-      hsl(25 90% 50%) 50%,
-      hsl(0 75% 25%) 100%
-    );
-    --shadow-divine: 0 10px 40px -10px hsl(35 95% 55% / 0.5);
-    --shadow-glow: 0 0 60px hsl(35 95% 55% / 0.4);
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-background: 0 61% 19%;
+    --sidebar-foreground: 42 93% 92%;
+    --sidebar-primary: 46 65% 52%;
+    --sidebar-primary-foreground: 0 66% 17%;
+    --sidebar-accent: 0 58% 25%;
+    --sidebar-accent-foreground: 46 84% 66%;
+    --sidebar-border: 46 65% 52%;
+    --sidebar-ring: 46 65% 52%;
   }
 }
 
@@ -138,32 +77,110 @@ All colors MUST be HSL.
     @apply border-border;
   }
 
+  html {
+    scroll-behavior: smooth;
+  }
+
   body {
-    @apply bg-background text-foreground font-body;
+    background-color: var(--temple-cream);
+    color: var(--temple-ink);
+    font-family: "Inter", system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
   }
 
   h1,
   h2,
-  h3,
-  h4,
-  h5,
-  h6 {
-    @apply font-display;
+  h3 {
+    font-family: "Cinzel", Georgia, serif;
+    letter-spacing: 0.015em;
   }
 }
 
+/* Smooth Micro-Animations */
+@keyframes fadeInUp {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes subtlePop {
+  0% {
+    opacity: 0;
+    transform: scale(0.97) translateY(6px);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes barGrow {
+  0% {
+    transform: scaleY(0);
+    transform-origin: bottom;
+  }
+  100% {
+    transform: scaleY(1);
+    transform-origin: bottom;
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.18s ease-out;
+}
+
+.animate-subtle-pop {
+  animation: subtlePop 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.animate-bar-grow {
+  animation: barGrow 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
 @layer components {
-  /* Spiritual cursor glow effect */
-  .cursor-glow {
-    cursor: pointer;
-    transition: var(--transition-smooth);
+  .font-heading-temple {
+    font-family: "Cinzel", Georgia, serif;
   }
 
-  .cursor-glow:hover {
-    filter: drop-shadow(var(--shadow-glow));
+  .font-display-temple {
+    font-family: "Cinzel Decorative", "Cinzel", serif;
   }
 
-  /* Divine gradient text */
+  .font-body-temple {
+    font-family: "EB Garamond", Georgia, serif;
+  }
+
+  .temple-hero-pattern {
+    background-color: #2e0b0b;
+    background-image:
+      repeating-linear-gradient(
+        135deg,
+        rgba(212, 175, 55, 0.05) 0px,
+        rgba(212, 175, 55, 0.05) 1px,
+        transparent 1px,
+        transparent 18px
+      ),
+      linear-gradient(135deg, #2a0a0a 0%, #4a0f0f 55%, #6b1a1a 100%);
+  }
+
+  .temple-card {
+    background-color: #fffdf8;
+    border: 1px solid rgba(212, 175, 55, 0.38);
+    border-radius: 1rem;
+    box-shadow: 0 4px 20px -6px rgba(44, 26, 14, 0.08);
+    transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1),
+      box-shadow 0.25s cubic-bezier(0.22, 1, 0.36, 1),
+      border-color 0.25s ease;
+  }
+
+  .temple-card:hover {
+    border-color: rgba(212, 175, 55, 0.72);
+    box-shadow: 0 12px 28px -8px rgba(107, 26, 26, 0.14);
+  }
+
   .text-gradient {
     background: var(--gradient-divine);
     -webkit-background-clip: text;
@@ -171,38 +188,22 @@ All colors MUST be HSL.
     background-clip: text;
   }
 
-  /* Smooth scroll */
-  html {
-    scroll-behavior: smooth;
-  }
-
-  /* Custom scrollbar */
+  /* Subtle themed scrollbar */
   ::-webkit-scrollbar {
-    width: 0px;
+    width: 6px;
+    height: 6px;
   }
 
   ::-webkit-scrollbar-track {
-    @apply bg-muted;
+    background: rgba(245, 230, 200, 0.45);
   }
 
   ::-webkit-scrollbar-thumb {
-    background: var(--gradient-divine);
-    border-radius: 5px;
+    background: rgba(107, 26, 26, 0.3);
+    border-radius: 9999px;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    @apply bg-primary;
-  }
-}
-
-/* ---break---
-*/
-
-@layer base {
-  * {
-    @apply border-border;
-  }
-  body {
-    @apply bg-background text-foreground;
+    background: rgba(212, 175, 55, 0.75);
   }
 }

@@ -649,62 +649,93 @@ const Banners = () => {
                 {isMarathi ? "फलक लोड होत आहेत..." : "Loading Divine Glimpses…"}
               </p>
             </div>
+          ) : !banners.hero &&
+            !banners["top-right"] &&
+            !banners["middle-right"] &&
+            !banners["bottom-right"] ? (
+            <div className="relative bg-[#fef6e4] border border-gold/40 rounded-lg p-10 sm:p-16 text-center max-w-2xl mx-auto shadow-sm">
+              <div className="absolute top-0 left-0 w-4 h-4 border-t-2 border-l-2 border-saffron pointer-events-none" />
+              <div className="absolute top-0 right-0 w-4 h-4 border-t-2 border-r-2 border-saffron pointer-events-none" />
+              <div className="absolute bottom-0 left-0 w-4 h-4 border-b-2 border-l-2 border-saffron pointer-events-none" />
+              <div className="absolute bottom-0 right-0 w-4 h-4 border-b-2 border-r-2 border-saffron pointer-events-none" />
+              <Sparkles className="w-12 h-12 text-gold-dk mx-auto mb-4 opacity-80" />
+              <h3 className="font-heading text-xl sm:text-2xl font-bold text-maroon mb-2">
+                {isMarathi ? "कोणतेही फलक आढळले नाहीत" : "No Banners Found"}
+              </h3>
+              <p className="font-body text-ink-light text-sm sm:text-base max-w-md mx-auto">
+                {isMarathi
+                  ? `${selectedYear} या वर्षासाठी अद्याप कोणतेही उत्सव किंवा कार्यक्रम फलक जोडलेले नाहीत.`
+                  : `No festival or event banners have been added for ${selectedYear} yet.`}
+              </p>
+            </div>
           ) : (
             <div
               className={`space-y-8 sm:space-y-12 transition-opacity duration-300 ${isAnimating ? "opacity-50" : "opacity-100"
                 }`}
             >
               {/* 1. Featured Main Banner Showcase */}
-              <FeaturedBannerCard
-                banner={banners.hero}
-                selectedYear={selectedYear}
-                isMarathi={isMarathi}
-                onSelect={handleBannerClick}
-                onDownload={handleDownload}
-                onShare={handleShare}
-                isCopied={copiedBannerId && banners.hero && copiedBannerId === (banners.hero._id || banners.hero.id || banners.hero.title)}
-              />
+              {banners.hero && (
+                <FeaturedBannerCard
+                  banner={banners.hero}
+                  selectedYear={selectedYear}
+                  isMarathi={isMarathi}
+                  onSelect={handleBannerClick}
+                  onDownload={handleDownload}
+                  onShare={handleShare}
+                  isCopied={copiedBannerId && banners.hero && copiedBannerId === (banners.hero._id || banners.hero.id || banners.hero.title)}
+                />
+              )}
 
-              {/* 2. Secondary Festival & Event Banners (1 col mobile, 2 cols tablet, 3 cols desktop) */}
-              <div>
-                <div className="flex items-center gap-3 mb-5 sm:mb-6">
-                  <div className="h-px flex-1 bg-gradient-to-r from-transparent via-gold/50 to-gold/20" />
-                  <span className="font-heading text-xs sm:text-sm font-bold uppercase tracking-[0.18em] text-maroon">
-                    {isMarathi ? "इतर उत्सव व कार्यक्रम फलक" : "Festival & Event Posters"}
-                  </span>
-                  <div className="h-px flex-1 bg-gradient-to-l from-transparent via-gold/50 to-gold/20" />
-                </div>
+              {/* 2. Secondary Festival & Event Banners (only render added banners) */}
+              {(banners["top-right"] ||
+                banners["middle-right"] ||
+                banners["bottom-right"]) && (
+                <div>
+                  <div className="flex items-center gap-3 mb-5 sm:mb-6">
+                    <div className="h-px flex-1 bg-gradient-to-r from-transparent via-gold/50 to-gold/20" />
+                    <span className="font-heading text-xs sm:text-sm font-bold uppercase tracking-[0.18em] text-maroon">
+                      {isMarathi ? "इतर उत्सव व कार्यक्रम फलक" : "Festival & Event Posters"}
+                    </span>
+                    <div className="h-px flex-1 bg-gradient-to-l from-transparent via-gold/50 to-gold/20" />
+                  </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
-                  <BannerCard
-                    banner={banners["top-right"]}
-                    label={isMarathi ? "विशेष फलक १" : "Highlight 01"}
-                    isMarathi={isMarathi}
-                    onSelect={handleBannerClick}
-                    onDownload={handleDownload}
-                    onShare={handleShare}
-                    isCopied={copiedBannerId && banners["top-right"] && copiedBannerId === (banners["top-right"]._id || banners["top-right"].id || banners["top-right"].title)}
-                  />
-                  <BannerCard
-                    banner={banners["middle-right"]}
-                    label={isMarathi ? "विशेष फलक २" : "Highlight 02"}
-                    isMarathi={isMarathi}
-                    onSelect={handleBannerClick}
-                    onDownload={handleDownload}
-                    onShare={handleShare}
-                    isCopied={copiedBannerId && banners["middle-right"] && copiedBannerId === (banners["middle-right"]._id || banners["middle-right"].id || banners["middle-right"].title)}
-                  />
-                  <BannerCard
-                    banner={banners["bottom-right"]}
-                    label={isMarathi ? "विशेष फलक ३" : "Highlight 03"}
-                    isMarathi={isMarathi}
-                    onSelect={handleBannerClick}
-                    onDownload={handleDownload}
-                    onShare={handleShare}
-                    isCopied={copiedBannerId && banners["bottom-right"] && copiedBannerId === (banners["bottom-right"]._id || banners["bottom-right"].id || banners["bottom-right"].title)}
-                  />
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
+                    {banners["top-right"] && (
+                      <BannerCard
+                        banner={banners["top-right"]}
+                        label={isMarathi ? "विशेष फलक १" : "Highlight 01"}
+                        isMarathi={isMarathi}
+                        onSelect={handleBannerClick}
+                        onDownload={handleDownload}
+                        onShare={handleShare}
+                        isCopied={copiedBannerId && banners["top-right"] && copiedBannerId === (banners["top-right"]._id || banners["top-right"].id || banners["top-right"].title)}
+                      />
+                    )}
+                    {banners["middle-right"] && (
+                      <BannerCard
+                        banner={banners["middle-right"]}
+                        label={isMarathi ? "विशेष फलक २" : "Highlight 02"}
+                        isMarathi={isMarathi}
+                        onSelect={handleBannerClick}
+                        onDownload={handleDownload}
+                        onShare={handleShare}
+                        isCopied={copiedBannerId && banners["middle-right"] && copiedBannerId === (banners["middle-right"]._id || banners["middle-right"].id || banners["middle-right"].title)}
+                      />
+                    )}
+                    {banners["bottom-right"] && (
+                      <BannerCard
+                        banner={banners["bottom-right"]}
+                        label={isMarathi ? "विशेष फलक ३" : "Highlight 03"}
+                        isMarathi={isMarathi}
+                        onSelect={handleBannerClick}
+                        onDownload={handleDownload}
+                        onShare={handleShare}
+                        isCopied={copiedBannerId && banners["bottom-right"] && copiedBannerId === (banners["bottom-right"]._id || banners["bottom-right"].id || banners["bottom-right"].title)}
+                      />
+                    )}
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           )}
         </main>

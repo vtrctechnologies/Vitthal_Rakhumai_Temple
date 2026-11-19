@@ -1,5 +1,6 @@
 import crypto from 'crypto';
 import { Subscriber } from './subscriber.model.js';
+import { SubscriberSettings } from './subscriberSettings.model.js';
 
 /**
  * Securely hashes a 6-digit OTP using SHA-256 before database storage.
@@ -15,6 +16,13 @@ const hashOTP = (otp) => {
  */
 export const requestOTP = async (req, res) => {
   try {
+    const settings = await SubscriberSettings.findOne({ key: 'newsletter' });
+    if (settings && (settings.isDisabled || !settings.isVisible)) {
+      return res.status(403).json({
+        status: 'error',
+        message: 'Newsletter subscription is temporarily disabled.'
+      });
+    }
     const { name, email, phone } = req.body;
 
     if (!name || !email || !phone) {
@@ -154,6 +162,71 @@ export const getSubscribers = async (req, res) => {
     res.status(500).json({
       status: 'error',
       message: error.message || 'Internal server error'
+    });
+  }
+};
+
+
+/**
+ * @desc    Get newsletter subscribe button visibility & disabled settings
+ * @route   GET /api/subscribers/settings
+ * @access  Public
+ */
+export const getSubscriberSettings = async (req, res) => {
+  try {
+    let settings = await SubscriberSettings.findOne({ key: 'newsletter' }).lean();
+    if (!settings) {
+      settings = await SubscriberSettings.create({
+        key: 'newsletter',
+        isVisible: true,
+        isDisabled: true,
+        disabledMessage: 'Temporarily Disabled',
+        disabledMessageMr: 'तात्पुरते बंद आहे',
+      });
+    }
+
+    res.status(200).json({
+      status: 'success',
+      data: settings,
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: 'error',
+      message: error.message || 'Internal server error',
+    });
+  }
+};
+
+/**
+ * @desc    Update newsletter subscribe button visibility & disabled settings (Admin)
+ * @route   PUT /api/subscribers/settings
+ * @access  Private/Admin
+ */
+export const updateSubscriberSettings = async (req, res) => {
+  try {
+    const { isVisible, isDisabled, disabledMessage, disabledMessageMr } = req.body;
+
+    const update = {};
+    if (isVisible !== undefined) update.isVisible = Boolean(isVisible);
+    if (isDisabled !== undefined) update.isDisabled = Boolean(isDisabled);
+    if (disabledMessage !== undefined) update.disabledMessage = String(disabledMessage).trim();
+    if (disabledMessageMr !== undefined) update.disabledMessageMr = String(disabledMessageMr).trim();
+
+    const settings = await SubscriberSettings.findOneAndUpdate(
+      { key: 'newsletter' },
+      { $set: update, $setOnInsert: { key: 'newsletter' } },
+      { new: true, upsert: true }
+    );
+
+    res.status(200).json({
+      status: 'success',
+      message: 'Subscriber button settings updated successfully',
+      data: settings,
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: 'error',
+      message: error.message || 'Internal server error',
     });
   }
 };

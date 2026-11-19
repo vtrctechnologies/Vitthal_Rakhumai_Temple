@@ -21,7 +21,7 @@ const GalleryView = ({ initialTab = "images" }) => {
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
   const [showImageForm, setShowImageForm] = useState(false);
-  const [showCategoryForm, setShowCategoryForm] = useState(initialTab === "categories");
+  const [showCategoryForm, setShowCategoryForm] = useState(false);
   const [editingImage, setEditingImage] = useState(null);
   const [editingCategory, setEditingCategory] = useState(null);
   const [message, setMessage] = useState({ type: "", text: "" });
@@ -402,7 +402,7 @@ const GalleryView = ({ initialTab = "images" }) => {
           onClick={() => setActiveTab("images")}
           className={`px-4 py-2 font-medium transition-colors border-b-2 ${
             activeTab === "images"
-              ? "border-blue-600 text-blue-600"
+              ? "border-[#6b1a1a] text-[#6b1a1a]"
               : "border-transparent text-gray-600 hover:text-gray-800"
           }`}
         >
@@ -412,7 +412,7 @@ const GalleryView = ({ initialTab = "images" }) => {
           onClick={() => setActiveTab("categories")}
           className={`px-4 py-2 font-medium transition-colors border-b-2 ${
             activeTab === "categories"
-              ? "border-blue-600 text-blue-600"
+              ? "border-[#6b1a1a] text-[#6b1a1a]"
               : "border-transparent text-gray-600 hover:text-gray-800"
           }`}
         >
@@ -460,7 +460,7 @@ const GalleryView = ({ initialTab = "images" }) => {
                 id="showInactiveImages"
                 checked={showInactive}
                 onChange={(e) => setShowInactive(e.target.checked)}
-                className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                className="w-4 h-4 accent-[#6b1a1a] text-[#6b1a1a] border-[#d4af37]/50 rounded focus:ring-[#e8650a]"
               />
               <label htmlFor="showInactiveImages" className="text-sm text-gray-700 cursor-pointer">
                 Show inactive images
@@ -490,7 +490,7 @@ const GalleryView = ({ initialTab = "images" }) => {
 
       {/* Image Form Modal */}
       {showImageForm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-[#2c1a0e]/60 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
             <div className="p-6">
               <div className="flex justify-between items-center mb-6 border-b pb-4">
@@ -598,7 +598,7 @@ const GalleryView = ({ initialTab = "images" }) => {
                         onChange={(e) =>
                           setImageFormData({ ...imageFormData, isActive: e.target.checked })
                         }
-                        className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                        className="w-4 h-4 accent-[#6b1a1a] text-[#6b1a1a] border-[#d4af37]/50 rounded focus:ring-[#e8650a]"
                       />
                       <label
                         htmlFor="isActiveImage"
@@ -689,7 +689,7 @@ const GalleryView = ({ initialTab = "images" }) => {
 
       {/* Category Form Modal */}
       {showCategoryForm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-[#2c1a0e]/60 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg max-w-xl w-full shadow-2xl">
             <div className="p-6">
               <div className="flex justify-between items-center mb-6 border-b pb-4">
@@ -773,7 +773,7 @@ const GalleryView = ({ initialTab = "images" }) => {
                           onChange={(e) =>
                             setCategoryFormData({ ...categoryFormData, isActive: e.target.checked })
                           }
-                          className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                          className="w-4 h-4 accent-[#6b1a1a] text-[#6b1a1a] border-[#d4af37]/50 rounded focus:ring-[#e8650a]"
                         />
                         <label
                           htmlFor="isActiveCategory"
@@ -816,7 +816,7 @@ const GalleryView = ({ initialTab = "images" }) => {
 
       {/* Delete Image Confirmation Modal */}
       {deleteImageId && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-[#2c1a0e]/60 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
             <h3 className="text-lg font-bold mb-4">Confirm Delete</h3>
             <p className="text-gray-600 mb-6">
@@ -847,7 +847,7 @@ const GalleryView = ({ initialTab = "images" }) => {
 
       {/* Delete Category Confirmation Modal */}
       {deleteCategoryId && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-[#2c1a0e]/60 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
             <h3 className="text-lg font-bold mb-4">Confirm Delete</h3>
             <p className="text-gray-600 mb-6">
@@ -882,7 +882,7 @@ const GalleryView = ({ initialTab = "images" }) => {
         <>
           {fetching ? (
             <div className="flex items-center justify-center py-12">
-              <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+              <Loader2 className="w-8 h-8 animate-spin text-[#6b1a1a]" />
             </div>
           ) : filteredImages.length === 0 ? (
             <div className="text-center py-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">

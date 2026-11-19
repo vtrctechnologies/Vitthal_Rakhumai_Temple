@@ -165,6 +165,11 @@ export const donationAPI = {
   getLeaderboard: async (params = {}) => {
     return apiClient.get("/donations/leaderboard", { params });
   },
+
+  // Get admin-curated top donors for homepage ticker
+  getTopDonors: async () => {
+    return apiClient.get("/donations/top-donors");
+  },
 };
 
 // Subscriber API functions
@@ -177,6 +182,11 @@ export const subscriberAPI = {
   // Verify OTP and finalize subscription
   verifyOTP: async (data) => {
     return apiClient.post("/subscribers/verify", data);
+  },
+
+  // Get Subscribe Now button visibility & disabled state
+  getSettings: async () => {
+    return apiClient.get("/subscribers/settings");
   },
 };
 

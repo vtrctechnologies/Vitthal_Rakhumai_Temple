@@ -80,6 +80,11 @@ const DonationTicker = () => {
     let isMounted = true;
     const fetchTopDonors = async () => {
       try {
+        const topRes = await donationAPI.getTopDonors();
+        if (isMounted && topRes?.status === "success" && Array.isArray(topRes.data) && topRes.data.length > 0) {
+          setDonors(topRes.data.map((d) => ({ name: d.name || "Devotee", marathiName: d.marathiName || d.name || "भाविक", amount: d.amount || 0, tag: d.tag || "दानशूर" })));
+          return;
+        }
         const response = await donationAPI.getLeaderboard({ limit: 15 });
         if (isMounted && response?.status === "success" && Array.isArray(response.data?.leaderboard) && response.data.leaderboard.length > 0) {
           // Merge API data with mock details for richer display

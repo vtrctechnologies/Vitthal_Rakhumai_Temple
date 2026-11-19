@@ -519,6 +519,31 @@ export const subscriberAPI = {
   getSubscribers: async () => {
     return apiClient.get("/subscribers");
   },
+  getSettings: async () => {
+    return apiClient.get("/subscribers/settings");
+  },
+  updateSettings: async (data) => {
+    return apiClient.put("/subscribers/settings", data);
+  },
+};
+
+// Top Donors & Donations API functions
+export const donationAPI = {
+  getTopDonorsAdmin: async () => {
+    return apiClient.get("/donations/top-donors/admin");
+  },
+  createTopDonor: async (data) => {
+    return apiClient.post("/donations/top-donors", data);
+  },
+  updateTopDonor: async (id, data) => {
+    return apiClient.put(`/donations/top-donors/${id}`, data);
+  },
+  deleteTopDonor: async (id) => {
+    return apiClient.delete(`/donations/top-donors/${id}`);
+  },
+  getAllDonations: async () => {
+    return apiClient.get("/donations");
+  },
 };
 
 // Contact API functions

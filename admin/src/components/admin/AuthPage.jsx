@@ -225,44 +225,45 @@ const AuthPage = ({ onLoginSuccess }) => {
   };
 
   return (
-    <div className="w-full min-h-screen flex items-center justify-center p-4 py-28 font-sans text-gray-800 relative">
+    <div className="w-full min-h-screen flex items-center justify-center p-4 py-8 sm:py-16 text-[#2c1a0e] relative">
       <BackgroundPattern />
 
-      <div className="relative z-10 w-full max-w-4xl bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col md:flex-row min-h-[600px] animate-fade-in-up">
+      <div className="relative z-10 w-full max-w-4xl bg-[#fffdf8] border border-[#d4af37]/45 rounded-2xl shadow-[0_20px_50px_-12px_rgba(44,26,14,0.28)] overflow-hidden flex flex-col md:flex-row min-h-[560px] animate-fade-in-up">
         {/* Left Side: Visual */}
-        <div className="w-full md:w-1/2 bg-gradient-to-br from-orange-600 to-red-700 p-8 flex flex-col justify-between text-white relative overflow-hidden">
+        <div className="w-full md:w-1/2 temple-hero-pattern p-7 sm:p-8 flex flex-col justify-between text-[#fef6e4] relative overflow-hidden border-b md:border-b-0 md:border-r border-[#d4af37]/30">
           <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
           <div className="relative z-10">
             <div className="flex items-center gap-3 mb-6">
-              <div className="p-2 bg-white/20 rounded-lg backdrop-blur-sm">
-                <Landmark size={28} className="text-yellow-300" />
+              <div className="w-11 h-11 shrink-0 rounded-full border-2 border-[#d4af37]/70 p-[2px] bg-[#180303] shadow-md">
+                <img src="/temple-logo-optimized.png" alt="Shree Vitthal Rakhumai Mandir Logo" className="w-full h-full rounded-full object-cover" />
               </div>
-              <span className="font-bold text-xl tracking-wider text-yellow-300">
+
+              <span className="font-bold text-lg sm:text-xl tracking-wider text-[#f0d060] font-heading-temple">
                 ADMIN PORTAL
               </span>
             </div>
-            <h1 className="text-4xl md:text-5xl font-serif font-bold leading-tight mb-4">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-heading-temple font-bold leading-tight mb-4 text-[#fef6e4]">
               Shri Vitthal <br /> Rakhumai
             </h1>
-            <p className="text-orange-100 text-lg opacity-90">
+            <p className="text-[#ffebc8]/85 text-base sm:text-lg font-body-temple">
               {view.includes("forgot")
                 ? "Securely recover access to your account via OTP verification."
                 : "Manage devotees, events, and temple services efficiently."}
             </p>
           </div>
-          <div className="relative z-10 text-xs text-orange-200/60 mt-auto pt-8">
+          <div className="relative z-10 text-xs text-[#f0d060]/60 mt-auto pt-8 tracking-wide">
             © 2025 Shri Vitthal Rakhumai Temple Seva Mandal.
           </div>
         </div>
 
         {/* Right Side: Form */}
-        <div className="w-full md:w-1/2 p-8 md:p-12 bg-white flex flex-col justify-center">
+        <div className="w-full md:w-1/2 p-6 sm:p-8 md:p-10 bg-[#fffdf8] flex flex-col justify-center">
           {view !== "victory" && (
             <div className="mb-8 text-center md:text-left">
-              <h2 className="text-3xl font-bold text-gray-800 mb-2">
+              <h2 className="text-2xl sm:text-3xl font-bold text-[#6b1a1a] mb-1.5 font-heading-temple">
                 {getTitle()}
               </h2>
-              <p className="text-gray-500">{getSubtitle()}</p>
+              <p className="text-sm sm:text-base text-[#8b5e3c]">{getSubtitle()}</p>
             </div>
           )}
 
@@ -432,7 +433,7 @@ const AuthPage = ({ onLoginSuccess }) => {
                   <button
                     type="button"
                     onClick={() => resetFormState("forgot-email")}
-                    className="text-sm font-medium text-orange-600 hover:text-orange-700"
+                    className="text-sm font-medium text-[#e8650a] hover:text-[#6b1a1a] transition-colors cursor-pointer"
                   >
                     Forgot Password?
                   </button>
@@ -471,7 +472,7 @@ const AuthPage = ({ onLoginSuccess }) => {
                     onClick={() =>
                       resetFormState(view === "login" ? "register" : "login")
                     }
-                    className="font-bold text-orange-600 hover:text-orange-700"
+                    className="font-bold text-[#e8650a] hover:text-[#6b1a1a] transition-colors cursor-pointer"
                   >
                     {view === "login" ? "Sign up" : "Log in"}
                   </button>
@@ -488,7 +489,7 @@ const AuthPage = ({ onLoginSuccess }) => {
                 <div className="absolute inset-0 bg-orange-400 rounded-full blur-3xl opacity-30 animate-pulse"></div>
                 <div className="absolute inset-0 bg-yellow-300 rounded-full blur-2xl opacity-20 animate-ping duration-1000"></div>
 
-                <div className="relative bg-gradient-to-br from-orange-500 to-red-600 p-8 rounded-full text-white shadow-2xl transform hover:scale-105 transition-transform">
+                <div className="relative bg-gradient-to-br from-[#6b1a1a] to-[#e8650a] p-8 rounded-full text-[#fef6e4] border-2 border-[#d4af37]/60 shadow-2xl transform hover:scale-105 transition-transform">
                   <Sparkles size={64} className="animate-spin" style={{ animationDuration: '4s' }} />
                   <div className="absolute -bottom-2 -right-2 bg-green-500 p-2 rounded-full border-4 border-white">
                     <CheckCircle2 size={24} />
@@ -497,7 +498,7 @@ const AuthPage = ({ onLoginSuccess }) => {
               </div>
 
               <div className="text-center space-y-3">
-                <h2 className="text-4xl font-serif font-bold text-gray-900 tracking-tight animate-bounce">
+                <h2 className="text-3xl sm:text-4xl font-heading-temple font-bold text-[#6b1a1a] tracking-tight">
                   Ram Krishna Hari!
                 </h2>
                 <p className="text-xl text-gray-600 font-medium">
@@ -506,12 +507,12 @@ const AuthPage = ({ onLoginSuccess }) => {
               </div>
 
               <div className="flex flex-col items-center gap-4 pt-4">
-                <div className="bg-orange-50 px-8 py-4 rounded-2xl border border-orange-100 shadow-sm flex items-center gap-4 group">
+                <div className="bg-[#f5e6c8]/60 px-7 py-3.5 rounded-2xl border border-[#d4af37]/45 shadow-sm flex items-center gap-3.5 group">
                   <div className="relative">
                     <div className="w-3 h-3 bg-orange-500 rounded-full animate-ping"></div>
                     <div className="absolute inset-0 w-3 h-3 bg-orange-600 rounded-full opacity-75"></div>
                   </div>
-                  <span className="text-orange-800 font-bold text-sm tracking-widest uppercase">
+                  <span className="text-[#6b1a1a] font-bold text-xs sm:text-sm tracking-widest uppercase">
                     Entering Seva Dashboard...
                   </span>
                 </div>

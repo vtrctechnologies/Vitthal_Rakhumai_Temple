@@ -1,83 +1,207 @@
-import { Layout, IndianRupee, Calendar, User, Lock, Bell, Image, Timer, FileImage, Trophy, Video, Users, MessageSquare, Folder } from "lucide-react";
+import {
+  Layout,
+  IndianRupee,
+  Calendar,
+  User,
+  Lock,
+  Bell,
+  Image,
+  Timer,
+  FileImage,
+  Trophy,
+  Video,
+  Users,
+  MessageSquare,
+  Folder,
+  X,
+  ChevronRight,
+} from "lucide-react";
 
 const Sidebar = ({ isOpen, toggleSidebar, activeTab, setActiveTab }) => {
-  const menuItems = [
-    { id: "dashboard", label: "Dashboard", icon: Layout },
-    { id: "donations", label: "Donations", icon: IndianRupee },
-    { id: "events", label: "Events", icon: Calendar },
-    { id: "events-page", label: "Events Page", icon: Timer },
-    { id: "banners", label: "Banners", icon: FileImage },
-    { id: "sports", label: "Sports", icon: Trophy },
-    { id: "sports-registrations", label: "Registrations", icon: Trophy },
-    { id: "live-programs", label: "Live Programs", icon: Video },
-    { id: "subscribers", label: "Subscribers", icon: Users },
-    { id: "messages", label: "Messages", icon: MessageSquare },
-    { id: "guests", label: "Guests", icon: User },
-    { id: "members", label: "Members", icon: User },
-    { id: "gallery", label: "Gallery", icon: Image },
-    { id: "categories", label: "Categories", icon: Folder },
-    { id: "notifications", label: "Notifications", icon: Bell },
-    { id: "settings", label: "Settings", icon: Lock },
+  const menuGroups = [
+    {
+      title: "Overview",
+      items: [
+        { id: "dashboard", label: "Dashboard", icon: Layout },
+        { id: "donations", label: "Donations", icon: IndianRupee },
+      ],
+    },
+    {
+      title: "Temple & Events",
+      items: [
+        { id: "events", label: "Events", icon: Calendar },
+        { id: "events-page", label: "Events Page", icon: Timer },
+        { id: "banners", label: "Banners", icon: FileImage },
+        { id: "sports", label: "Sports", icon: Trophy },
+        { id: "sports-registrations", label: "Registrations", icon: Trophy },
+        { id: "live-programs", label: "Live Programs", icon: Video },
+      ],
+    },
+    {
+      title: "Community & Media",
+      items: [
+        { id: "gallery", label: "Gallery", icon: Image },
+        { id: "categories", label: "Categories", icon: Folder },
+        { id: "guests", label: "Guests", icon: User },
+        { id: "members", label: "Members", icon: User },
+        { id: "subscribers", label: "Subscribers", icon: Users },
+        { id: "messages", label: "Messages", icon: MessageSquare },
+      ],
+    },
+    {
+      title: "System",
+      items: [
+        { id: "notifications", label: "Notifications", icon: Bell },
+        { id: "settings", label: "Settings", icon: Lock },
+      ],
+    },
   ];
+
+  const handleSelect = (id) => {
+    setActiveTab(id);
+    if (window.innerWidth < 1024) {
+      toggleSidebar();
+    }
+  };
 
   return (
     <>
-      {/* Mobile Overlay */}
-      {isOpen && (
-        <div
-          className="fixed inset-0 bg-black/50 z-40 md:hidden"
-          onClick={toggleSidebar}
-        />
-      )}
+      {/* Mobile & Tablet Overlay */}
+      <div
+        className={`fixed inset-0 bg-[#2c1a0e]/55 z-40 lg:hidden transition-opacity duration-200 ${
+          isOpen
+            ? "opacity-100 pointer-events-auto"
+            : "opacity-0 pointer-events-none"
+        }`}
+        onClick={toggleSidebar}
+        aria-hidden="true"
+      />
 
       {/* Sidebar Container */}
       <aside
         className={`
-        fixed md:sticky top-16 left-0 h-[calc(100vh-4rem)] w-64 z-40 transition-transform duration-300 ease-in-out flex flex-col justify-between pb-4
-        ${isOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}
+          fixed lg:sticky top-0 lg:top-16 left-0 h-screen lg:h-[calc(100vh-4rem)] w-72 lg:w-64 z-50 lg:z-40
+          transition-transform duration-300 ease-out flex flex-col justify-between temple-hero-pattern
+          ${isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
         `}
-        style={{ background: "linear-gradient(180deg, #3d0f0f 0%, #5a1515 60%, #6b1a1a 100%)", borderRight: "1px solid rgba(212,175,55,0.25)" }}
+        style={{
+          borderRight: "1px solid rgba(212,175,55,0.28)",
+          boxShadow: "4px 0 24px rgba(44,26,14,0.22)",
+        }}
       >
         {/* Decorative top gold border */}
-        <div className="h-1 w-full" style={{ background: "linear-gradient(90deg, #6b1a1a, #d4af37, #e8650a, #d4af37, #6b1a1a)" }} />
+        <div
+          className="h-1 w-full flex-shrink-0"
+          style={{
+            background:
+              "linear-gradient(90deg, #4a0f0f, #d4af37, #e8650a, #d4af37, #4a0f0f)",
+          }}
+        />
 
-        <div className="p-4 space-y-1 overflow-y-auto flex-1">
-          <p className="px-4 text-[10px] font-bold uppercase tracking-[0.25em] mb-3 mt-2" style={{ color: "rgba(212,175,55,0.55)" }}>
-            Main Menu
-          </p>
-          {menuItems.map((item) => (
-            <button
-              key={item.id}
-              onClick={() => {
-                setActiveTab(item.id);
-                if (window.innerWidth < 768) toggleSidebar();
-              }}
-              className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-md text-sm font-medium transition-all duration-200 ${
-                activeTab === item.id
-                  ? "text-white"
-                  : "hover:bg-white/5"
-              }`}
-              style={
-                activeTab === item.id
-                  ? {
-                      background: "linear-gradient(90deg, rgba(212,175,55,0.25), rgba(212,175,55,0.1))",
-                      borderLeft: "3px solid #d4af37",
-                      color: "#f0d060",
-                      paddingLeft: "13px",
-                    }
-                  : { color: "rgba(255,235,200,0.65)", borderLeft: "3px solid transparent" }
-              }
-            >
-              <item.icon size={18} style={{ flexShrink: 0, opacity: activeTab === item.id ? 1 : 0.7 }} />
-              {item.label}
-            </button>
+        {/* Mobile/Tablet Drawer Header */}
+        <div className="flex items-center justify-between px-4 py-3.5 border-b border-[#d4af37]/20 lg:hidden">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="w-8 h-8 shrink-0 rounded-full border border-[#d4af37]/65 p-[1.5px] bg-[#180303]">
+              <img
+                src="/temple-logo-optimized.png"
+                alt="Shree Vitthal Rakhumai Mandir Logo"
+                className="w-full h-full rounded-full object-cover"
+              />
+            </div>
+            <div className="min-w-0">
+              <span className="block text-sm font-bold tracking-wide text-[#f0d060] font-display-temple truncate">
+                Shree Vitthal Rakhumai
+              </span>
+              <span className="block text-[10px] uppercase tracking-[0.18em] text-[#f5a623]">
+                Mandir Admin
+              </span>
+            </div>
+          </div>
+          <button
+            onClick={toggleSidebar}
+            className="p-1.5 rounded-lg text-[#f0d060]/80 hover:text-[#f0d060] hover:bg-white/10 transition-colors cursor-pointer"
+            aria-label="Close navigation menu"
+          >
+            <X size={20} />
+          </button>
+        </div>
+
+        {/* Navigation Groups */}
+        <div className="px-3 py-4 space-y-5 overflow-y-auto flex-1">
+          {menuGroups.map((group) => (
+            <div key={group.title}>
+              <p
+                className="px-3.5 text-[10px] font-bold uppercase tracking-[0.22em] mb-2"
+                style={{ color: "rgba(212,175,55,0.58)" }}
+              >
+                {group.title}
+              </p>
+              <div className="space-y-1">
+                {group.items.map((item) => {
+                  const isActive = activeTab === item.id;
+                  return (
+                    <button
+                      key={item.id}
+                      onClick={() => handleSelect(item.id)}
+                      className={`group w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 cursor-pointer ${
+                        isActive
+                          ? "text-[#f0d060] shadow-sm"
+                          : "text-[#ffebc8]/70 hover:text-[#fef6e4] hover:bg-white/[0.06] hover:translate-x-1"
+                      }`}
+                      style={
+                        isActive
+                          ? {
+                              background:
+                                "linear-gradient(90deg, rgba(212,175,55,0.22) 0%, rgba(232,101,10,0.12) 100%)",
+                              borderLeft: "3px solid #d4af37",
+                              paddingLeft: "11px",
+                            }
+                          : {
+                              borderLeft: "3px solid transparent",
+                            }
+                      }
+                    >
+                      <span className="flex items-center gap-3 min-w-0">
+                        <item.icon
+                          size={17}
+                          className={`flex-shrink-0 transition-transform duration-200 ${
+                            isActive
+                              ? "text-[#f0d060] scale-105"
+                              : "opacity-75 group-hover:opacity-100 group-hover:text-[#f0d060]"
+                          }`}
+                        />
+                        <span className="truncate">{item.label}</span>
+                      </span>
+                      {isActive && (
+                        <ChevronRight
+                          size={14}
+                          className="text-[#d4af37] flex-shrink-0"
+                        />
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
           ))}
         </div>
 
-        {/* Sidebar footer ornament */}
-        <div className="px-6 py-3 text-center">
-          <div className="h-px w-full mb-3" style={{ background: "linear-gradient(90deg, transparent, rgba(212,175,55,0.35), transparent)" }} />
-          <p className="text-[10px] tracking-widest uppercase" style={{ fontFamily: '"Cinzel", serif', color: "rgba(212,175,55,0.45)" }}>
+        {/* Sidebar Footer Ornament */}
+        <div className="px-5 py-3.5 text-center flex-shrink-0">
+          <div
+            className="h-px w-full mb-3"
+            style={{
+              background:
+                "linear-gradient(90deg, transparent, rgba(212,175,55,0.4), transparent)",
+            }}
+          />
+          <p
+            className="text-[11px] tracking-[0.2em] uppercase"
+            style={{
+              fontFamily: '"Cinzel", serif',
+              color: "rgba(240,208,96,0.55)",
+            }}
+          >
             || जय हरी विठ्ठल ||
           </p>
         </div>
@@ -87,4 +211,3 @@ const Sidebar = ({ isOpen, toggleSidebar, activeTab, setActiveTab }) => {
 };
 
 export default Sidebar;
-

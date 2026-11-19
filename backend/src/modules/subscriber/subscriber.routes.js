@@ -9,10 +9,12 @@ import {
 const router = express.Router();
 
 // Public routes (Protected against OTP flooding and brute force)
+router.get('/settings', ctrl.getSubscriberSettings);
 router.post('/subscribe', otpRequestLimiter, ctrl.requestOTP);
 router.post('/verify', otpVerifyLimiter, ctrl.verifyOTP);
 
 // Admin routes (Protected - Admin only)
 router.get('/', protect, admin, ctrl.getSubscribers);
+router.put('/settings', protect, admin, ctrl.updateSubscriberSettings);
 
 export default router;
