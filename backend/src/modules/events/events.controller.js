@@ -34,6 +34,9 @@ export const createEvent = async (req, res, next) => {
       eventDate,
       eventTime,
       eventDetails,
+      eventDetailsMarathi,
+      eventDateMarathi,
+      eventTimeMarathi,
       status,
       isFeatured,
     } = req.body;
@@ -85,6 +88,9 @@ export const createEvent = async (req, res, next) => {
       eventDate: eventDate || "",
       eventTime: eventTime || "",
       eventDetails: eventDetails || "",
+        eventDetailsMarathi: eventDetailsMarathi || "",
+        eventDateMarathi: eventDateMarathi || "",
+        eventTimeMarathi: eventTimeMarathi || "",
       status: status || "upcoming",
       isFeatured: isFeatured === "true" || isFeatured === true,
       isActive: true,
@@ -257,6 +263,9 @@ export const setFeaturedEvent = async (req, res, next) => {
       if (eventDate !== undefined) event.eventDate = eventDate;
       if (eventTime !== undefined) event.eventTime = eventTime;
       if (eventDetails !== undefined) event.eventDetails = eventDetails;
+      if (eventDetailsMarathi !== undefined) event.eventDetailsMarathi = eventDetailsMarathi;
+      if (eventDateMarathi !== undefined) event.eventDateMarathi = eventDateMarathi;
+      if (eventTimeMarathi !== undefined) event.eventTimeMarathi = eventTimeMarathi;
       if (date !== undefined) event.date = date;
       if (time !== undefined) event.time = time;
       if (location !== undefined) event.location = location;

@@ -11,7 +11,15 @@ const winnerSchema = new mongoose.Schema({
     required: [true, 'Team name is required'],
     trim: true
   },
-  captain: { 
+  captain: {
+    type: String,
+    trim: true
+  },
+  teamNameMarathi: {
+    type: String,
+    trim: true
+  },
+  captainMarathi: {
     type: String,
     trim: true
   },

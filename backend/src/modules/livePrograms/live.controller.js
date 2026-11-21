@@ -88,7 +88,7 @@ export const getLivePrograms = async (req, res) => {
     else if (active === 'false') filter.isActive = false;
 
     const programs = await LiveProgram.find(filter)
-      .populate('category', 'name')
+      .populate('category', 'name nameMarathi')
       .sort({ startTimestamp: -1 });
 
     res.status(200).json({ status: 'success', results: programs.length, data: programs });
@@ -111,7 +111,7 @@ export const getLiveProgramYears = async (req, res) => {
 // Get single program
 export const getLiveProgram = async (req, res) => {
   try {
-    const program = await LiveProgram.findById(req.params.id).populate('category', 'name');
+    const program = await LiveProgram.findById(req.params.id).populate('category', 'name nameMarathi');
     if (!program) {
       return res.status(404).json({ status: 'error', message: 'Program not found' });
     }

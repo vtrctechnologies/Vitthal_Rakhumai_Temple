@@ -11,6 +11,14 @@ const liveCategorySchema = new mongoose.Schema({
     type: String,
     trim: true
   },
+  nameMarathi: {
+    type: String,
+    trim: true
+  },
+  descriptionMarathi: {
+    type: String,
+    trim: true
+  },
   order: {
     type: Number,
     default: 0
@@ -32,6 +40,14 @@ const liveProgramSchema = new mongoose.Schema({
   description: {
     type: String,
     required: [true, 'Program description is required'],
+    trim: true
+  },
+  titleMarathi: {
+    type: String,
+    trim: true
+  },
+  descriptionMarathi: {
+    type: String,
     trim: true
   },
   category: {

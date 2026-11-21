@@ -207,7 +207,6 @@ const MembersView = () => {
       order: 0,
       image: null,
       isActive: true,
-      image: null,
     });
     setErrors({});
     setImagePreview(null);

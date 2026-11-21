@@ -14,6 +14,17 @@ const sportSchema = new mongoose.Schema({
   description: { 
     type: String 
   },
+  nameMarathi: { 
+    type: String, 
+    trim: true 
+  },
+  titleMarathi: { 
+    type: String, 
+    trim: true 
+  },
+  descriptionMarathi: { 
+    type: String 
+  },
   imageUrl: { 
     type: String 
   },
@@ -54,6 +65,22 @@ const sportSchema = new mongoose.Schema({
     default: ''
   },
   rules: {
+    type: String,
+    default: ''
+  },
+  rulesMarathi: {
+    type: String,
+    default: ''
+  },
+  prizesMarathi: {
+    type: String,
+    default: ''
+  },
+  entryFeeMarathi: {
+    type: String,
+    default: ''
+  },
+  categoryMarathi: {
     type: String,
     default: ''
   },

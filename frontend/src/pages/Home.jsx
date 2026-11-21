@@ -92,9 +92,8 @@ const SectionHeader = ({
     <DiamondDivider />
     {subtitle && (
       <p
-        className={`text-sm sm:text-base md:text-lg leading-relaxed text-ink-mid max-w-[600px] ${
-          center ? "mx-auto" : ""
-        }`}
+        className={`text-sm sm:text-base md:text-lg leading-relaxed text-ink-mid max-w-[600px] ${center ? "mx-auto" : ""
+          }`}
       >
         {subtitle}
       </p>
@@ -278,7 +277,7 @@ const Home = memo(() => {
                 className="fill-[#2b0808] text-[#2b0808] shrink-0"
               />
               <span className="whitespace-nowrap">
-                {isMarathi ? "देणगी द्या" : "Donate Now"}
+                {isMarathi ? "देणगी" : "Donate Now"}
               </span>
             </button>
 

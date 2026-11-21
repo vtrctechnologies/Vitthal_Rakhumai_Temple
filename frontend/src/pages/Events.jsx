@@ -372,11 +372,11 @@ const Events = memo(() => {
               </span>
 
               <h2 className="font-display text-2xl sm:text-4xl font-bold text-white mb-2">
-                {featuredEvent.title}
+                {(isMarathi && featuredEvent.titleMarathi) ? featuredEvent.titleMarathi : featuredEvent.title}
               </h2>
               {featuredEvent.description && (
                 <p className="text-cream/80 font-body text-sm sm:text-base italic max-w-2xl mx-auto leading-relaxed">
-                  "{featuredEvent.description}"
+                  "{(isMarathi && featuredEvent.descriptionMarathi) ? featuredEvent.descriptionMarathi : featuredEvent.description}"
                 </p>
               )}
             </div>
@@ -493,7 +493,7 @@ const Events = memo(() => {
 
                         {/* Title */}
                         <h3 className="font-display text-xl font-bold text-maroon group-hover:text-saffron-dk transition-colors mb-3 leading-snug">
-                          {event.title}
+                          {(isMarathi && event.titleMarathi) ? event.titleMarathi : event.title}
                         </h3>
 
                         {/* Meta info */}
@@ -505,13 +505,13 @@ const Events = memo(() => {
                           {event.time && (
                             <div className="flex items-center">
                               <Clock className="w-3.5 h-3.5 mr-2 text-saffron shrink-0" />
-                              <span>{event.time}</span>
+                              <span>{(isMarathi && event.timeMarathi) ? event.timeMarathi : event.time}</span>
                             </div>
                           )}
                           {event.location && (
                             <div className="flex items-center">
                               <MapPin className="w-3.5 h-3.5 mr-2 text-saffron shrink-0" />
-                              <span>{event.location}</span>
+                              <span>{(isMarathi && event.locationMarathi) ? event.locationMarathi : event.location}</span>
                             </div>
                           )}
                         </div>
@@ -520,7 +520,7 @@ const Events = memo(() => {
                       {/* Description */}
                       {event.description && (
                         <p className="text-ink-dark text-xs sm:text-sm italic border-t border-gold/30 pt-3 line-clamp-2 mt-auto">
-                          "{event.description}"
+                          "{(isMarathi && event.descriptionMarathi) ? event.descriptionMarathi : event.description}"
                         </p>
                       )}
                     </div>

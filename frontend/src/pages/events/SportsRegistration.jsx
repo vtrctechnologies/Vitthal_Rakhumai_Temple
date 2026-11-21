@@ -201,7 +201,7 @@ const RegistrationModal = ({ competition, onClose, onSuccess }) => {
               Sports Registration
             </span>
             <h2 className="text-lg sm:text-xl font-display font-bold text-white">
-              {competition.name}
+              {(isMarathi && competition.nameMarathi) ? competition.nameMarathi : competition.name}
             </h2>
           </div>
           <button
@@ -446,7 +446,7 @@ const CompetitionCard = ({ comp, onRegister, onRefresh }) => {
             </div>
             <div>
               <h3 className="font-display font-bold text-lg text-maroon leading-tight">
-                {comp.name}
+                {(isMarathi && comp.nameMarathi) ? comp.nameMarathi : comp.name}
               </h3>
               <div className="flex items-center gap-1.5 mt-0.5">
                 {comp.category && (
@@ -468,7 +468,7 @@ const CompetitionCard = ({ comp, onRegister, onRefresh }) => {
 
         {comp.description && (
           <p className="text-xs text-ink-light font-body line-clamp-2 mb-3">
-            {comp.description}
+            {(isMarathi && comp.descriptionMarathi) ? comp.descriptionMarathi : comp.description}
           </p>
         )}
 

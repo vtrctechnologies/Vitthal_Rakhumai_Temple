@@ -350,18 +350,18 @@ const ProgramCard = ({
               <Sparkles size={11} className="text-saffron shrink-0" />
               <span className="text-[10px] font-heading font-bold uppercase tracking-wider text-saffron-dk">
                 {typeof program.category === "object" && program.category?.name
-                  ? program.category.name
+                  ? ((isMarathi && program.category?.nameMarathi) ? program.category.nameMarathi : program.category.name)
                   : "Satsang"}
               </span>
             </div>
 
             <h3 className="font-display text-lg font-bold text-maroon group-hover:text-saffron-dk transition-colors leading-snug line-clamp-2 mb-2">
-              {program.title}
+              {(isMarathi && program.titleMarathi) ? program.titleMarathi : program.title}
             </h3>
 
             {program.description && (
               <p className="font-body text-xs text-ink-light line-clamp-2 mb-3">
-                {program.description}
+                {(isMarathi && program.descriptionMarathi) ? program.descriptionMarathi : program.description}
               </p>
             )}
 

@@ -200,14 +200,14 @@ const FeaturedBannerCard = memo(({ banner, selectedYear, isMarathi, onSelect, on
             </span>
 
             <h2 className="font-heading text-lg sm:text-xl lg:text-2xl font-bold text-maroon leading-snug group-hover:text-saffron transition-colors">
-              {banner.title || (isMarathi ? "उत्सव दर्शन फलक" : "Temple Celebration Banner")}
+              {(isMarathi && banner.titleMarathi) ? banner.titleMarathi : (banner.title || (isMarathi ? "उत्सव दर्शन फलक" : "Temple Celebration Banner"))}
             </h2>
 
             <div className="w-16 h-0.5 bg-gradient-to-r from-saffron via-gold to-transparent my-3" />
 
             {banner.description && (
               <p className="font-body text-xs sm:text-sm lg:text-base text-ink-mid leading-relaxed line-clamp-3 sm:line-clamp-4">
-                {banner.description}
+                {(isMarathi && banner.descriptionMarathi) ? banner.descriptionMarathi : banner.description}
               </p>
             )}
           </div>
@@ -300,13 +300,13 @@ const BannerCard = memo(({ banner, label, isMarathi, onSelect, onDownload, onSha
 
           {banner.title && (
             <h3 className="text-maroon text-base sm:text-lg font-heading font-bold leading-snug line-clamp-2 group-hover:text-saffron transition-colors">
-              {banner.title}
+              {(isMarathi && banner.titleMarathi) ? banner.titleMarathi : banner.title}
             </h3>
           )}
 
           {banner.description && (
             <p className="text-ink-light text-xs sm:text-sm line-clamp-2 font-body mt-1">
-              {banner.description}
+              {(isMarathi && banner.descriptionMarathi) ? banner.descriptionMarathi : banner.description}
             </p>
           )}
         </div>

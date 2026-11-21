@@ -64,6 +64,15 @@ const eventSchema = new mongoose.Schema(
     eventDetails: {
       type: String,
     },
+    eventDetailsMarathi: {
+      type: String,
+    },
+    eventDateMarathi: {
+      type: String,
+    },
+    eventTimeMarathi: {
+      type: String,
+    },
     status: {
       type: String,
       enum: ["upcoming", "ongoing", "completed", "cancelled"],

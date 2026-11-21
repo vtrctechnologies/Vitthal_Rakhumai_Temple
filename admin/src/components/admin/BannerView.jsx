@@ -21,7 +21,9 @@ const BannerView = () => {
   const [editingBanner, setEditingBanner] = useState(null);
   const [formData, setFormData] = useState({
     title: "",
+    titleMarathi: "",
     description: "",
+    descriptionMarathi: "",
     position: "hero",
     order: 0,
     year: new Date().getFullYear(),
@@ -136,7 +138,9 @@ const BannerView = () => {
   const resetForm = () => {
     setFormData({
       title: "",
+      titleMarathi: "",
       description: "",
+      descriptionMarathi: "",
       position: "hero",
       order: 0,
       year: selectedYear,
@@ -154,7 +158,9 @@ const BannerView = () => {
     setEditingBanner(banner);
     setFormData({
       title: banner.title || "",
+      titleMarathi: banner.titleMarathi || "",
       description: banner.description || "",
+      descriptionMarathi: banner.descriptionMarathi || "",
       position: banner.position || "hero",
       order: banner.order || 0,
       year: banner.year || new Date().getFullYear(),
@@ -200,7 +206,9 @@ const BannerView = () => {
     try {
       const submitFormData = new FormData();
       submitFormData.append("title", formData.title);
+      submitFormData.append("titleMarathi", formData.titleMarathi || "");
       submitFormData.append("description", formData.description);
+      submitFormData.append("descriptionMarathi", formData.descriptionMarathi || "");
       submitFormData.append("position", formData.position);
       submitFormData.append("order", formData.order.toString());
       submitFormData.append("year", formData.year.toString());
@@ -448,7 +456,21 @@ const BannerView = () => {
                 )}
               </div>
 
-              <div>
+                            <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Title (मराठी शीर्षक)
+                </label>
+                <input
+                  type="text"
+                  name="titleMarathi"
+                  value={formData.titleMarathi}
+                  onChange={handleInputChange}
+                  placeholder="उदा. महाशिवरात्री उत्सव फलक"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                />
+              </div>
+
+<div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Description
                 </label>
@@ -462,7 +484,21 @@ const BannerView = () => {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+                            <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Description (मराठी माहिती)
+                </label>
+                <textarea
+                  name="descriptionMarathi"
+                  value={formData.descriptionMarathi}
+                  onChange={handleInputChange}
+                  rows={3}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                  placeholder="उत्सव फलकाचे मराठी वर्णन लिहा..."
+                />
+              </div>
+
+<div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Position *

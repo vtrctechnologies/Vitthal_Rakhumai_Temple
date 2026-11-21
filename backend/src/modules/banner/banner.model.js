@@ -11,6 +11,14 @@ const bannerSchema = new mongoose.Schema(
       type: String,
       trim: true,
     },
+    titleMarathi: {
+      type: String,
+      trim: true,
+    },
+    descriptionMarathi: {
+      type: String,
+      trim: true,
+    },
     imageUrl: {
       type: String,
       required: [true, "Image/Video URL is required"],

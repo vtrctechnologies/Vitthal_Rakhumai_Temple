@@ -36,7 +36,11 @@ const EventsView = () => {
 
   const [formData, setFormData] = useState({
     title: "",
+    titleMarathi: "",
     description: "",
+    descriptionMarathi: "",
+    timeMarathi: "",
+    locationMarathi: "",
     date: "",
     time: "",
     location: "",
@@ -150,7 +154,11 @@ const EventsView = () => {
     try {
       const formDataToSend = new FormData();
       formDataToSend.append("title", formData.title);
+      formDataToSend.append("titleMarathi", formData.titleMarathi || "");
       formDataToSend.append("description", formData.description);
+      formDataToSend.append("descriptionMarathi", formData.descriptionMarathi || "");
+      formDataToSend.append("timeMarathi", formData.timeMarathi || "");
+      formDataToSend.append("locationMarathi", formData.locationMarathi || "");
       formDataToSend.append("date", formData.date);
       formDataToSend.append("time", formData.time);
       formDataToSend.append("location", formData.location);
@@ -196,7 +204,11 @@ const EventsView = () => {
     setEditingEvent(event);
     setFormData({
       title: event.title || "",
+      titleMarathi: event.titleMarathi || "",
       description: event.description || "",
+      descriptionMarathi: event.descriptionMarathi || "",
+      timeMarathi: event.timeMarathi || "",
+      locationMarathi: event.locationMarathi || "",
       date: event.date ? new Date(event.date).toISOString().split("T")[0] : "",
       time: event.time || "",
       location: event.location || "",
@@ -242,7 +254,11 @@ const EventsView = () => {
   const resetForm = () => {
     setFormData({
       title: "",
+      titleMarathi: "",
       description: "",
+      descriptionMarathi: "",
+      timeMarathi: "",
+      locationMarathi: "",
       date: "",
       time: "",
       location: "",
@@ -380,6 +396,19 @@ const EventsView = () => {
                   />
                 </div>
 
+                <div className="col-span-1 md:col-span-2">
+                  <InputField
+                    label="Event Title (मराठी शीर्षक)"
+                    placeholder="उदा. महाशिवरात्री उत्सव"
+                    type="text"
+                    icon={FileText}
+                    value={formData.titleMarathi}
+                    onChange={(e) =>
+                      setFormData({ ...formData, titleMarathi: e.target.value })
+                    }
+                  />
+                </div>
+
                 <InputField
                   label="Event Date"
                   placeholder="Select date"
@@ -417,6 +446,28 @@ const EventsView = () => {
                 />
 
                 <InputField
+                  label="Event Time (मराठी वेळ)"
+                  placeholder="उदा. सकाळी ६:०० वाजता"
+                  type="text"
+                  icon={Clock}
+                  value={formData.timeMarathi}
+                  onChange={(e) =>
+                    setFormData({ ...formData, timeMarathi: e.target.value })
+                  }
+                />
+
+                <InputField
+                  label="Location (मराठी ठिकाण)"
+                  placeholder="उदा. मुख्य मंडप"
+                  type="text"
+                  icon={MapPin}
+                  value={formData.locationMarathi}
+                  onChange={(e) =>
+                    setFormData({ ...formData, locationMarathi: e.target.value })
+                  }
+                />
+
+                <InputField
                   label="Expected Attendees"
                   placeholder="e.g. 500+ Devotees"
                   type="text"
@@ -450,6 +501,20 @@ const EventsView = () => {
                     {errors.description}
                   </p>
                 )}
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2 ml-1">
+                  Description (मराठी माहिती)
+                </label>
+                <textarea
+                  className="w-full py-3 px-4 min-h-[100px] rounded-xl bg-gray-50 border border-gray-200 focus:border-amber-600 focus:bg-white focus:ring-4 focus:ring-amber-500/10 transition-all duration-200 outline-none resize-y"
+                  placeholder="उत्सवाची माहिती आणि वेळापत्रक मराठीत लिहा..."
+                  value={formData.descriptionMarathi}
+                  onChange={(e) =>
+                    setFormData({ ...formData, descriptionMarathi: e.target.value })
+                  }
+                />
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

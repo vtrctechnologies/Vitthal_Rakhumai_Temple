@@ -515,11 +515,11 @@ const Sports = () => {
                 {selectedYear} {isMarathi ? "क्रीडा स्पर्धा" : "Championship"}
               </span>
               <h2 className="font-display text-2xl sm:text-3xl font-bold text-maroon mb-2">
-                {currentSport.name}
+                {(isMarathi && currentSport.nameMarathi) ? currentSport.nameMarathi : currentSport.name}
               </h2>
               {currentSport.description && (
                 <p className="font-body text-ink-light text-sm sm:text-base leading-relaxed">
-                  {currentSport.description}
+                  {(isMarathi && currentSport.descriptionMarathi) ? currentSport.descriptionMarathi : currentSport.description}
                 </p>
               )}
             </div>
@@ -709,12 +709,12 @@ const WinnerCard = ({
             </div>
 
             <h3 className="font-display font-bold text-lg text-maroon text-center leading-tight mb-1">
-              {winner.teamName}
+              {(isMarathi && winner.teamNameMarathi) ? winner.teamNameMarathi : winner.teamName}
             </h3>
 
             <p className="text-xs text-ink-mid font-body mb-4">
               <span className="text-ink-light mr-1">{isMarathi ? "कर्णधार:" : "Captain:"}</span>
-              <span className="text-maroon font-bold">{winner.captain}</span>
+              <span className="text-maroon font-bold">{(isMarathi && winner.captainMarathi) ? winner.captainMarathi : winner.captain}</span>
             </p>
           </div>
 

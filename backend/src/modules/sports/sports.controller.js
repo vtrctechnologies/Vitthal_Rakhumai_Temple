@@ -144,7 +144,7 @@ export const updateSport = async (req, res) => {
 export const setWinners = async (req, res) => {
   try {
     const { sportId } = req.params;
-    const { teamName, captain, members, position } = req.body;
+    const { teamName, teamNameMarathi, captain, captainMarathi, members, position } = req.body;
 
     let winner = await Winner.findOne({ sportId, position });
 

@@ -17,7 +17,7 @@ const parseYear = (val) => {
 // @access  Private/Admin
 export const createBanner = async (req, res, next) => {
   try {
-    const { title, description, position, order, year, isActive, active, link } =
+    const { title, titleMarathi, description, descriptionMarathi, position, order, year, isActive, active, link } =
       req.body;
 
     if (!title || !title.trim()) {
@@ -207,7 +207,7 @@ export const getBannerById = async (req, res, next) => {
 // @access  Private/Admin
 export const updateBanner = async (req, res, next) => {
   try {
-    const { title, description, position, order, year, isActive, active, link } =
+    const { title, titleMarathi, description, descriptionMarathi, position, order, year, isActive, active, link } =
       req.body;
 
     const banner = await Banner.findById(req.params.id);

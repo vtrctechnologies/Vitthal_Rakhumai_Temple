@@ -26,8 +26,11 @@ const SportsView = () => {
   const [editingWinner, setEditingWinner] = useState(null);
   const [sportFormData, setSportFormData] = useState({
     name: "",
+    nameMarathi: "",
     title: "",
+    titleMarathi: "",
     description: "",
+    descriptionMarathi: "",
     heroColor: "bg-orange-100",
     order: 0,
     year: new Date().getFullYear(),
@@ -37,7 +40,9 @@ const SportsView = () => {
   const [winnerFormData, setWinnerFormData] = useState({
     position: "first",
     teamName: "",
+    teamNameMarathi: "",
     captain: "",
+    captainMarathi: "",
     members: [],
     image: null,
   });
@@ -342,8 +347,11 @@ const SportsView = () => {
   const resetSportForm = () => {
     setSportFormData({
       name: "",
+      nameMarathi: "",
       title: "",
+      titleMarathi: "",
       description: "",
+      descriptionMarathi: "",
       heroColor: "bg-orange-100",
       order: 0,
       year: new Date().getFullYear(),
@@ -361,7 +369,9 @@ const SportsView = () => {
     setWinnerFormData({
       position: "first",
       teamName: "",
+      teamNameMarathi: "",
       captain: "",
+      captainMarathi: "",
       members: [],
       image: null,
     });
@@ -379,8 +389,11 @@ const SportsView = () => {
     setEditingSport(sport);
     setSportFormData({
       name: sport.name || "",
+      nameMarathi: sport.nameMarathi || "",
       title: sport.title || "",
+      titleMarathi: sport.titleMarathi || "",
       description: sport.description || "",
+      descriptionMarathi: sport.descriptionMarathi || "",
       heroColor: sport.heroColor || "bg-orange-100",
       order: sport.order || 0,
       year: sport.year || new Date().getFullYear(),
@@ -406,7 +419,9 @@ const SportsView = () => {
       setWinnerFormData({
         position: winner.position || position,
         teamName: winner.teamName || "",
+        teamNameMarathi: winner.teamNameMarathi || "",
         captain: winner.captain || "",
+        captainMarathi: winner.captainMarathi || "",
         members: winner.members ? winner.members.map((m) => m.name) : [],
         image: null,
       });
@@ -417,7 +432,9 @@ const SportsView = () => {
       setWinnerFormData({
         position: position,
         teamName: "",
+        teamNameMarathi: "",
         captain: "",
+        captainMarathi: "",
         members: [],
         image: null,
       });
@@ -471,8 +488,11 @@ const SportsView = () => {
     try {
       const submitFormData = new FormData();
       submitFormData.append("name", sportFormData.name);
+      submitFormData.append("nameMarathi", sportFormData.nameMarathi || "");
       submitFormData.append("title", sportFormData.title);
+      submitFormData.append("titleMarathi", sportFormData.titleMarathi || "");
       submitFormData.append("description", sportFormData.description);
+      submitFormData.append("descriptionMarathi", sportFormData.descriptionMarathi || "");
       submitFormData.append("heroColor", sportFormData.heroColor);
       submitFormData.append("order", sportFormData.order.toString());
       submitFormData.append("year", sportFormData.year.toString());
@@ -535,7 +555,9 @@ const SportsView = () => {
       const submitFormData = new FormData();
       submitFormData.append("position", winnerFormData.position);
       submitFormData.append("teamName", winnerFormData.teamName);
+      submitFormData.append("teamNameMarathi", winnerFormData.teamNameMarathi || "");
       submitFormData.append("captain", winnerFormData.captain);
+      submitFormData.append("captainMarathi", winnerFormData.captainMarathi || "");
       submitFormData.append("members", JSON.stringify(winnerFormData.members));
 
       if (winnerFormData.image) {
@@ -699,7 +721,21 @@ const SportsView = () => {
                 )}
               </div>
 
-              <div>
+                            <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Sport Name (मराठी खेळ नाव)
+                </label>
+                <input
+                  type="text"
+                  name="nameMarathi"
+                  value={sportFormData.nameMarathi}
+                  onChange={handleSportInputChange}
+                  placeholder="उदा. क्रिकेट, कबड्डी, खो-खो"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                />
+              </div>
+
+<div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Sport Title *
                 </label>
@@ -718,7 +754,21 @@ const SportsView = () => {
                 )}
               </div>
 
-              <div>
+                            <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Sport Title (मराठी स्पर्धा शीर्षक)
+                </label>
+                <input
+                  type="text"
+                  name="titleMarathi"
+                  value={sportFormData.titleMarathi}
+                  onChange={handleSportInputChange}
+                  placeholder="उदा. श्री विठ्ठल चषक २०२६"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                />
+              </div>
+
+<div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Description
                 </label>
@@ -914,7 +964,21 @@ const SportsView = () => {
                 )}
               </div>
 
-              <div>
+                            <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Team Name (मराठी संघाचे नाव)
+                </label>
+                <input
+                  type="text"
+                  name="teamNameMarathi"
+                  value={winnerFormData.teamNameMarathi}
+                  onChange={handleWinnerInputChange}
+                  placeholder="उदा. जय हनुमान संघ"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                />
+              </div>
+
+<div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Captain Name *
                 </label>
@@ -933,7 +997,21 @@ const SportsView = () => {
                 )}
               </div>
 
-              <div>
+                            <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Captain Name (मराठी कर्णधार)
+                </label>
+                <input
+                  type="text"
+                  name="captainMarathi"
+                  value={winnerFormData.captainMarathi}
+                  onChange={handleWinnerInputChange}
+                  placeholder="उदा. रमेश पाटील"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                />
+              </div>
+
+<div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Team Members *
                 </label>

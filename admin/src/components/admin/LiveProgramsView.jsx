@@ -43,7 +43,9 @@ const LiveProgramsView = () => {
   const [editingCategory, setEditingCategory] = useState(null);
   const [formData, setFormData] = useState({
     title: "",
+    titleMarathi: "",
     description: "",
+    descriptionMarathi: "",
     category: "",
     year: new Date().getFullYear(),
     startTimestamp: "",
@@ -59,7 +61,9 @@ const LiveProgramsView = () => {
   });
   const [categoryFormData, setCategoryFormData] = useState({
     name: "",
+    nameMarathi: "",
     description: "",
+    descriptionMarathi: "",
     order: 0,
     isActive: true,
   });
@@ -219,7 +223,9 @@ const LiveProgramsView = () => {
       (categories.length > 0 ? categories[0]._id : "");
     setFormData({
       title: "",
+      titleMarathi: "",
       description: "",
+      descriptionMarathi: "",
       category: defaultCategory,
       year: new Date().getFullYear(),
       startTimestamp: "",
@@ -243,7 +249,9 @@ const LiveProgramsView = () => {
   const resetCategoryForm = () => {
     setCategoryFormData({
       name: "",
+      nameMarathi: "",
       description: "",
+      descriptionMarathi: "",
       order: 0,
       isActive: true,
     });
@@ -274,7 +282,9 @@ const LiveProgramsView = () => {
 
     setFormData({
       title: program.title || "",
+      titleMarathi: program.titleMarathi || "",
       description: program.description || "",
+      descriptionMarathi: program.descriptionMarathi || "",
       category: categoryId,
       year: program.year || new Date().getFullYear(),
       startTimestamp: formatDateTime(startDate),
@@ -350,7 +360,9 @@ const LiveProgramsView = () => {
   const handleCategoryEdit = (category) => {
     setCategoryFormData({
       name: category.name || "",
+      nameMarathi: category.nameMarathi || "",
       description: category.description || "",
+      descriptionMarathi: category.descriptionMarathi || "",
       order: category.order || 0,
       isActive: category.isActive !== undefined ? category.isActive : true,
     });
@@ -431,7 +443,9 @@ const LiveProgramsView = () => {
     try {
       const submitFormData = new FormData();
       submitFormData.append("title", formData.title.trim());
+      submitFormData.append("titleMarathi", formData.titleMarathi ? formData.titleMarathi.trim() : "");
       submitFormData.append("description", formData.description.trim());
+      submitFormData.append("descriptionMarathi", formData.descriptionMarathi ? formData.descriptionMarathi.trim() : "");
       submitFormData.append("category", formData.category);
       submitFormData.append("year", formData.year.toString());
       submitFormData.append("startTimestamp", formData.startTimestamp);

@@ -13,7 +13,12 @@ import Swal from "sweetalert2";
 // ─────────────────────────────────────────────────────────────────────────────
 const blankForm = () => ({
   name: "",
+  nameMarathi: "",
   description: "",
+  descriptionMarathi: "",
+  rulesMarathi: "",
+  prizesMarathi: "",
+  entryFeeMarathi: "",
   category: "Sports",
   rules: "",
   entryFee: "Free",
@@ -28,7 +33,12 @@ const blankForm = () => ({
 
 const compToForm = (c) => ({
   name:                  c.name || "",
+  nameMarathi:           c.nameMarathi || "",
   description:           c.description || "",
+  descriptionMarathi:    c.descriptionMarathi || "",
+  rulesMarathi:          c.rulesMarathi || "",
+  prizesMarathi:         c.prizesMarathi || "",
+  entryFeeMarathi:       c.entryFeeMarathi || "",
   category:              c.category || "Sports",
   rules:                 c.rules || "",
   entryFee:              c.entryFee || "Free",
@@ -149,7 +159,12 @@ const CompetitionFormModal = ({ initial, onClose, onSaved }) => {
 
     const payload = {
       name:                 form.name.trim(),
+      nameMarathi:          form.nameMarathi?.trim() || "",
       description:          form.description.trim(),
+      descriptionMarathi:   form.descriptionMarathi?.trim() || "",
+      rulesMarathi:         form.rulesMarathi?.trim() || "",
+      prizesMarathi:        form.prizesMarathi?.trim() || "",
+      entryFeeMarathi:      form.entryFeeMarathi?.trim() || "",
       category:             form.category,
       rules:                form.rules.trim(),
       entryFee:             form.entryFee.trim(),
@@ -224,6 +239,18 @@ const CompetitionFormModal = ({ initial, onClose, onSaved }) => {
                 className="w-full text-sm px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:outline-none bg-white"
               />
             </div>
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold text-gray-700 mb-1">Competition Name (मराठी स्पर्धा नाव)</label>
+            <input
+              type="text"
+              name="nameMarathi"
+              value={form.nameMarathi}
+              onChange={handleChange}
+              placeholder="उदा. कबड्डी अजिंक्यपद स्पर्धा २०२५"
+              className="w-full text-sm px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:outline-none bg-white"
+            />
             <div>
               <label className="block text-xs font-semibold text-gray-700 mb-1">Year</label>
               <input
@@ -279,6 +306,19 @@ const CompetitionFormModal = ({ initial, onClose, onSaved }) => {
             />
           </div>
 
+          {/* Description Marathi */}
+          <div>
+            <label className="block text-xs font-semibold text-gray-700 mb-1">Description (मराठी वर्णन)</label>
+            <textarea
+              name="descriptionMarathi"
+              value={form.descriptionMarathi}
+              onChange={handleChange}
+              placeholder="स्पर्धेची माहिती मराठीत लिहा…"
+              rows={2}
+              className="w-full text-sm px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:outline-none resize-none bg-white"
+            />
+          </div>
+
           {/* Rules */}
           <div>
             <label className="block text-xs font-semibold text-gray-700 mb-1">Rules & Guidelines</label>
@@ -287,6 +327,19 @@ const CompetitionFormModal = ({ initial, onClose, onSaved }) => {
               value={form.rules}
               onChange={handleChange}
               placeholder="List competition rules, eligibility criteria…"
+              rows={3}
+              className="w-full text-sm px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:outline-none resize-none bg-white"
+            />
+          </div>
+
+          {/* Rules Marathi */}
+          <div>
+            <label className="block text-xs font-semibold text-gray-700 mb-1">Rules & Guidelines (मराठी नियम)</label>
+            <textarea
+              name="rulesMarathi"
+              value={form.rulesMarathi}
+              onChange={handleChange}
+              placeholder="स्पर्धेचे नियम व अटी मराठीत लिहा…"
               rows={3}
               className="w-full text-sm px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:outline-none resize-none bg-white"
             />

@@ -30,7 +30,12 @@ const EventsPageView = () => {
   const [showFeaturedForm, setShowFeaturedForm] = useState(false);
   const [featuredFormData, setFeaturedFormData] = useState({
     title: "",
+    titleMarathi: "",
     description: "",
+    descriptionMarathi: "",
+    eventDateMarathi: "",
+    eventTimeMarathi: "",
+    eventDetailsMarathi: "",
     targetDate: "",
     eventDate: "",
     eventTime: "",
@@ -46,7 +51,11 @@ const EventsPageView = () => {
   const [editingUpcoming, setEditingUpcoming] = useState(null);
   const [upcomingFormData, setUpcomingFormData] = useState({
     title: "",
+    titleMarathi: "",
     description: "",
+    descriptionMarathi: "",
+    timeMarathi: "",
+    locationMarathi: "",
     date: "",
     time: "",
     location: "",
@@ -83,7 +92,12 @@ const EventsPageView = () => {
         setFeaturedEvent(response.data);
         setFeaturedFormData({
           title: response.data.title || "",
+          titleMarathi: response.data.titleMarathi || "",
           description: response.data.description || "",
+          descriptionMarathi: response.data.descriptionMarathi || "",
+          eventDateMarathi: response.data.eventDateMarathi || "",
+          eventTimeMarathi: response.data.eventTimeMarathi || "",
+          eventDetailsMarathi: response.data.eventDetailsMarathi || "",
           targetDate: response.data.targetDate
             ? new Date(response.data.targetDate).toISOString().slice(0, 16)
             : "",
@@ -184,7 +198,11 @@ const EventsPageView = () => {
     try {
       const formDataToSend = new FormData();
       formDataToSend.append("title", upcomingFormData.title);
+      formDataToSend.append("titleMarathi", upcomingFormData.titleMarathi || "");
       formDataToSend.append("description", upcomingFormData.description);
+      formDataToSend.append("descriptionMarathi", upcomingFormData.descriptionMarathi || "");
+      formDataToSend.append("timeMarathi", upcomingFormData.timeMarathi || "");
+      formDataToSend.append("locationMarathi", upcomingFormData.locationMarathi || "");
       formDataToSend.append("date", upcomingFormData.date);
       formDataToSend.append("time", upcomingFormData.time);
       formDataToSend.append("location", upcomingFormData.location);
@@ -220,7 +238,11 @@ const EventsPageView = () => {
     setEditingUpcoming(event);
     setUpcomingFormData({
       title: event.title || "",
+      titleMarathi: event.titleMarathi || "",
       description: event.description || "",
+      descriptionMarathi: event.descriptionMarathi || "",
+      timeMarathi: event.timeMarathi || "",
+      locationMarathi: event.locationMarathi || "",
       date: event.date ? new Date(event.date).toISOString().split("T")[0] : "",
       time: event.time || "",
       location: event.location || "",
@@ -253,7 +275,11 @@ const EventsPageView = () => {
   const resetUpcomingForm = () => {
     setUpcomingFormData({
       title: "",
+      titleMarathi: "",
       description: "",
+      descriptionMarathi: "",
+      timeMarathi: "",
+      locationMarathi: "",
       date: "",
       time: "",
       location: "",
@@ -439,6 +465,16 @@ const EventsPageView = () => {
                         error={featuredErrors.title}
                       />
                       <InputField
+                        label="Event Title (मराठी शीर्षक)"
+                        placeholder="उदा. कार्तिकी एकादशी उत्सव २०२५"
+                        type="text"
+                        icon={FileText}
+                        value={featuredFormData.titleMarathi}
+                        onChange={(e) =>
+                          setFeaturedFormData({ ...featuredFormData, titleMarathi: e.target.value })
+                        }
+                      />
+                      <InputField
                         label="Description"
                         placeholder="Event description"
                         type="text"
@@ -446,6 +482,16 @@ const EventsPageView = () => {
                         value={featuredFormData.description}
                         onChange={(e) =>
                           setFeaturedFormData({ ...featuredFormData, description: e.target.value })
+                        }
+                      />
+                      <InputField
+                        label="Description (मराठी माहिती)"
+                        placeholder="उत्सवाची मराठी माहिती"
+                        type="text"
+                        icon={FileText}
+                        value={featuredFormData.descriptionMarathi}
+                        onChange={(e) =>
+                          setFeaturedFormData({ ...featuredFormData, descriptionMarathi: e.target.value })
                         }
                       />
                       <InputField
@@ -555,6 +601,16 @@ const EventsPageView = () => {
                       error={upcomingErrors.title}
                     />
                     <InputField
+                      label="Event Title (मराठी शीर्षक)"
+                      placeholder="उदा. श्री विठ्ठल रखुमाई क्रिकेट चषक"
+                      type="text"
+                      icon={FileText}
+                      value={upcomingFormData.titleMarathi}
+                      onChange={(e) =>
+                        setUpcomingFormData({ ...upcomingFormData, titleMarathi: e.target.value })
+                      }
+                    />
+                    <InputField
                       label="Event Date *"
                       type="date"
                       icon={Calendar}
@@ -585,6 +641,26 @@ const EventsPageView = () => {
                         setUpcomingFormData({ ...upcomingFormData, location: e.target.value })
                       }
                       error={upcomingErrors.location}
+                    />
+                    <InputField
+                      label="Event Time (मराठी वेळ)"
+                      placeholder="उदा. दुपारी ३:३० वा."
+                      type="text"
+                      icon={Clock}
+                      value={upcomingFormData.timeMarathi}
+                      onChange={(e) =>
+                        setUpcomingFormData({ ...upcomingFormData, timeMarathi: e.target.value })
+                      }
+                    />
+                    <InputField
+                      label="Location (मराठी ठिकाण)"
+                      placeholder="उदा. श्री विठ्ठल रखुमाई क्रीडांगण"
+                      type="text"
+                      icon={MapPin}
+                      value={upcomingFormData.locationMarathi}
+                      onChange={(e) =>
+                        setUpcomingFormData({ ...upcomingFormData, locationMarathi: e.target.value })
+                      }
                     />
                     <InputField
                       label="Expected Attendees"
